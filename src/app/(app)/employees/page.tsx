@@ -141,28 +141,31 @@ export default function EmployeesPage() {
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50/50 text-[11px] font-bold uppercase text-slate-400">
                 <tr>
-                  <th className="px-6 py-4">Collaborateur</th>
-                  <th className="px-6 py-4">Rôle / Statut</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
+                  <th className="px-3 sm:px-6 py-4">Collaborateur</th>
+                  <th className="hidden sm:table-cell px-6 py-4">Rôle / Statut</th>
+                  <th className="px-3 sm:px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {employees.map((emp) => (
                   <tr key={emp.id} className="group hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4">
+                    <td className="px-3 sm:px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-100 to-slate-200 font-bold text-slate-600 shadow-inner">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-100 to-slate-200 font-bold text-slate-600 shadow-inner">
                           {emp.name.charAt(0)}
                         </div>
-                        <div>
-                          <p className="font-bold text-slate-900">{emp.name}</p>
-                          <p className="text-xs text-slate-500 flex items-center gap-1">
+                        <div className="min-w-0">
+                          <p className="font-bold text-slate-900 truncate">{emp.name}</p>
+                          <p className="text-xs text-slate-500 hidden sm:flex items-center gap-1">
                             <Mail size={12} /> {emp.email}
                           </p>
+                          <span className={`sm:hidden text-[10px] font-medium ${emp.status === 'active' ? 'text-emerald-500' : 'text-slate-400'}`}>
+                            ● {emp.status === 'active' ? 'Actif' : 'Inactif'}
+                          </span>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="hidden sm:table-cell px-6 py-4">
                       <div className="flex flex-col gap-1.5">
                         <span className="flex w-fit items-center gap-1 rounded-md bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
                           <Shield size={10} /> {emp.role.toUpperCase()}
@@ -172,7 +175,7 @@ export default function EmployeesPage() {
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-3 sm:px-6 py-4 text-right">
                       <div className="flex justify-end gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                         <button 
                           onClick={() => { setEditId(emp.id); setForm({...emp, password: ""}); }}
