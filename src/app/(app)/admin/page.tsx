@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
-import { Building2, KeyRound, CalendarDays, Upload, Users, Copy, Check } from "lucide-react";
+import { Building2, KeyRound, CalendarDays, Upload, Users, Send, Check, AlertCircle } from "lucide-react";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -14,18 +14,26 @@ export default function AdminPage() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [updating, setUpdating] = useState(false);
-  const [orgCode, setOrgCode] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteStatus, setInviteStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [inviteError, setInviteError] = useState("");
 
-  const inviteLink = typeof window !== "undefined" && orgCode
-    ? `${window.location.origin}/signup/employee?code=${orgCode}`
-    : "";
-
-  const copyInviteLink = () => {
-    if (!inviteLink) return;
-    navigator.clipboard.writeText(inviteLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const sendInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setInviteStatus("loading");
+    setInviteError("");
+    try {
+      await apiFetchClient("/invitations/send", {
+        method: "POST",
+        body: JSON.stringify({ email: inviteEmail }),
+      });
+      setInviteStatus("success");
+      setInviteEmail("");
+      setTimeout(() => setInviteStatus("idle"), 4000);
+    } catch (err) {
+      setInviteError(err instanceof Error ? err.message : "Erreur lors de l'envoi");
+      setInviteStatus("error");
+    }
   };
 
   useEffect(() => {
@@ -36,17 +44,13 @@ export default function AdminPage() {
       return;
     }
 
-    Promise.all([
-      apiFetchClient<{ role?: string; orgName?: string }>("/auth/me"),
-      apiFetchClient<{ code?: string; name?: string }>("/admin/organization"),
-    ])
-      .then(([me, org]) => {
+    apiFetchClient<{ role?: string; orgName?: string }>("/auth/me")
+      .then((me) => {
         if (me?.role !== "admin") {
           setError("Accès réservé aux admins");
           router.push("/dashboard");
         } else {
           setOrgName(me?.orgName || "");
-          setOrgCode(org?.code ?? null);
         }
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Erreur"))
@@ -187,28 +191,41 @@ export default function AdminPage() {
         </div>
 
         <div className="space-y-6">
-          {/* Inviter un employé */}
+          {/* Inviter un employé par email */}
           <div className="rounded-3xl border border-indigo-100 bg-indigo-50/50 p-6 shadow-sm">
             <h2 className="flex items-center gap-2 text-lg font-semibold text-indigo-900">
               <Users size={18} className="text-indigo-500" /> Inviter un employé
             </h2>
-            <p className="mt-1 text-xs text-indigo-600">Partagez ce lien ou ce code pour qu'un employé puisse s'inscrire.</p>
+            <p className="mt-1 text-xs text-indigo-600">L&apos;employé recevra un email avec un lien pour créer son compte.</p>
 
-            {orgCode && (
-              <div className="mt-4 space-y-3">
-                <div className="flex items-center justify-between rounded-2xl bg-white border border-indigo-200 px-4 py-3">
-                  <span className="text-xl font-mono font-black tracking-widest text-indigo-600">{orgCode}</span>
-                  <span className="text-[10px] font-bold uppercase text-indigo-400">Code org</span>
+            <form onSubmit={sendInvite} className="mt-4 space-y-3">
+              <input
+                type="email"
+                required
+                placeholder="Email de l'employé"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                className="w-full rounded-2xl border border-indigo-200 bg-white px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+              />
+              {inviteStatus === "error" && (
+                <div className="flex items-center gap-2 rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold text-rose-600 border border-rose-100">
+                  <AlertCircle size={13} /> {inviteError}
                 </div>
-                <button
-                  type="button"
-                  onClick={copyInviteLink}
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-all"
-                >
-                  {copied ? <><Check size={15} /> Lien copié !</> : <><Copy size={15} /> Copier le lien d'invitation</>}
-                </button>
-              </div>
-            )}
+              )}
+              {inviteStatus === "success" && (
+                <div className="flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-600 border border-emerald-100">
+                  <Check size={13} /> Invitation envoyée !
+                </div>
+              )}
+              <button
+                type="submit"
+                disabled={inviteStatus === "loading"}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-all disabled:opacity-50"
+              >
+                <Send size={15} />
+                {inviteStatus === "loading" ? "Envoi..." : "Envoyer l'invitation"}
+              </button>
+            </form>
           </div>
 
           <div className="rounded-3xl border border-slate-200/60 bg-white p-6 shadow-lg shadow-indigo-500/10">
