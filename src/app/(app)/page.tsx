@@ -38,18 +38,18 @@ export default function Home() {
     <motion.div 
       initial="hidden"
       animate="visible"
-      className="max-w-6xl mx-auto px-4 py-12 space-y-16 font-sans overflow-x-hidden"
+      className="max-w-6xl mx-auto px-4 py-8 md:py-12 space-y-10 md:space-y-16 font-sans overflow-x-hidden"
     >
       {/* --- HERO SECTION --- */}
       <motion.header 
         variants={itemVariants}
-        className="relative p-8 md:p-16 rounded-[40px] bg-slate-900 text-white overflow-hidden shadow-2xl"
+        className="relative p-6 sm:p-8 md:p-16 rounded-[28px] sm:rounded-[40px] bg-slate-900 text-white overflow-hidden shadow-2xl"
       >
         {/* Cercles décoratifs animés */}
         <motion.div 
           animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.3, 0.2] }}
           transition={{ duration: 8, repeat: Infinity }}
-          className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-96 h-96 bg-indigo-500/20 rounded-full blur-[120px]" 
+          className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-48 h-48 sm:w-72 sm:h-72 md:w-96 md:h-96 bg-indigo-500/20 rounded-full blur-[80px] md:blur-[120px]"
         />
         
         <div className="relative z-10 max-w-3xl space-y-8">
@@ -64,7 +64,7 @@ export default function Home() {
 
           <motion.h1 
             variants={itemVariants}
-            className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.1]"
+            className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight leading-[1.1]"
           >
             Maîtrisez votre <span className="text-indigo-400">organisation.</span>
           </motion.h1>

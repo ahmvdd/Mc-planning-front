@@ -9,7 +9,7 @@ export default function AppLayout({
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur-xl">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-3 sm:px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-sky-500 text-sm font-bold text-white shadow-lg shadow-indigo-500/25">
               MC
@@ -24,7 +24,7 @@ export default function AppLayout({
           <Navbar />
         </div>
       </div>
-      <main className="mx-auto w-full max-w-6xl px-6 py-10">{children}</main>
+      <main className="mx-auto w-full max-w-6xl px-3 sm:px-6 py-6 md:py-10">{children}</main>
       <footer className="mt-16 border-t border-slate-200 bg-white">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-6 py-6 text-xs text-slate-400 sm:flex-row">
           <p>

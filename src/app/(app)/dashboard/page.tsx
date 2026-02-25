@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
@@ -109,9 +109,9 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto p-4">
+    <div className="space-y-8 max-w-7xl mx-auto p-4 md:p-6">
       {/* Header Section */}
-      <header className="rounded-3xl border border-slate-200/60 bg-white p-8 shadow-lg shadow-indigo-500/10">
+      <header className="rounded-3xl border border-slate-200/60 bg-white p-6 md:p-8 shadow-lg shadow-indigo-500/10">
         <div className="space-y-1">
           <p className="text-xs font-bold uppercase tracking-widest text-indigo-500">Tableau de Bord</p>
           <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Planning de l&apos;équipe</h1>
@@ -138,23 +138,25 @@ export default function DashboardPage() {
             </button>
           </div>
 
-          <div className="overflow-hidden rounded-2xl border border-slate-100">
-            <div className="grid grid-cols-5 bg-slate-50/50 text-[10px] font-bold uppercase text-slate-400">
-              {["Lun", "Mar", "Mer", "Jeu", "Ven"].map(day => (
-                <div key={day} className="px-4 py-3 border-r border-slate-100 last:border-0 text-center">{day}</div>
-              ))}
-            </div>
-            <div className="grid grid-cols-5 text-sm">
-              {data.planning.length === 0 ? (
-                <div className="col-span-5 py-12 text-center text-slate-400 italic">Aucun créneau prévu.</div>
-              ) : (
-                data.planning.slice(0, 5).map((slot, idx) => (
-                  <div key={slot.id} className={`px-3 py-5 text-center border-r border-slate-100 last:border-0 ${idx % 2 === 0 ? "bg-white" : "bg-slate-50/30"}`}>
-                    <span className="block font-bold text-slate-800">{slot.shift}</span>
-                    <span className="text-[11px] text-indigo-500 font-medium">{slot.note || "Standard"}</span>
-                  </div>
-                ))
-              )}
+          <div className="overflow-x-auto rounded-2xl border border-slate-100">
+            <div className="min-w-[360px]">
+              <div className="grid grid-cols-5 bg-slate-50/50 text-[10px] font-bold uppercase text-slate-400">
+                {["Lun", "Mar", "Mer", "Jeu", "Ven"].map(day => (
+                  <div key={day} className="px-2 py-3 border-r border-slate-100 last:border-0 text-center">{day}</div>
+                ))}
+              </div>
+              <div className="grid grid-cols-5 text-sm">
+                {data.planning.length === 0 ? (
+                  <div className="col-span-5 py-12 text-center text-slate-400 italic">Aucun créneau prévu.</div>
+                ) : (
+                  data.planning.slice(0, 5).map((slot, idx) => (
+                    <div key={slot.id} className={`px-2 py-5 text-center border-r border-slate-100 last:border-0 ${idx % 2 === 0 ? "bg-white" : "bg-slate-50/30"}`}>
+                      <span className="block font-bold text-slate-800 text-xs">{slot.shift}</span>
+                      <span className="text-[10px] text-indigo-500 font-medium">{slot.note || "Standard"}</span>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         </Card>

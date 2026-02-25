@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
-import { 
-  Users, UserCheck, UserX, Pencil, Trash2, 
-  UserPlus, Loader2, Mail, Shield, CheckCircle2 
+import {
+  Users, UserCheck, Pencil, Trash2,
+  UserPlus, Loader2, Mail, Shield, CheckCircle2
 } from "lucide-react";
 
 // --- Types ---
@@ -31,7 +30,6 @@ export default function EmployeesPage() {
   const router = useRouter();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [me, setMe] = useState<{ role?: string } | null>(null);
   const [saving, setSaving] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
@@ -51,7 +49,7 @@ export default function EmployeesPage() {
       setEmployees(data);
       if (meData) setMe(meData);
     })
-    .catch(err => setError(err.message))
+    .catch(() => {})
     .finally(() => setLoading(false));
   }, [router]);
 
@@ -112,20 +110,20 @@ export default function EmployeesPage() {
   );
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8 p-6">
+    <div className="mx-auto max-w-7xl space-y-8 p-4 md:p-6">
       {/* Header avec Dégradé Doux */}
-      <header className="relative overflow-hidden rounded-[40px] border border-slate-200/60 bg-white p-10 shadow-xl shadow-indigo-500/5">
+      <header className="relative overflow-hidden rounded-[40px] border border-slate-200/60 bg-white p-6 md:p-10 shadow-xl shadow-indigo-500/5">
         <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-indigo-50/50 blur-3xl" />
         <div className="relative flex flex-col justify-between gap-6 md:flex-row md:items-end">
           <div className="space-y-2">
             <span className="inline-block rounded-full bg-indigo-50 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-indigo-600">
               Annuaire RH
             </span>
-            <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Gestion d'Équipe</h1>
+            <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">Gestion d'Équipe</h1>
             <p className="text-slate-500">Pilotez vos effectifs et gérez les accès plateforme.</p>
           </div>
-          
-          <div className="flex gap-4">
+
+          <div className="flex gap-3">
             <StatCard icon={Users} value={stats.total} label="Total" colorClass={{bg: "bg-indigo-50", text: "text-indigo-600"}} />
             <StatCard icon={UserCheck} value={stats.active} label="Actifs" colorClass={{bg: "bg-emerald-50", text: "text-emerald-600"}} />
           </div>
@@ -175,7 +173,7 @@ export default function EmployeesPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex justify-end gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                         <button 
                           onClick={() => { setEditId(emp.id); setForm({...emp, password: ""}); }}
                           className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
