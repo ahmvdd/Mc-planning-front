@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
-import { Building2, KeyRound, CalendarDays, Upload } from "lucide-react";
+import { Building2, KeyRound, CalendarDays, Upload, Users, Copy, Check } from "lucide-react";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -14,6 +14,19 @@ export default function AdminPage() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [updating, setUpdating] = useState(false);
+  const [orgCode, setOrgCode] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const inviteLink = typeof window !== "undefined" && orgCode
+    ? `${window.location.origin}/signup/employee?code=${orgCode}`
+    : "";
+
+  const copyInviteLink = () => {
+    if (!inviteLink) return;
+    navigator.clipboard.writeText(inviteLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   useEffect(() => {
     if (!getToken()) {
@@ -23,13 +36,17 @@ export default function AdminPage() {
       return;
     }
 
-    apiFetchClient<{ role?: string; orgName?: string }>("/auth/me")
-      .then((data) => {
-        if (data?.role !== "admin") {
+    Promise.all([
+      apiFetchClient<{ role?: string; orgName?: string }>("/auth/me"),
+      apiFetchClient<{ code?: string; name?: string }>("/admin/organization"),
+    ])
+      .then(([me, org]) => {
+        if (me?.role !== "admin") {
           setError("Accès réservé aux admins");
           router.push("/dashboard");
         } else {
-          setOrgName(data?.orgName || "");
+          setOrgName(me?.orgName || "");
+          setOrgCode(org?.code ?? null);
         }
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Erreur"))
@@ -170,6 +187,30 @@ export default function AdminPage() {
         </div>
 
         <div className="space-y-6">
+          {/* Inviter un employé */}
+          <div className="rounded-3xl border border-indigo-100 bg-indigo-50/50 p-6 shadow-sm">
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-indigo-900">
+              <Users size={18} className="text-indigo-500" /> Inviter un employé
+            </h2>
+            <p className="mt-1 text-xs text-indigo-600">Partagez ce lien ou ce code pour qu'un employé puisse s'inscrire.</p>
+
+            {orgCode && (
+              <div className="mt-4 space-y-3">
+                <div className="flex items-center justify-between rounded-2xl bg-white border border-indigo-200 px-4 py-3">
+                  <span className="text-xl font-mono font-black tracking-widest text-indigo-600">{orgCode}</span>
+                  <span className="text-[10px] font-bold uppercase text-indigo-400">Code org</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={copyInviteLink}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-indigo-600 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 transition-all"
+                >
+                  {copied ? <><Check size={15} /> Lien copié !</> : <><Copy size={15} /> Copier le lien d'invitation</>}
+                </button>
+              </div>
+            )}
+          </div>
+
           <div className="rounded-3xl border border-slate-200/60 bg-white p-6 shadow-lg shadow-indigo-500/10">
             <h2 className="flex items-center gap-2 text-lg font-semibold"><KeyRound size={18} className="text-indigo-500" />Réinitialiser un mot de passe</h2>
             <form className="mt-4 space-y-3">

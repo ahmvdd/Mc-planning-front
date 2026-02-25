@@ -40,6 +40,7 @@ export default function AdminSignupPage() {
       setOrgCode(data.organizationCode ?? null);
       if (typeof window !== "undefined") {
         localStorage.setItem("mcplanning_token", data.accessToken);
+        if (data.refreshToken) localStorage.setItem("mcplanning_refresh_token", data.refreshToken);
       }
       setStatus({ type: 'success' });
     } catch (err) {

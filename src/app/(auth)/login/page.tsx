@@ -30,8 +30,9 @@ export default function LoginPage() {
         throw new Error("Identifiants invalides");
       }
 
-      const data = (await response.json()) as { accessToken: string };
+      const data = (await response.json()) as { accessToken: string; refreshToken?: string };
       localStorage.setItem("mcplanning_token", data.accessToken);
+      if (data.refreshToken) localStorage.setItem("mcplanning_refresh_token", data.refreshToken);
       window.dispatchEvent(new Event("mcplanning:login"));
       router.push("/dashboard");
     } catch (err) {
