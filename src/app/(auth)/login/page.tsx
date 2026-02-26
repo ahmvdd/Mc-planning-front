@@ -6,7 +6,7 @@ import { motion } from "framer-motion"; // Installe framer-motion si possible
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("admin@mcplanning.local");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("admin123");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,9 +31,9 @@ export default function LoginPage() {
       }
 
       const data = (await response.json()) as { accessToken: string; refreshToken?: string };
-      localStorage.setItem("mcplanning_token", data.accessToken);
-      if (data.refreshToken) localStorage.setItem("mcplanning_refresh_token", data.refreshToken);
-      window.dispatchEvent(new Event("mcplanning:login"));
+      localStorage.setItem("shiftly_token", data.accessToken);
+      if (data.refreshToken) localStorage.setItem("shiftly_refresh_token", data.refreshToken);
+      window.dispatchEvent(new Event("shiftly:login"));
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur inconnue");
@@ -49,7 +49,7 @@ export default function LoginPage() {
       <div className="relative hidden w-1/2 flex-col justify-between bg-gradient-to-br from-indigo-600 to-violet-700 p-12 text-white md:flex">
         <div className="relative z-10">
           <div className="h-10 w-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center font-bold text-xl">
-            M
+            S
           </div>
         </div>
         

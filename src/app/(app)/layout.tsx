@@ -12,11 +12,11 @@ export default function AppLayout({
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-3 sm:px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-sky-500 text-sm font-bold text-white shadow-lg shadow-indigo-500/25">
-              MC
+              S
             </div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                MCPlanning
+                Shiftly
               </p>
               <OrgTitle />
             </div>

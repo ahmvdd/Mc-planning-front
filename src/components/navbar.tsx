@@ -25,7 +25,7 @@ export default function Navbar() {
 
   useEffect(() => {
     const checkAuth = () => {
-      const token = localStorage.getItem("mcplanning_token");
+      const token = localStorage.getItem("shiftly_token");
       setIsAuthed(Boolean(token));
       if (token) {
         apiFetchClient<{ role?: string }>("/auth/me")
@@ -39,19 +39,19 @@ export default function Navbar() {
 
     checkAuth();
     window.addEventListener("storage", checkAuth);
-    window.addEventListener("mcplanning:login", checkAuth);
-    window.addEventListener("mcplanning:logout", checkAuth);
+    window.addEventListener("shiftly:login", checkAuth);
+    window.addEventListener("shiftly:logout", checkAuth);
 
     return () => {
       window.removeEventListener("storage", checkAuth);
-      window.removeEventListener("mcplanning:login", checkAuth);
-      window.removeEventListener("mcplanning:logout", checkAuth);
+      window.removeEventListener("shiftly:login", checkAuth);
+      window.removeEventListener("shiftly:logout", checkAuth);
     };
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("mcplanning_token");
-    window.dispatchEvent(new Event("mcplanning:logout"));
+    localStorage.removeItem("shiftly_token");
+    window.dispatchEvent(new Event("shiftly:logout"));
     setIsAuthed(false);
     setRole(null);
     setMobileOpen(false);

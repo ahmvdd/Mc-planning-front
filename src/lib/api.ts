@@ -4,7 +4,7 @@ const getToken = () => {
   if (typeof window === "undefined") {
     return null;
   }
-  return window.localStorage.getItem("mcplanning_token");
+  return window.localStorage.getItem("shiftly_token");
 };
 
 export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {

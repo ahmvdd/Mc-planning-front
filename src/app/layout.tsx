@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MCPlanning Manager",
+  title: "Shiftly",
   description: "Gestion des employés, planning et demandes",
 };
 

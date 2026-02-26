@@ -2,17 +2,17 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:3000/api"
 
 export function getToken() {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem("mcplanning_token");
+  return localStorage.getItem("shiftly_token");
 }
 
 function getRefreshToken() {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem("mcplanning_refresh_token");
+  return localStorage.getItem("shiftly_refresh_token");
 }
 
 export function clearAuth() {
-  localStorage.removeItem("mcplanning_token");
-  localStorage.removeItem("mcplanning_refresh_token");
+  localStorage.removeItem("shiftly_token");
+  localStorage.removeItem("shiftly_refresh_token");
 }
 
 async function tryRefresh(): Promise<string | null> {
@@ -28,9 +28,9 @@ async function tryRefresh(): Promise<string | null> {
     if (!res.ok) return null;
 
     const data = await res.json() as { accessToken: string; refreshToken?: string };
-    localStorage.setItem("mcplanning_token", data.accessToken);
+    localStorage.setItem("shiftly_token", data.accessToken);
     if (data.refreshToken) {
-      localStorage.setItem("mcplanning_refresh_token", data.refreshToken);
+      localStorage.setItem("shiftly_refresh_token", data.refreshToken);
     }
     return data.accessToken;
   } catch {
@@ -63,7 +63,7 @@ export async function apiFetchClient<T>(path: string, options?: RequestInit): Pr
       if (retry.ok) return retry.json() as Promise<T>;
     }
     clearAuth();
-    window.dispatchEvent(new Event("mcplanning:logout"));
+    window.dispatchEvent(new Event("shiftly:logout"));
     window.location.href = "/login";
     throw new Error("Session expirée");
   }

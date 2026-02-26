@@ -39,8 +39,8 @@ export default function AdminSignupPage() {
       const data = await response.json();
       setOrgCode(data.organizationCode ?? null);
       if (typeof window !== "undefined") {
-        localStorage.setItem("mcplanning_token", data.accessToken);
-        if (data.refreshToken) localStorage.setItem("mcplanning_refresh_token", data.refreshToken);
+        localStorage.setItem("shiftly_token", data.accessToken);
+        if (data.refreshToken) localStorage.setItem("shiftly_refresh_token", data.refreshToken);
       }
       setStatus({ type: 'success' });
     } catch (err) {
