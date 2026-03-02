@@ -4,7 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
-import { Building2, KeyRound, CalendarDays, Upload, Users, Send, Check, AlertCircle } from "lucide-react";
+import { Building2, KeyRound, CalendarDays, Upload, Users, Send, Check, AlertCircle, FileSpreadsheet, Loader2, X } from "lucide-react";
+
+type ImportResult = {
+  total: number;
+  invited: number;
+  errors: { email: string; reason: string }[];
+};
 
 export default function AdminPage() {
   const router = useRouter();
@@ -17,6 +23,37 @@ export default function AdminPage() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteStatus, setInviteStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [inviteError, setInviteError] = useState("");
+
+  // Import CSV/Excel
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importStatus, setImportStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!importFile) return;
+    setImportStatus("loading");
+    setImportResult(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", importFile);
+      const token = getToken();
+      const API = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:3001/api";
+      const res = await fetch(`${API}/employees/import`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      const data: ImportResult = await res.json();
+      setImportResult(data);
+      setImportStatus("done");
+      setImportFile(null);
+      if (importInputRef.current) importInputRef.current.value = "";
+    } catch {
+      setImportStatus("error");
+    }
+  };
 
   const sendInvite = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -226,6 +263,80 @@ export default function AdminPage() {
                 {inviteStatus === "loading" ? "Envoi..." : "Envoyer l'invitation"}
               </button>
             </form>
+          </div>
+
+          {/* Import CSV / Excel */}
+          <div className="rounded-3xl border border-emerald-100 bg-emerald-50/40 p-6 shadow-sm">
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-emerald-900">
+              <FileSpreadsheet size={18} className="text-emerald-500" /> Importer des employés
+            </h2>
+            <p className="mt-1 text-xs text-emerald-700">
+              CSV ou Excel — colonnes attendues : <strong>email</strong>, name (optionnel).<br/>
+              Chaque personne recevra un email d'invitation pour créer son compte.
+            </p>
+
+            <form onSubmit={handleImport} className="mt-4 space-y-3">
+              <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-emerald-200 bg-white py-6 hover:bg-emerald-50 hover:border-emerald-400 transition-all">
+                {importFile ? (
+                  <div className="flex items-center gap-2 text-sm font-medium text-emerald-700">
+                    <FileSpreadsheet size={18} />
+                    {importFile.name}
+                    <button
+                      type="button"
+                      onClick={e => { e.preventDefault(); setImportFile(null); if (importInputRef.current) importInputRef.current.value = ""; }}
+                      className="ml-1 text-slate-400 hover:text-rose-500"
+                    >
+                      <X size={15} />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <Upload size={20} className="mb-1 text-emerald-400" />
+                    <span className="text-xs font-bold text-emerald-600 uppercase">Choisir un fichier</span>
+                    <span className="text-[11px] text-emerald-500 mt-0.5">.csv, .xlsx, .xls</span>
+                  </>
+                )}
+                <input
+                  ref={importInputRef}
+                  type="file"
+                  accept=".csv,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                  className="hidden"
+                  onChange={e => setImportFile(e.target.files?.[0] ?? null)}
+                />
+              </label>
+
+              <button
+                type="submit"
+                disabled={!importFile || importStatus === "loading"}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition-all disabled:opacity-40"
+              >
+                {importStatus === "loading"
+                  ? <><Loader2 size={15} className="animate-spin" /> Import en cours...</>
+                  : <><Send size={15} /> Lancer l'import</>}
+              </button>
+            </form>
+
+            {/* Résultats */}
+            {importStatus === "done" && importResult && (
+              <div className="mt-4 space-y-2 text-sm">
+                <div className="flex items-center gap-2 rounded-xl bg-emerald-100 px-4 py-2.5 font-bold text-emerald-700">
+                  <Check size={15} /> {importResult.invited} invitation{importResult.invited !== 1 ? "s" : ""} envoyée{importResult.invited !== 1 ? "s" : ""} sur {importResult.total}
+                </div>
+                {importResult.errors.length > 0 && (
+                  <div className="rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 space-y-1">
+                    <p className="text-xs font-bold text-rose-600 flex items-center gap-1"><AlertCircle size={13} /> {importResult.errors.length} erreur{importResult.errors.length > 1 ? "s" : ""}</p>
+                    {importResult.errors.map((err, i) => (
+                      <p key={i} className="text-xs text-rose-500">{err.email} — {err.reason}</p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            {importStatus === "error" && (
+              <div className="mt-3 flex items-center gap-2 rounded-xl bg-rose-50 px-3 py-2 text-xs font-bold text-rose-600 border border-rose-100">
+                <AlertCircle size={13} /> Erreur lors de l'import, réessayez.
+              </div>
+            )}
           </div>
 
           <div className="rounded-3xl border border-slate-200/60 bg-white p-6 shadow-lg shadow-indigo-500/10">
