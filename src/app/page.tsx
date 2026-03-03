@@ -49,37 +49,40 @@ export default function Home() {
       <div className="fixed inset-0 pointer-events-none z-50 opacity-[0.025] hidden sm:block" style={{backgroundImage:"url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")"}}></div>
 
       {/* --- NAVIGATION RESPONSIVE --- */}
-      <nav className="fixed top-0 w-full z-40 bg-white/95 backdrop-blur-md border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-black text-xl tracking-tighter">
+      <nav className="fixed top-0 w-full z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center">
+
+          {/* Gauche — Logo */}
+          <div className="flex-1 flex items-center gap-2 font-black text-xl tracking-tighter">
             <div className="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">S</div>
             SHIFTLY
           </div>
-          
-          {/* Menu bureau */}
-          <div className="hidden lg:flex items-center gap-8 text-sm font-medium text-slate-600">
-            <a href="#features" className="hover:text-indigo-600 transition-colors">Produit</a>
-            <a href="#solutions" className="hover:text-indigo-600 transition-colors">Solutions</a>
-            <a href="#pricing" className="hover:text-indigo-600 transition-colors">Tarifs</a>
-          </div>
-          
-          {/* Actions bureau */}
-          <div className="hidden lg:flex items-center gap-4">
-            {!me ? (
-              <Link href="/login" className="text-sm font-bold hover:text-indigo-600 transition-colors px-4">Connexion</Link>
-            ) : null}
-            <Link 
-              href={me ? "/dashboard" : "/signup"} 
-              className="bg-slate-900 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-indigo-600 transition-all shadow-md active:scale-95"
-            >
-              {me ? "Mon Dashboard" : "Essai gratuit"}
-            </Link>
+
+          {/* Centre — liens desktop (invisible sur mobile = largeur 0) */}
+          <div className="flex items-center gap-8">
+            <a href="#features" className="hidden lg:block text-sm font-semibold text-slate-800 hover:text-indigo-600 transition-colors">Produit</a>
+            <a href="#solutions" className="hidden lg:block text-sm font-semibold text-slate-800 hover:text-indigo-600 transition-colors">Solutions</a>
+            <a href="#pricing"   className="hidden lg:block text-sm font-semibold text-slate-800 hover:text-indigo-600 transition-colors">Tarifs</a>
           </div>
 
-          {/* Bouton Menu Mobile */}
-          <button className="lg:hidden p-2 text-slate-700" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            {mobileMenuOpen ? <X size={24}/> : <AlignLeft size={24} />}
-          </button>
+          {/* Droite — actions desktop + hamburger mobile */}
+          <div className="flex-1 flex items-center justify-end gap-3">
+            <div className="hidden lg:flex items-center gap-3">
+              {!me && (
+                <Link href="/login" className="text-sm font-bold text-slate-700 hover:text-indigo-600 transition-colors px-3">Connexion</Link>
+              )}
+              <Link
+                href={me ? "/dashboard" : "/signup"}
+                className="bg-slate-900 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-indigo-600 transition-all shadow-md active:scale-95"
+              >
+                {me ? "Mon Dashboard" : "Essai gratuit"}
+              </Link>
+            </div>
+            <button className="lg:hidden p-2 text-slate-700" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              {mobileMenuOpen ? <X size={24}/> : <AlignLeft size={24} />}
+            </button>
+          </div>
+
         </div>
 
         {/* Menu Mobile Déroulant */}
@@ -122,7 +125,7 @@ export default function Home() {
           {/* IMAGE AU DÉBUT (sur mobile elle est en haut, sur bureau elle est à gauche) */}
           <motion.div variants={itemVariants} className="md:col-span-5 relative h-[300px] sm:h-[400px] md:h-[550px] rounded-[32px] sm:rounded-[40px] overflow-hidden shadow-2xl border-4 border-white bg-slate-100">
             <img 
-              src="image_0.jpg"
+              src="/image_0.jpg"
               alt="Shiftly Platform Core"
               className="w-full h-full object-cover opacity-90 hover:scale-105 transition-transform duration-1000"
             />
@@ -141,7 +144,7 @@ export default function Home() {
           <motion.div variants={itemVariants} className="md:col-span-7 space-y-6 sm:space-y-8 z-10">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-[11px] sm:text-xs font-bold uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5" />
-              Nouveau : IA Scheduling v2.0
+              Nouveau : Scheduling v2.0
             </div>
             
             <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.9] text-slate-900">
@@ -170,7 +173,7 @@ export default function Home() {
                   ))}
                 </div>
                 <p className="text-sm text-slate-400 font-medium leading-tight">
-                  <span className="text-slate-900 font-bold">+2k managers</span> <br/> nous font confiance
+                  <span className="text-slate-900 font-bold">+15 managers</span> <br/> nous font confiance
                 </p>
               </div>
             </div>
@@ -291,13 +294,10 @@ export default function Home() {
           <div className="relative z-10 text-center max-w-3xl mx-auto space-y-10 sm:space-y-12">
             <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white tracking-tight leading-tight">Prêt à gagner 10h par semaine ?</h2>
             <p className="text-slate-400 text-lg sm:text-xl leading-relaxed max-w-2xl mx-auto">L'installation prend moins de 2 minutes. Vos employés vont adorer la simplicité de l'application.</p>
-            <div className="flex flex-col sm:flex-row justify-center gap-5 pt-3">
-              <Link href="/signup" className="w-full sm:w-auto px-10 py-5 bg-white text-slate-950 rounded-2xl font-black text-lg hover:bg-indigo-500 hover:text-white transition-all scale-100 sm:scale-105 shadow-2xl active:scale-98">
-                Démarrer l'essai gratuit
+            <div className="flex justify-center pt-3">
+              <Link href="/signup" className="px-12 py-5 bg-white text-slate-950 rounded-2xl font-black text-lg hover:bg-indigo-500 hover:text-white transition-all shadow-2xl active:scale-98">
+                Commencer gratuitement
               </Link>
-              <button className="w-full sm:w-auto px-10 py-5 bg-white/5 text-white rounded-2xl font-bold border border-white/10 hover:bg-white/10 transition-all text-lg">
-                Réserver une démo
-              </button>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 pt-10 sm:pt-12 border-t border-white/10">
                <div className="flex items-center gap-2.5 text-white/50 text-sm font-medium"><Globe size={17}/> Multilingue (FR, EN, ES)</div>
