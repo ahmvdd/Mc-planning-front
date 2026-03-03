@@ -45,8 +45,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#fafafa] text-slate-900 selection:bg-indigo-500 selection:text-white font-sans overflow-x-hidden">
       
-      {/* Overlay de grain pour texture "Premium" (désactivé sur très petit mobile) */}
-      <div className="fixed inset-0 pointer-events-none z-50 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] hidden sm:block"></div>
+      {/* Overlay de grain pour texture "Premium" */}
+      <div className="fixed inset-0 pointer-events-none z-50 opacity-[0.025] hidden sm:block" style={{backgroundImage:"url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")"}}></div>
 
       {/* --- NAVIGATION RESPONSIVE --- */}
       <nav className="fixed top-0 w-full z-40 bg-white/95 backdrop-blur-md border-b border-slate-100">
@@ -122,7 +122,7 @@ export default function Home() {
           {/* IMAGE AU DÉBUT (sur mobile elle est en haut, sur bureau elle est à gauche) */}
           <motion.div variants={itemVariants} className="md:col-span-5 relative h-[300px] sm:h-[400px] md:h-[550px] rounded-[32px] sm:rounded-[40px] overflow-hidden shadow-2xl border-4 border-white bg-slate-100">
             <img 
-              src="image_0.png" 
+              src="image_0.jpg"
               alt="Shiftly Platform Core"
               className="w-full h-full object-cover opacity-90 hover:scale-105 transition-transform duration-1000"
             />
@@ -163,8 +163,10 @@ export default function Home() {
               </Link>
               <div className="flex items-center justify-center gap-3 px-2 sm:px-4">
                 <div className="flex -space-x-3.5">
-                  {[1,2,3].map(i => (
-                    <img key={i} className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border-4 border-white object-cover shadow-sm" src={`https://i.pravatar.cc/100?img=${i+15}`} alt="user avatar" />
+                  {["bg-indigo-400","bg-sky-400","bg-violet-400"].map((c, i) => (
+                    <div key={i} className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full border-4 border-white shadow-sm ${c} flex items-center justify-center text-white text-xs font-bold`}>
+                      {["J","M","A"][i]}
+                    </div>
                   ))}
                 </div>
                 <p className="text-sm text-slate-400 font-medium leading-tight">
@@ -236,32 +238,35 @@ export default function Home() {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
             {[
-              { 
-                title: "Planification Intelligente", 
-                desc: "Notre algorithme IA suggère le meilleur planning selon les compétences, disponibilités et règles.", 
+              {
+                title: "Planification Intelligente",
+                desc: "Notre algorithme IA suggère le meilleur planning selon les compétences, disponibilités et règles.",
                 icon: <Zap className="text-amber-500 w-7 h-7" />,
-                img: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=2420&auto=format&fit=crop"
+                gradient: "from-amber-50 via-orange-50 to-yellow-100",
+                iconBig: <Zap className="text-amber-300 w-20 h-20 opacity-40" />,
               },
-              { 
-                title: "Équipe Ultra-Connectée", 
-                desc: "Une application mobile dédiée pour vos employés : pointeuse, demandes de congés et planning live.", 
+              {
+                title: "Équipe Ultra-Connectée",
+                desc: "Une application mobile dédiée pour vos employés : pointeuse, demandes de congés et planning live.",
                 icon: <Users className="text-indigo-500 w-7 h-7" />,
-                img: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2420&auto=format&fit=crop"
+                gradient: "from-indigo-50 via-blue-50 to-sky-100",
+                iconBig: <Users className="text-indigo-300 w-20 h-20 opacity-40" />,
               },
-              { 
-                title: "Conformité Légale", 
-                desc: "Contrats, temps de repos, alertes heures sup. : dormez sur vos deux oreilles.", 
+              {
+                title: "Conformité Légale",
+                desc: "Contrats, temps de repos, alertes heures sup. : dormez sur vos deux oreilles.",
                 icon: <ShieldCheck className="text-emerald-500 w-7 h-7" />,
-                img: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?q=80&w=2420&auto=format&fit=crop"
+                gradient: "from-emerald-50 via-teal-50 to-green-100",
+                iconBig: <ShieldCheck className="text-emerald-300 w-20 h-20 opacity-40" />,
               },
             ].map((f, i) => (
-              <motion.div 
-                key={i} 
+              <motion.div
+                key={i}
                 variants={itemVariants}
                 className="group bg-white rounded-[32px] p-5 border border-slate-100 hover:border-indigo-100 hover:shadow-2xl transition-all duration-500"
               >
-                <div className="h-48 sm:h-56 rounded-2xl overflow-hidden mb-6 sm:mb-8">
-                  <img src={f.img} alt={f.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                <div className={`h-48 sm:h-56 rounded-2xl overflow-hidden mb-6 sm:mb-8 bg-gradient-to-br ${f.gradient} flex items-center justify-center group-hover:scale-[1.02] transition-transform duration-500`}>
+                  {f.iconBig}
                 </div>
                 <div className="px-3 pb-3">
                   <div className="flex items-center gap-4 mb-4">
