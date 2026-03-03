@@ -48,8 +48,8 @@ export default function LoginPage() {
       {/* Côté Gauche : Visuel & Branding */}
       <div className="relative hidden w-1/2 flex-col justify-between bg-gradient-to-br from-indigo-600 to-violet-700 p-12 text-white md:flex">
         <div className="relative z-10">
-          <div className="h-10 w-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center font-bold text-xl">
-            S
+          <div className="h-10 w-10 rounded-xl overflow-hidden">
+            <img src="/logo.png" alt="Shiftly" className="h-full w-full object-cover" />
           </div>
         </div>
         
