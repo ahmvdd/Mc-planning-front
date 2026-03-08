@@ -209,25 +209,29 @@ export default function PlanningPage() {
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setImageUploading(true);
-    try {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = async () => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = async () => {
+      try {
         const response = await apiFetchClient<{ planningImageUrl: string | null }>("/admin/planning-image", {
           method: "POST",
           body: JSON.stringify({ imageData: reader.result }),
         });
         setPlanningImageUrl(response.planningImageUrl ?? String(reader.result));
-      };
-    } catch (err: any) {
-      alert(err.message);
-    } finally {
+      } catch (err: any) {
+        alert("Erreur upload image : " + err.message);
+      } finally {
+        setImageUploading(false);
+      }
+    };
+    reader.onerror = () => {
+      alert("Impossible de lire le fichier.");
       setImageUploading(false);
-    }
+    };
   };
 
   const fmtDate = (iso: string) =>
