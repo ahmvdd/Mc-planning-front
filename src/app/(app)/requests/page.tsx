@@ -11,16 +11,35 @@ import {
 } from "lucide-react";
 
 // --- Types ---
+type RequestLog = {
+  id: number;
+  action: string;
+  note?: string | null;
+  createdAt: string;
+  byEmployeeName?: string | null;
+};
+
 type RequestItem = {
   id: number;
   employeeId: number;
+  employeeName?: string | null;
   type: string;
   status: string;
   message?: string | null;
   createdAt: string;
   managerEmail?: string | null;
   adminMessage?: string | null;
+  logs?: RequestLog[];
 };
+
+// --- Helpers ---
+const logActionLabel = (action: string) => ({
+  created: "Demande créée",
+  pending: "Remise en attente",
+  approved: "Approuvée",
+  rejected: "Refusée",
+  office: "Convocation bureau",
+}[action] ?? action);
 
 // --- Styles Dynamiques ---
 const statusConfig: Record<string, { bg: string, text: string, icon: any }> = {
@@ -145,7 +164,7 @@ export default function RequestsPage() {
                             <h3 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{item.type}</h3>
                           </div>
                           <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-                            <User size={12} /> Employé #{item.employeeId}
+                            <User size={12} /> {item.employeeName ?? `Employé #${item.employeeId}`}
                           </p>
                         </div>
                       </div>
@@ -169,6 +188,23 @@ export default function RequestsPage() {
                           <p className="text-[10px] font-bold uppercase text-indigo-400 mb-1">Note de l'administration</p>
                           <p className="text-xs font-medium text-indigo-700 leading-relaxed">{item.adminMessage}</p>
                         </div>
+                      </div>
+                    )}
+
+                    {item.logs && item.logs.length > 0 && (
+                      <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50/50 p-4 space-y-2">
+                        <p className="text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-2">Historique</p>
+                        {item.logs.map((log) => (
+                          <div key={log.id} className="flex items-start gap-2 text-xs text-slate-600">
+                            <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-indigo-300" />
+                            <div>
+                              <span className="font-semibold text-slate-700">{logActionLabel(log.action)}</span>
+                              {log.byEmployeeName && <span className="text-slate-400"> par {log.byEmployeeName}</span>}
+                              {log.note && <span className="italic text-slate-400"> — {log.note}</span>}
+                              <span className="block text-[10px] text-slate-400">{new Date(log.createdAt).toLocaleString("fr-FR")}</span>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     )}
 
