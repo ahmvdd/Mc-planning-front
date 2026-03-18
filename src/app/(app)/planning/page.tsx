@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import * as XLSX from "xlsx";
 import { useRouter } from "next/navigation";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
 import {
@@ -269,16 +270,33 @@ export default function PlanningPage() {
     if (!file) return;
     setCsvImporting(true);
     setCsvResult(null);
-    const text = await file.text();
-    const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
-    // Skip header row
-    const rows = lines[0]?.toLowerCase().includes("date") ? lines.slice(1) : lines;
+
+    let rows: string[][];
+    const isExcel = file.name.endsWith(".xlsx") || file.name.endsWith(".xls");
+
+    if (isExcel) {
+      const buffer = await file.arrayBuffer();
+      const workbook = XLSX.read(buffer, { type: "array" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json<string[]>(sheet, { header: 1 });
+      const hasHeader = data[0]?.[0]?.toString().toLowerCase().includes("date");
+      rows = (hasHeader ? data.slice(1) : data)
+        .filter(r => r.length > 0)
+        .map(r => r.map(c => (c ?? "").toString().trim()));
+    } else {
+      const text = await file.text();
+      const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+      const hasHeader = lines[0]?.toLowerCase().includes("date");
+      rows = (hasHeader ? lines.slice(1) : lines).map(line =>
+        line.split(",").map(c => c.trim().replace(/^"|"$/g, ""))
+      );
+    }
+
     let ok = 0;
     const errors: string[] = [];
-    for (const row of rows) {
-      const cols = row.split(",").map(c => c.trim().replace(/^"|"$/g, ""));
+    for (const cols of rows) {
       const [dateRaw, shift, employeeName, note, planningName] = cols;
-      if (!dateRaw || !shift) { errors.push(`Ligne ignorée : "${row}"`); continue; }
+      if (!dateRaw || !shift) { errors.push(`Ligne ignorée : "${cols.join(",")}"`); continue; }
       try {
         const employee = employeeName ? employees.find(emp => emp.name.toLowerCase() === employeeName.toLowerCase()) : undefined;
         const period = planningName ? periods.find(p => p.name.toLowerCase() === planningName.toLowerCase()) : undefined;
@@ -294,12 +312,12 @@ export default function PlanningPage() {
         });
         ok++;
       } catch (err: any) {
-        errors.push(`Erreur ligne "${row}" : ${err.message}`);
+        errors.push(`Erreur ligne "${cols.join(",")}" : ${err.message}`);
       }
     }
+
     setCsvResult({ ok, errors });
     setCsvImporting(false);
-    // Refresh data
     const [pds, allEntries] = await Promise.all([
       apiFetchClient<PlanningEntry[]>("/planning/periods").catch(() => []),
       apiFetchClient<PlanningEntry[]>("/planning").catch(() => []),
@@ -677,7 +695,7 @@ export default function PlanningPage() {
                 <Upload size={16} className="text-emerald-500" /> Import CSV
               </h3>
               <p className="text-[11px] text-slate-400 leading-relaxed">
-                Format : <span className="font-mono text-slate-600">date, shift, employé, note, planning</span><br />
+                Format CSV/Excel : <span className="font-mono text-slate-600">date, shift, employé, note, planning</span><br />
                 Exemple : <span className="font-mono text-slate-600">2026-03-17, 09:00-17:00, Jean, Ouverture, Semaine 12</span>
               </p>
               <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 py-6 hover:bg-emerald-50/30 hover:border-emerald-200 transition-all">
@@ -686,10 +704,10 @@ export default function PlanningPage() {
                 ) : (
                   <>
                     <Upload className="mb-2 text-slate-400" size={20} />
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">Importer un CSV</span>
+                    <span className="text-[11px] font-bold text-slate-500 uppercase">Importer CSV / Excel</span>
                   </>
                 )}
-                <input type="file" className="hidden" accept=".csv,text/csv" onChange={handleCsvImport} />
+                <input type="file" className="hidden" accept=".csv,.xlsx,.xls,text/csv" onChange={handleCsvImport} />
               </label>
               {csvResult && (
                 <div className={`rounded-xl p-3 text-xs ${csvResult.errors.length === 0 ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>
