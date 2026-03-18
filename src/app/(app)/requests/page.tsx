@@ -33,6 +33,13 @@ type RequestItem = {
 };
 
 // --- Helpers ---
+const statusLabel: Record<string, string> = {
+  pending: "En attente",
+  approved: "Approuvée",
+  rejected: "Refusée",
+  office: "Convocation",
+};
+
 const logActionLabel = (action: string) => ({
   created: "Demande créée",
   pending: "Remise en attente",
@@ -93,6 +100,14 @@ export default function RequestsPage() {
       setCreateForm({ type: "", message: "", documentUrl: "", employeeId: "" });
     } catch (err: any) { alert(err.message); }
     finally { setSaving(false); }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("Supprimer cette demande ?")) return;
+    try {
+      await apiFetchClient(`/requests/${id}`, { method: "DELETE" });
+      setRequests(prev => prev.filter(r => r.id !== id));
+    } catch (err: any) { alert(err.message); }
   };
 
   const handleUpdate = async (e: React.FormEvent) => {
@@ -171,7 +186,7 @@ export default function RequestsPage() {
                       
                       <div className={`flex items-center gap-2 rounded-full border px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider ${config.bg} ${config.text}`}>
                         <StatusIcon size={14} />
-                        {item.status}
+                        {statusLabel[item.status] ?? item.status}
                       </div>
                     </div>
 
@@ -219,7 +234,7 @@ export default function RequestsPage() {
                         >
                           <Pencil size={14} /> Traiter la demande
                         </button>
-                        <button className="flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors">
+                        <button onClick={() => handleDelete(item.id)} className="flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors">
                           <Trash2 size={14} /> Supprimer
                         </button>
                       </div>

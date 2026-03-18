@@ -11,8 +11,11 @@ import {
 
 // --- Types ---
 type Employee = { id: number; name: string; email: string; role: string; status: string };
-type PlanningEntry = { id: number; date: string; shift: string; note?: string | null; employeeId: number };
+type PlanningEntry = { id: number; date: string; shift: string; note?: string | null; employeeId?: number | null };
 type RequestItem = { id: number; employeeId: number; type: string; status: string; message?: string | null; createdAt: string; managerEmail?: string | null };
+
+const fmtDate = (iso: string) =>
+  new Date(iso).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" });
 
 interface DashboardData {
   planning: PlanningEntry[];
@@ -55,12 +58,18 @@ function useDashboard() {
     fetchData();
   }, [router]);
 
-  // Mémos pour éviter de recalculer à chaque render
-  const stats = useMemo(() => ({
-    pendingCount: data.requests.filter(r => r.status === "pending").length,
-    docCount: data.requests.filter(r => r.type.toLowerCase().includes("document")).length,
-    activeEmployees: data.employees.length
-  }), [data]);
+  const stats = useMemo(() => {
+    const pending = data.requests.filter(r => r.status === "pending").length;
+    const approved = data.requests.filter(r => r.status === "approved").length;
+    const rejected = data.requests.filter(r => r.status === "rejected").length;
+    const office = data.requests.filter(r => r.status === "office").length;
+    const total = data.requests.length;
+    const upcomingShifts = [...data.planning]
+      .filter(s => new Date(s.date) >= new Date(new Date().setHours(0,0,0,0)))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .slice(0, 7);
+    return { pending, approved, rejected, office, total, activeEmployees: data.employees.length, upcomingShifts };
+  }, [data]);
 
   return { data, loading, error, stats };
 }
@@ -120,59 +129,77 @@ export default function DashboardPage() {
         
         <div className="mt-8 flex flex-wrap gap-3">
           <StatBadge icon={Users} label={`${stats.activeEmployees} employés`} color="bg-emerald-50 text-emerald-700" />
-          <StatBadge icon={ClipboardList} label={`${stats.pendingCount} demandes`} color="bg-blue-50 text-blue-700" />
-          <StatBadge icon={FileText} label={`${stats.docCount} documents`} color="bg-amber-50 text-amber-700" />
+          <StatBadge icon={ClipboardList} label={`${stats.pending} en attente`} color="bg-blue-50 text-blue-700" />
+          <StatBadge icon={FileText} label={`${stats.total} demandes`} color="bg-amber-50 text-amber-700" />
         </div>
       </header>
 
       <section className="grid gap-6 lg:grid-cols-3">
         {/* Main Planning Column */}
-        <Card title="Planning de la semaine" icon={CalendarDays} className="lg:col-span-2">
-          <div className="flex justify-end mb-4">
-            <button className={`rounded-full px-5 py-2 text-sm font-bold transition-all ${
-              data.me?.role === 'admin' 
-                ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-md shadow-indigo-200" 
-                : "border border-slate-200 text-slate-600 hover:bg-slate-50"
-            }`}>
-              {data.me?.role === "admin" ? "Publier le planning" : "Télécharger PDF"}
-            </button>
-          </div>
-
-          {/* Mobile : liste verticale */}
-          <div className="sm:hidden space-y-2 rounded-2xl border border-slate-100 overflow-hidden">
-            {data.planning.length === 0 ? (
-              <p className="py-10 text-center text-slate-400 italic text-sm">Aucun créneau prévu.</p>
+        {/* Vue employé : mes prochains créneaux */}
+        {data.me?.role !== "admin" && (
+          <Card title="Mon planning" icon={CalendarDays} className="lg:col-span-2">
+            {stats.upcomingShifts.length === 0 ? (
+              <div className="py-12 text-center text-slate-400">
+                <CalendarDays className="mx-auto mb-3 opacity-20" size={40} />
+                <p className="font-medium text-sm">Aucun créneau prévu.</p>
+              </div>
             ) : (
-              data.planning.slice(0, 5).map(slot => (
-                <div key={slot.id} className="flex items-center justify-between px-4 py-3 border-b border-slate-100 last:border-0">
-                  <span className="font-bold text-slate-800 text-sm">{slot.shift}</span>
-                  <span className="text-xs text-indigo-500 font-medium">{slot.note || "Standard"}</span>
-                </div>
-              ))
+              <div className="divide-y divide-slate-100 rounded-2xl border border-slate-100 overflow-hidden">
+                {stats.upcomingShifts.map(slot => (
+                  <div key={slot.id} className="flex items-center justify-between px-5 py-4 hover:bg-slate-50/50 transition-colors">
+                    <div>
+                      <p className="font-bold text-slate-800 text-sm">{slot.shift}</p>
+                      <p className="text-xs text-slate-400 mt-0.5">{fmtDate(slot.date)}</p>
+                    </div>
+                    {slot.note && (
+                      <span className="text-xs bg-indigo-50 text-indigo-600 font-medium px-3 py-1 rounded-full">{slot.note}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
             )}
-          </div>
+          </Card>
+        )}
 
-          {/* Desktop : grille 5 jours */}
-          <div className="hidden sm:block rounded-2xl border border-slate-100 overflow-hidden">
-            <div className="grid grid-cols-5 bg-slate-50/50 text-[10px] font-bold uppercase text-slate-400">
-              {["Lun", "Mar", "Mer", "Jeu", "Ven"].map(day => (
-                <div key={day} className="px-2 py-3 border-r border-slate-100 last:border-0 text-center">{day}</div>
+        {/* Vue admin : graphe des demandes */}
+        {data.me?.role === "admin" && (
+          <Card title="Activité de l'entreprise" icon={CalendarDays} className="lg:col-span-2">
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              {[
+                { label: "Employés", value: stats.activeEmployees, color: "text-emerald-600", bg: "bg-emerald-50" },
+                { label: "Demandes totales", value: stats.total, color: "text-indigo-600", bg: "bg-indigo-50" },
+              ].map(({ label, value, color, bg }) => (
+                <div key={label} className={`rounded-2xl ${bg} p-4 text-center`}>
+                  <p className={`text-3xl font-extrabold ${color}`}>{value}</p>
+                  <p className="text-xs text-slate-500 mt-1 font-medium">{label}</p>
+                </div>
               ))}
             </div>
-            <div className="grid grid-cols-5 text-sm">
-              {data.planning.length === 0 ? (
-                <div className="col-span-5 py-12 text-center text-slate-400 italic">Aucun créneau prévu.</div>
-              ) : (
-                data.planning.slice(0, 5).map((slot, idx) => (
-                  <div key={slot.id} className={`px-2 py-5 text-center border-r border-slate-100 last:border-0 ${idx % 2 === 0 ? "bg-white" : "bg-slate-50/30"}`}>
-                    <span className="block font-bold text-slate-800 text-xs">{slot.shift}</span>
-                    <span className="text-[10px] text-indigo-500 font-medium">{slot.note || "Standard"}</span>
+            <div className="space-y-3">
+              <p className="text-[10px] font-bold uppercase text-slate-400 tracking-widest mb-3">Répartition des demandes</p>
+              {[
+                { label: "En attente", count: stats.pending, color: "bg-amber-400" },
+                { label: "Approuvées", count: stats.approved, color: "bg-emerald-400" },
+                { label: "Refusées", count: stats.rejected, color: "bg-rose-400" },
+                { label: "Convocations", count: stats.office, color: "bg-blue-400" },
+              ].map(({ label, count, color }) => (
+                <div key={label}>
+                  <div className="flex justify-between text-xs mb-1.5">
+                    <span className="text-slate-600 font-medium">{label}</span>
+                    <span className="font-bold text-slate-800">{count}</span>
                   </div>
-                ))
-              )}
+                  <div className="h-2 w-full rounded-full bg-slate-100">
+                    <div
+                      className={`h-2 rounded-full ${color} transition-all duration-500`}
+                      style={{ width: `${stats.total ? Math.round((count / stats.total) * 100) : 0}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
-        </Card>
+          </Card>
+        )}
 
         {/* Sidebar */}
         <div className="space-y-6">
