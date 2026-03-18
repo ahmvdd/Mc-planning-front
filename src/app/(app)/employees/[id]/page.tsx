@@ -40,10 +40,7 @@ export default function EmployeeProfilePage() {
       apiFetchClient<Employee>(`/employees/${id}`),
       apiFetchClient<RequestItem[]>(`/requests?employeeId=${id}`).catch(() => []),
     ])
-      .then(([emp, reqs]) => {
-        setEmployee(emp);
-        setRequests(reqs);
-      })
+      .then(([emp, reqs]) => { setEmployee(emp); setRequests(reqs); })
       .catch(() => router.push("/employees"))
       .finally(() => setLoading(false));
   }, [id, router]);
@@ -58,95 +55,113 @@ export default function EmployeeProfilePage() {
   }, [requests]);
 
   if (loading) return (
-    <div className="flex h-96 items-center justify-center text-indigo-500">
-      <Loader2 className="animate-spin" size={40} />
+    <div className="flex h-screen items-center justify-center bg-slate-50">
+      <div className="text-center">
+        <Loader2 className="animate-spin text-indigo-600 mx-auto mb-4" size={48} />
+        <p className="text-slate-500 font-medium animate-pulse">Chargement du profil...</p>
+      </div>
     </div>
   );
 
   if (!employee) return null;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8 p-4 md:p-6">
-      {/* Back */}
-      <Link href="/requests" className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors">
-        <ArrowLeft size={16} /> Retour aux demandes
-      </Link>
-
-      {/* Header profil */}
-      <div className="rounded-3xl border border-slate-200/60 bg-white p-8 shadow-lg shadow-indigo-500/5">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-br from-indigo-100 to-indigo-200 text-3xl font-extrabold text-indigo-600 shadow-inner">
-            {employee.name.charAt(0).toUpperCase()}
-          </div>
-          <div className="flex-1">
-            <h1 className="text-3xl font-extrabold text-slate-900">{employee.name}</h1>
-            <p className="mt-1 flex items-center gap-2 text-sm text-slate-500">
-              <Mail size={14} /> {employee.email}
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span className="flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-700">
-                <Shield size={11} /> {employee.role.toUpperCase()}
-              </span>
-              <span className={`rounded-full px-3 py-1 text-xs font-bold ${employee.status === "active" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
-                ● {employee.status === "active" ? "En poste" : "Inactif"}
-              </span>
-            </div>
-          </div>
-
-          {/* Score implication */}
-          {score && (
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-center min-w-[140px]">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Implication</p>
-              <div className="flex justify-center gap-0.5 mb-2">
-                {[1, 2, 3, 4, 5].map(i => (
-                  <Star key={i} size={18} className={i <= score.stars ? "fill-amber-400 text-amber-400" : "text-slate-200"} />
-                ))}
-              </div>
-              <p className="text-2xl font-extrabold text-slate-900">{score.pct}%</p>
-              <p className="text-xs text-slate-400 mt-0.5">{score.approved}/{score.total} approuvées</p>
-            </div>
-          )}
+    <div className="min-h-screen bg-[#F8FAFC] pb-20">
+      {/* Header sticky */}
+      <div className="bg-white border-b border-slate-200 sticky top-0 z-30">
+        <div className="mx-auto max-w-4xl px-6 py-4 flex items-center gap-4">
+          <Link href="/requests" className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors">
+            <ArrowLeft size={16} /> Retour
+          </Link>
+          <div className="h-4 w-px bg-slate-200" />
+          <h1 className="text-lg font-bold text-slate-900">{employee.name}</h1>
+          <span className={`ml-auto rounded-full px-3 py-1 text-xs font-bold ${employee.status === "active" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
+            ● {employee.status === "active" ? "En poste" : "Inactif"}
+          </span>
         </div>
       </div>
 
-      {/* Historique des demandes */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-bold text-slate-800 px-1">Historique des demandes</h2>
-        {requests.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 py-16 text-center text-slate-400">
-            <User className="mx-auto mb-3 opacity-20" size={40} />
-            <p className="font-medium">Aucune demande pour cet employé.</p>
-          </div>
-        ) : (
-          requests.map(req => {
-            const config = statusConfig[req.status] || statusConfig.pending;
-            const StatusIcon = config.icon;
-            return (
-              <div key={req.id} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">REQ-{req.id}</span>
-                    <h3 className="font-bold text-slate-900 mt-0.5">{req.type}</h3>
-                    <p className="text-xs text-slate-400 mt-1">{new Date(req.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</p>
-                  </div>
-                  <div className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-bold uppercase ${config.bg} ${config.text}`}>
-                    <StatusIcon size={13} />
-                    {statusLabel[req.status] ?? req.status}
-                  </div>
-                </div>
-                {req.message && (
-                  <p className="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600 italic">"{req.message}"</p>
-                )}
-                {req.adminMessage && (
-                  <p className="mt-3 rounded-2xl bg-indigo-50/50 border border-indigo-100/50 px-4 py-3 text-xs text-indigo-700">
-                    <span className="font-bold block mb-1">Réponse admin</span>{req.adminMessage}
-                  </p>
-                )}
+      <main className="mx-auto max-w-4xl px-6 py-8 space-y-8">
+        {/* Profil card */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-100 to-indigo-200 text-3xl font-extrabold text-indigo-600">
+              {employee.name.charAt(0).toUpperCase()}
+            </div>
+            <div className="flex-1">
+              <h2 className="text-2xl font-extrabold text-slate-900">{employee.name}</h2>
+              <p className="mt-1 flex items-center gap-2 text-sm text-slate-500">
+                <Mail size={14} /> {employee.email}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <span className="flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-700">
+                  <Shield size={11} /> {employee.role.toUpperCase()}
+                </span>
               </div>
-            );
-          })
-        )}
-      </div>
+            </div>
+
+            {score && (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-center min-w-[130px]">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Implication</p>
+                <div className="flex justify-center gap-0.5 mb-2">
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <Star key={i} size={16} className={i <= score.stars ? "fill-amber-400 text-amber-400" : "text-slate-200"} />
+                  ))}
+                </div>
+                <p className="text-2xl font-extrabold text-slate-900">{score.pct}%</p>
+                <p className="text-xs text-slate-400 mt-0.5">{score.approved}/{score.total} approuvées</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Historique */}
+        <section className="space-y-4">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+            <User size={16} /> Historique des demandes
+          </h3>
+
+          {requests.length === 0 ? (
+            <div className="rounded-[2rem] border-2 border-dashed border-slate-200 bg-white p-12 text-center">
+              <div className="mx-auto w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
+                <User className="text-slate-300" size={32} />
+              </div>
+              <h4 className="text-slate-900 font-bold">Aucune demande</h4>
+              <p className="text-slate-500 text-sm mt-1">Cet employé n'a pas encore soumis de demande.</p>
+            </div>
+          ) : (
+            requests.map(req => {
+              const config = statusConfig[req.status] || statusConfig.pending;
+              const StatusIcon = config.icon;
+              return (
+                <div key={req.id} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">REQ-{req.id}</span>
+                      <h4 className="font-bold text-slate-900 mt-0.5">{req.type}</h4>
+                      <p className="text-xs text-slate-400 mt-1">
+                        {new Date(req.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                      </p>
+                    </div>
+                    <div className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-bold uppercase ${config.bg} ${config.text}`}>
+                      <StatusIcon size={13} />
+                      {statusLabel[req.status] ?? req.status}
+                    </div>
+                  </div>
+                  {req.message && (
+                    <p className="mt-4 rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-600 italic">"{req.message}"</p>
+                  )}
+                  {req.adminMessage && (
+                    <p className="mt-3 rounded-xl bg-indigo-50/50 border border-indigo-100/50 px-4 py-3 text-xs text-indigo-700">
+                      <span className="font-bold block mb-1">Réponse admin</span>{req.adminMessage}
+                    </p>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </section>
+      </main>
     </div>
   );
 }
