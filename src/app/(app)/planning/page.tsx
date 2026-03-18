@@ -57,6 +57,8 @@ export default function PlanningPage() {
   const [periodForm, setPeriodForm] = useState(EMPTY_PERIOD);
 
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
+  const [confirmDeleteEntryId, setConfirmDeleteEntryId] = useState<number | null>(null);
+  const [confirmDeletePeriodId, setConfirmDeletePeriodId] = useState<number | null>(null);
 
   const isAdmin = me?.role === "admin";
 
@@ -117,13 +119,14 @@ export default function PlanningPage() {
     }
   };
 
-  const handleDeletePeriod = async (id: number, name: string) => {
-    if (!confirm(`Supprimer le planning "${name}" ?`)) return;
+  const handleDeletePeriod = async (id: number) => {
     try {
       await apiFetchClient(`/planning/periods/${id}`, { method: "DELETE" });
       setPeriods(prev => prev.filter(p => p.id !== id));
     } catch (err: any) {
       alert("Erreur : " + err.message);
+    } finally {
+      setConfirmDeletePeriodId(null);
     }
   };
 
@@ -144,7 +147,6 @@ export default function PlanningPage() {
   };
 
   const handleDeleteEntry = async (id: number) => {
-    if (!confirm("Supprimer ce créneau ?")) return;
     try {
       await apiFetchClient(`/planning/${id}`, { method: "DELETE" });
       setPeriods(prev =>
@@ -153,6 +155,8 @@ export default function PlanningPage() {
       setOrphanEntries(prev => prev.filter(e => e.id !== id));
     } catch (err: any) {
       alert("Erreur : " + err.message);
+    } finally {
+      setConfirmDeleteEntryId(null);
     }
   };
 
@@ -448,12 +452,19 @@ export default function PlanningPage() {
                           </div>
                           <div className="flex items-center gap-2">
                             {isAdmin && (
-                              <button
-                                onClick={e => { e.stopPropagation(); handleDeletePeriod(period.id, period.name); }}
-                                className="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
-                              >
-                                <Trash2 size={18} />
-                              </button>
+                              confirmDeletePeriodId === period.id ? (
+                                <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                                  <button onClick={() => handleDeletePeriod(period.id)} className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-rose-700">Supprimer</button>
+                                  <button onClick={() => setConfirmDeletePeriodId(null)} className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-200">Annuler</button>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={e => { e.stopPropagation(); setConfirmDeletePeriodId(period.id); }}
+                                  className="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                                >
+                                  <Trash2 size={18} />
+                                </button>
+                              )
                             )}
                             <div className={`p-2 rounded-lg transition-transform ${expandedIds.has(period.id) ? 'rotate-180 text-indigo-600' : 'text-slate-400'}`}>
                               <ChevronDown size={20} />
@@ -482,14 +493,16 @@ export default function PlanningPage() {
                                     </tr>
                                   ) : (
                                     period.entries.sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime()).map(entry => (
-                                      <EntryRow 
-                                        key={entry.id} 
-                                        entry={entry} 
-                                        employees={employees} 
-                                        isAdmin={isAdmin} 
-                                        fmtShiftDate={fmtShiftDate} 
-                                        onEdit={handleEdit} 
-                                        onDelete={handleDeleteEntry} 
+                                      <EntryRow
+                                        key={entry.id}
+                                        entry={entry}
+                                        employees={employees}
+                                        isAdmin={isAdmin}
+                                        fmtShiftDate={fmtShiftDate}
+                                        onEdit={handleEdit}
+                                        onDelete={handleDeleteEntry}
+                                        confirmDeleteId={confirmDeleteEntryId}
+                                        setConfirmDeleteId={setConfirmDeleteEntryId}
                                       />
                                     ))
                                   )}
@@ -512,7 +525,7 @@ export default function PlanningPage() {
                            <table className="w-full text-left">
                               <tbody className="divide-y divide-slate-200/50">
                                 {orphanEntries.map(entry => (
-                                  <EntryRow key={entry.id} entry={entry} employees={employees} isAdmin={isAdmin} fmtShiftDate={fmtShiftDate} onEdit={handleEdit} onDelete={handleDeleteEntry} />
+                                  <EntryRow key={entry.id} entry={entry} employees={employees} isAdmin={isAdmin} fmtShiftDate={fmtShiftDate} onEdit={handleEdit} onDelete={handleDeleteEntry} confirmDeleteId={confirmDeleteEntryId} setConfirmDeleteId={setConfirmDeleteEntryId} />
                                 ))}
                               </tbody>
                            </table>
@@ -730,7 +743,7 @@ export default function PlanningPage() {
 }
 
 // ── Subcomponent: EntryRow ──────────────────────────────────────────────────
-function EntryRow({ entry, employees, isAdmin, fmtShiftDate, onEdit, onDelete }: any) {
+function EntryRow({ entry, employees, isAdmin, fmtShiftDate, onEdit, onDelete, confirmDeleteId, setConfirmDeleteId }: any) {
   const employee = employees.find((e: any) => e.id === entry.employeeId);
   
   return (
@@ -759,19 +772,22 @@ function EntryRow({ entry, employees, isAdmin, fmtShiftDate, onEdit, onDelete }:
       </td>
       {isAdmin && (
         <td className="px-4 py-4 text-right">
-          <div className="flex justify-end gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity">
-            <button 
-              onClick={() => onEdit(entry)}
-              className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-md transition-colors"
-            >
-              <Pencil size={14} />
-            </button>
-            <button 
-              onClick={() => onDelete(entry.id)}
-              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
-            >
-              <Trash2 size={14} />
-            </button>
+          <div className="flex justify-end gap-1">
+            {confirmDeleteId === entry.id ? (
+              <>
+                <button onClick={() => onDelete(entry.id)} className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-rose-700">Supprimer</button>
+                <button onClick={() => setConfirmDeleteId(null)} className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-200">Annuler</button>
+              </>
+            ) : (
+              <div className="flex gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity">
+                <button onClick={() => onEdit(entry)} className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-md transition-colors">
+                  <Pencil size={14} />
+                </button>
+                <button onClick={() => setConfirmDeleteId(entry.id)} className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors">
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            )}
           </div>
         </td>
       )}
