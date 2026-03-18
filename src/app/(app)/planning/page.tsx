@@ -6,9 +6,9 @@ import { useRouter } from "next/navigation";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
 import {
   Calendar, Clock, User, Users, Plus,
-  Trash2, Pencil, Upload,
-  Loader2, ChevronDown, ChevronRight, Image as ImageIcon,
-  LayoutGrid, List, FileSpreadsheet, X, Filter
+  Trash2, Pencil, Upload, Download,
+  Loader2, ChevronDown, Image as ImageIcon,
+  LayoutGrid, List, FileSpreadsheet, X
 } from "lucide-react";
 
 // --- Types ---
@@ -303,6 +303,26 @@ export default function PlanningPage() {
         setCsvImporting(false);
         e.target.value = "";
     }
+  };
+
+  const handleExportExcel = () => {
+    const allEntries = [
+      ...periods.flatMap(p => p.entries.map(e => ({ ...e, periodName: p.name }))),
+      ...orphanEntries.map(e => ({ ...e, periodName: "" })),
+    ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    const rows = allEntries.map(e => ({
+      "Date": new Date(e.date).toLocaleDateString("fr-FR"),
+      "Shift": e.shift,
+      "Employé": employees.find(emp => emp.id === e.employeeId)?.name ?? "Équipe complète",
+      "Note": e.note ?? "",
+      "Période": e.periodName,
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Planning");
+    XLSX.writeFile(wb, `planning_${new Date().toISOString().slice(0, 10)}.xlsx`);
   };
 
   const fmtDate = (iso: string) =>
@@ -633,6 +653,23 @@ export default function PlanningPage() {
 
                 {/* Secondary Actions (Import/Images) */}
                 <div className="mt-8 pt-6 border-t border-slate-100 space-y-6">
+                   {/* Export Excel */}
+                   <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-[11px] font-bold text-slate-400 uppercase">Exporter</h4>
+                        <Download size={14} className="text-indigo-400" />
+                      </div>
+                      <button
+                        onClick={handleExportExcel}
+                        className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 transition-all hover:bg-indigo-50 hover:border-indigo-200 group"
+                      >
+                        <div className="p-2 rounded-lg bg-white shadow-sm group-hover:text-indigo-600">
+                          <Download size={16} />
+                        </div>
+                        <span className="text-xs font-semibold text-slate-600">Télécharger Excel</span>
+                      </button>
+                   </div>
+
                    {/* CSV Import */}
                    <div className="space-y-3">
                       <div className="flex items-center justify-between">
