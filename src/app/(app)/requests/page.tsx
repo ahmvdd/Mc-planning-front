@@ -85,18 +85,23 @@ export default function RequestsPage() {
     .finally(() => setLoading(false));
   }, [router]);
 
+  const refreshRequests = async () => {
+    const data = await apiFetchClient<RequestItem[]>("/requests").catch(() => null);
+    if (data) setRequests(data);
+  };
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
-      const created = await apiFetchClient<RequestItem>("/requests", {
+      await apiFetchClient("/requests", {
         method: "POST",
         body: JSON.stringify({
           ...createForm,
           employeeId: createForm.employeeId ? Number(createForm.employeeId) : undefined
         }),
       });
-      setRequests(prev => [created, ...prev]);
+      await refreshRequests();
       setCreateForm({ type: "", message: "", documentUrl: "", employeeId: "" });
     } catch (err: any) { alert(err.message); }
     finally { setSaving(false); }
@@ -115,11 +120,11 @@ export default function RequestsPage() {
     if (!editId) return;
     setSaving(true);
     try {
-      const updated = await apiFetchClient<RequestItem>(`/requests/${editId}`, {
+      await apiFetchClient(`/requests/${editId}`, {
         method: "PATCH",
         body: JSON.stringify(editForm),
       });
-      setRequests(prev => prev.map(item => item.id === editId ? updated : item));
+      await refreshRequests();
       setEditId(null);
     } catch (err: any) { alert(err.message); }
     finally { setSaving(false); }
@@ -178,9 +183,9 @@ export default function RequestsPage() {
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">REQ-{item.id}</span>
                             <h3 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{item.type}</h3>
                           </div>
-                          <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                          <Link href={`/employees/${item.employeeId}`} className="text-xs text-indigo-500 hover:underline flex items-center gap-1 mt-0.5 w-fit">
                             <User size={12} /> {item.employeeName ?? `Employé #${item.employeeId}`}
-                          </p>
+                          </Link>
                         </div>
                       </div>
                       
