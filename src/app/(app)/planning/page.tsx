@@ -249,13 +249,16 @@ export default function PlanningPage() {
 
         if (isExcel) {
             const buffer = await file.arrayBuffer();
-            const workbook = XLSX.read(buffer, { type: "array" });
+            const workbook = XLSX.read(buffer, { type: "array", cellDates: true });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            const data = XLSX.utils.sheet_to_json<string[]>(sheet, { header: 1 });
+            const data = XLSX.utils.sheet_to_json<any[]>(sheet, { header: 1, raw: false, dateNF: "yyyy-mm-dd" });
             const hasHeader = data[0]?.[0]?.toString().toLowerCase().includes("date");
             rows = (hasHeader ? data.slice(1) : data)
                 .filter(r => r.length > 0)
-                .map(r => r.map(c => (c ?? "").toString().trim()));
+                .map(r => r.map((c: any) => {
+                    if (c instanceof Date) return c.toISOString().slice(0, 10);
+                    return (c ?? "").toString().trim();
+                }));
         } else {
             const text = await file.text();
             const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
@@ -271,12 +274,21 @@ export default function PlanningPage() {
             const [dateRaw, shift, employeeName, note, planningName] = cols;
             if (!dateRaw || !shift) continue;
             try {
+                // Normalise la date : "2026-03-18", "18/03/2026", etc.
+                let dateStr = dateRaw.trim();
+                if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) {
+                    const [d, m, y] = dateStr.split("/");
+                    dateStr = `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+                }
+                const parsedDate = new Date(dateStr);
+                if (isNaN(parsedDate.getTime())) { errors.push(`Date invalide : "${dateRaw}"`); continue; }
+
                 const employee = employeeName ? employees.find(emp => emp.name.toLowerCase() === employeeName.toLowerCase()) : undefined;
                 const period = planningName ? periods.find(p => p.name.toLowerCase() === planningName.toLowerCase()) : undefined;
                 await apiFetchClient("/planning", {
                     method: "POST",
                     body: JSON.stringify({
-                        date: `${dateRaw}T00:00:00.000Z`,
+                        date: `${dateStr}T00:00:00.000Z`,
                         shift,
                         employeeId: employee?.id ?? undefined,
                         note: note || undefined,
