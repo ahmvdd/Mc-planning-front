@@ -11,16 +11,42 @@ import {
 } from "lucide-react";
 
 // --- Types ---
+type RequestLog = {
+  id: number;
+  action: string;
+  note?: string | null;
+  createdAt: string;
+  byEmployeeName?: string | null;
+};
+
 type RequestItem = {
   id: number;
   employeeId: number;
+  employeeName?: string | null;
   type: string;
   status: string;
   message?: string | null;
   createdAt: string;
   managerEmail?: string | null;
   adminMessage?: string | null;
+  logs?: RequestLog[];
 };
+
+// --- Helpers ---
+const statusLabel: Record<string, string> = {
+  pending: "En attente",
+  approved: "Approuvée",
+  rejected: "Refusée",
+  office: "Convocation",
+};
+
+const logActionLabel = (action: string) => ({
+  created: "Demande créée",
+  pending: "Remise en attente",
+  approved: "Approuvée",
+  rejected: "Refusée",
+  office: "Convocation bureau",
+}[action] ?? action);
 
 // --- Styles Dynamiques ---
 const statusConfig: Record<string, { bg: string, text: string, icon: any }> = {
@@ -74,6 +100,14 @@ export default function RequestsPage() {
       setCreateForm({ type: "", message: "", documentUrl: "", employeeId: "" });
     } catch (err: any) { alert(err.message); }
     finally { setSaving(false); }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("Supprimer cette demande ?")) return;
+    try {
+      await apiFetchClient(`/requests/${id}`, { method: "DELETE" });
+      setRequests(prev => prev.filter(r => r.id !== id));
+    } catch (err: any) { alert(err.message); }
   };
 
   const handleUpdate = async (e: React.FormEvent) => {
@@ -145,14 +179,14 @@ export default function RequestsPage() {
                             <h3 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{item.type}</h3>
                           </div>
                           <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-                            <User size={12} /> Employé #{item.employeeId}
+                            <User size={12} /> {item.employeeName ?? `Employé #${item.employeeId}`}
                           </p>
                         </div>
                       </div>
                       
                       <div className={`flex items-center gap-2 rounded-full border px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider ${config.bg} ${config.text}`}>
                         <StatusIcon size={14} />
-                        {item.status}
+                        {statusLabel[item.status] ?? item.status}
                       </div>
                     </div>
 
@@ -172,6 +206,23 @@ export default function RequestsPage() {
                       </div>
                     )}
 
+                    {item.logs && item.logs.length > 0 && (
+                      <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50/50 p-4 space-y-2">
+                        <p className="text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-2">Historique</p>
+                        {item.logs.map((log) => (
+                          <div key={log.id} className="flex items-start gap-2 text-xs text-slate-600">
+                            <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-indigo-300" />
+                            <div>
+                              <span className="font-semibold text-slate-700">{logActionLabel(log.action)}</span>
+                              {log.byEmployeeName && <span className="text-slate-400"> par {log.byEmployeeName}</span>}
+                              {log.note && <span className="italic text-slate-400"> — {log.note}</span>}
+                              <span className="block text-[10px] text-slate-400">{new Date(log.createdAt).toLocaleString("fr-FR")}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
                     {isAdmin && (
                       <div className="mt-6 flex justify-end gap-2 border-t border-slate-50 pt-4">
                         <button 
@@ -183,7 +234,7 @@ export default function RequestsPage() {
                         >
                           <Pencil size={14} /> Traiter la demande
                         </button>
-                        <button className="flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors">
+                        <button onClick={() => handleDelete(item.id)} className="flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors">
                           <Trash2 size={14} /> Supprimer
                         </button>
                       </div>

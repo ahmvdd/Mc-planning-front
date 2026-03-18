@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import * as XLSX from "xlsx";
 import { useRouter } from "next/navigation";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
 import {
@@ -40,7 +41,11 @@ export default function PlanningPage() {
   const [loading, setLoading] = useState(true);
   const [me, setMe] = useState<{ role?: string } | null>(null);
   const [planningImageUrl, setPlanningImageUrl] = useState<string | null>(null);
+  const [planningImageUrl2, setPlanningImageUrl2] = useState<string | null>(null);
   const [imageUploading, setImageUploading] = useState(false);
+  const [imageUploading2, setImageUploading2] = useState(false);
+  const [csvImporting, setCsvImporting] = useState(false);
+  const [csvResult, setCsvResult] = useState<{ ok: number; errors: string[] } | null>(null);
 
   // Shift form
   const [saving, setSaving] = useState(false);
@@ -65,7 +70,7 @@ export default function PlanningPage() {
       apiFetchClient<PlanningEntry[]>("/planning"),
       apiFetchClient<EmployeeOption[]>("/employees"),
       apiFetchClient<{ role?: string }>("/auth/me").catch(() => null),
-      apiFetchClient<{ planningImageUrl: string | null }>("/planning/image").catch(() => ({ planningImageUrl: null })),
+      apiFetchClient<{ planningImageUrl: string | null; planningImageUrl2: string | null }>("/planning/image").catch(() => ({ planningImageUrl: null, planningImageUrl2: null })),
     ])
       .then(([pds, allEntries, emps, meData, img]) => {
         setPeriods(pds);
@@ -75,6 +80,7 @@ export default function PlanningPage() {
         setEmployees(emps);
         setMe(meData);
         setPlanningImageUrl(img.planningImageUrl);
+        setPlanningImageUrl2(img.planningImageUrl2 ?? null);
         // Auto-expand first period
         if (pds.length > 0) setExpandedIds(new Set([pds[0].id]));
       })
@@ -209,25 +215,119 @@ export default function PlanningPage() {
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setImageUploading(true);
-    try {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = async () => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = async () => {
+      try {
         const response = await apiFetchClient<{ planningImageUrl: string | null }>("/admin/planning-image", {
           method: "POST",
           body: JSON.stringify({ imageData: reader.result }),
         });
         setPlanningImageUrl(response.planningImageUrl ?? String(reader.result));
-      };
-    } catch (err: any) {
-      alert(err.message);
-    } finally {
+      } catch (err: any) {
+        alert("Erreur upload image : " + err.message);
+      } finally {
+        setImageUploading(false);
+      }
+    };
+    reader.onerror = () => {
+      alert("Impossible de lire le fichier.");
       setImageUploading(false);
+    };
+  };
+
+  const handleImageUpload2 = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageUploading2(true);
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = async () => {
+      try {
+        const response = await apiFetchClient<{ planningImageUrl2: string | null }>("/admin/planning-image2", {
+          method: "POST",
+          body: JSON.stringify({ imageData: reader.result }),
+        });
+        setPlanningImageUrl2(response.planningImageUrl2 ?? String(reader.result));
+      } catch (err: any) {
+        alert("Erreur upload image 2 : " + err.message);
+      } finally {
+        setImageUploading2(false);
+      }
+    };
+    reader.onerror = () => {
+      alert("Impossible de lire le fichier.");
+      setImageUploading2(false);
+    };
+  };
+
+  const handleCsvImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCsvImporting(true);
+    setCsvResult(null);
+
+    let rows: string[][];
+    const isExcel = file.name.endsWith(".xlsx") || file.name.endsWith(".xls");
+
+    if (isExcel) {
+      const buffer = await file.arrayBuffer();
+      const workbook = XLSX.read(buffer, { type: "array" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json<string[]>(sheet, { header: 1 });
+      const hasHeader = data[0]?.[0]?.toString().toLowerCase().includes("date");
+      rows = (hasHeader ? data.slice(1) : data)
+        .filter(r => r.length > 0)
+        .map(r => r.map(c => (c ?? "").toString().trim()));
+    } else {
+      const text = await file.text();
+      const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+      const hasHeader = lines[0]?.toLowerCase().includes("date");
+      rows = (hasHeader ? lines.slice(1) : lines).map(line =>
+        line.split(",").map(c => c.trim().replace(/^"|"$/g, ""))
+      );
     }
+
+    let ok = 0;
+    const errors: string[] = [];
+    for (const cols of rows) {
+      const [dateRaw, shift, employeeName, note, planningName] = cols;
+      if (!dateRaw || !shift) { errors.push(`Ligne ignorée : "${cols.join(",")}"`); continue; }
+      try {
+        const employee = employeeName ? employees.find(emp => emp.name.toLowerCase() === employeeName.toLowerCase()) : undefined;
+        const period = planningName ? periods.find(p => p.name.toLowerCase() === planningName.toLowerCase()) : undefined;
+        await apiFetchClient("/planning", {
+          method: "POST",
+          body: JSON.stringify({
+            date: `${dateRaw}T00:00:00.000Z`,
+            shift,
+            employeeId: employee?.id ?? undefined,
+            note: note || undefined,
+            planningId: period?.id ?? undefined,
+          }),
+        });
+        ok++;
+      } catch (err: any) {
+        errors.push(`Erreur ligne "${cols.join(",")}" : ${err.message}`);
+      }
+    }
+
+    setCsvResult({ ok, errors });
+    setCsvImporting(false);
+    const [pds, allEntries] = await Promise.all([
+      apiFetchClient<PlanningEntry[]>("/planning/periods").catch(() => []),
+      apiFetchClient<PlanningEntry[]>("/planning").catch(() => []),
+    ]);
+    if (Array.isArray(pds)) {
+      setPeriods(pds as unknown as PlanningPeriod[]);
+      const periodEntryIds = new Set((pds as unknown as PlanningPeriod[]).flatMap((p: PlanningPeriod) => p.entries.map((e: PlanningEntry) => e.id)));
+      setOrphanEntries(allEntries.filter(e => !periodEntryIds.has(e.id)));
+    }
+    e.target.value = "";
   };
 
   const fmtDate = (iso: string) =>
@@ -266,15 +366,29 @@ export default function PlanningPage() {
       <section className="grid gap-8 lg:grid-cols-12">
         <div className="lg:col-span-8 space-y-6">
 
-          {/* Planning Image */}
-          {planningImageUrl && (
-            <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-              <div className="absolute top-4 left-4 z-10">
-                <span className="flex items-center gap-2 rounded-full bg-white/90 backdrop-blur px-3 py-1.5 text-[10px] font-bold text-slate-800 shadow-sm uppercase">
-                  <ImageIcon size={14} className="text-indigo-500" /> Version Image
-                </span>
-              </div>
-              <img src={planningImageUrl} alt="Planning Global" className="h-auto w-full object-contain max-h-[400px]" />
+          {/* Planning Images */}
+          {(planningImageUrl || planningImageUrl2) && (
+            <div className={`grid gap-4 ${planningImageUrl && planningImageUrl2 ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"}`}>
+              {planningImageUrl && (
+                <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                  <div className="absolute top-4 left-4 z-10">
+                    <span className="flex items-center gap-2 rounded-full bg-white/90 backdrop-blur px-3 py-1.5 text-[10px] font-bold text-slate-800 shadow-sm uppercase">
+                      <ImageIcon size={14} className="text-indigo-500" /> Semaine 1
+                    </span>
+                  </div>
+                  <img src={planningImageUrl} alt="Planning Semaine 1" className="h-auto w-full object-contain max-h-[400px]" />
+                </div>
+              )}
+              {planningImageUrl2 && (
+                <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                  <div className="absolute top-4 left-4 z-10">
+                    <span className="flex items-center gap-2 rounded-full bg-white/90 backdrop-blur px-3 py-1.5 text-[10px] font-bold text-slate-800 shadow-sm uppercase">
+                      <ImageIcon size={14} className="text-indigo-500" /> Semaine 2
+                    </span>
+                  </div>
+                  <img src={planningImageUrl2} alt="Planning Semaine 2" className="h-auto w-full object-contain max-h-[400px]" />
+                </div>
+              )}
             </div>
           )}
 
@@ -540,22 +654,67 @@ export default function PlanningPage() {
               </form>
             </div>
 
-            {/* Upload Image */}
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 mb-4">
-                <Upload size={16} className="text-indigo-500" /> Planning Image
+            {/* Upload Images */}
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Upload size={16} className="text-indigo-500" /> Images planning
               </h3>
-              <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 py-8 hover:bg-indigo-50/30 hover:border-indigo-200 transition-all">
-                {imageUploading ? (
-                  <Loader2 className="animate-spin text-indigo-500" />
+              <div>
+                <p className="text-[10px] font-bold uppercase text-slate-400 ml-1 mb-2">Semaine 1</p>
+                <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 py-6 hover:bg-indigo-50/30 hover:border-indigo-200 transition-all">
+                  {imageUploading ? (
+                    <Loader2 className="animate-spin text-indigo-500" />
+                  ) : (
+                    <>
+                      <Upload className="mb-2 text-slate-400" size={20} />
+                      <span className="text-[11px] font-bold text-slate-500 uppercase">{planningImageUrl ? "Remplacer" : "Choisir"}</span>
+                    </>
+                  )}
+                  <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                </label>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase text-slate-400 ml-1 mb-2">Semaine 2</p>
+                <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 py-6 hover:bg-indigo-50/30 hover:border-indigo-200 transition-all">
+                  {imageUploading2 ? (
+                    <Loader2 className="animate-spin text-indigo-500" />
+                  ) : (
+                    <>
+                      <Upload className="mb-2 text-slate-400" size={20} />
+                      <span className="text-[11px] font-bold text-slate-500 uppercase">{planningImageUrl2 ? "Remplacer" : "Choisir"}</span>
+                    </>
+                  )}
+                  <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload2} />
+                </label>
+              </div>
+            </div>
+
+            {/* Import CSV */}
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Upload size={16} className="text-emerald-500" /> Import CSV
+              </h3>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Format CSV/Excel : <span className="font-mono text-slate-600">date, shift, employé, note, planning</span><br />
+                Exemple : <span className="font-mono text-slate-600">2026-03-17, 09:00-17:00, Jean, Ouverture, Semaine 12</span>
+              </p>
+              <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 py-6 hover:bg-emerald-50/30 hover:border-emerald-200 transition-all">
+                {csvImporting ? (
+                  <><Loader2 className="animate-spin text-emerald-500 mb-1" /><span className="text-[11px] text-slate-500">Import en cours…</span></>
                 ) : (
                   <>
-                    <Upload className="mb-2 text-slate-400" size={24} />
-                    <span className="text-[11px] font-bold text-slate-500 uppercase">Choisir un fichier</span>
+                    <Upload className="mb-2 text-slate-400" size={20} />
+                    <span className="text-[11px] font-bold text-slate-500 uppercase">Importer CSV / Excel</span>
                   </>
                 )}
-                <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                <input type="file" className="hidden" accept=".csv,.xlsx,.xls,text/csv" onChange={handleCsvImport} />
               </label>
+              {csvResult && (
+                <div className={`rounded-xl p-3 text-xs ${csvResult.errors.length === 0 ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>
+                  <p className="font-bold">{csvResult.ok} créneau{csvResult.ok !== 1 ? "x" : ""} importé{csvResult.ok !== 1 ? "s" : ""}</p>
+                  {csvResult.errors.map((err, i) => <p key={i} className="mt-1 opacity-80">{err}</p>)}
+                </div>
+              )}
             </div>
           </div>
         )}

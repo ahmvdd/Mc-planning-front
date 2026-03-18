@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion"; // Installe framer-motion si possible
 
@@ -11,35 +11,53 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Ping silencieux au montage pour réveiller le serveur (cold start Render)
+  useEffect(() => {
+    const API = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:3001/api";
+    fetch(API).catch(() => {});
+  }, []);
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
     setError(null);
 
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:3001/api"}/auth/login`,
-        {
+    const API = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:3001/api";
+    const MAX_RETRIES = 5;
+    const RETRY_DELAY_MS = 4000;
+
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const response = await fetch(`${API}/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
+        });
+
+        if (!response.ok) {
+          // Erreur HTTP (ex: 401 mauvais identifiants) → pas la peine de retry
+          throw new Error("Identifiants invalides");
         }
-      );
 
-      if (!response.ok) {
-        throw new Error("Identifiants invalides");
+        const data = (await response.json()) as { accessToken: string; refreshToken?: string };
+        localStorage.setItem("shiftly_token", data.accessToken);
+        if (data.refreshToken) localStorage.setItem("shiftly_refresh_token", data.refreshToken);
+        window.dispatchEvent(new Event("shiftly:login"));
+        router.push("/dashboard");
+        return;
+      } catch (err) {
+        const isNetworkError = err instanceof TypeError;
+        if (!isNetworkError || attempt === MAX_RETRIES) {
+          setError(err instanceof Error ? err.message : "Erreur inconnue");
+          break;
+        }
+        // Serveur en cold start → on attend et on réessaie
+        setError(`Serveur en démarrage... nouvelle tentative (${attempt}/${MAX_RETRIES})`);
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
       }
-
-      const data = (await response.json()) as { accessToken: string; refreshToken?: string };
-      localStorage.setItem("shiftly_token", data.accessToken);
-      if (data.refreshToken) localStorage.setItem("shiftly_refresh_token", data.refreshToken);
-      window.dispatchEvent(new Event("shiftly:login"));
-      router.push("/dashboard");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur inconnue");
-    } finally {
-      setLoading(false);
     }
+
+    setLoading(false);
   };
 
   return (
@@ -106,7 +124,11 @@ export default function LoginPage() {
               />
             </div>
 
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && (
+              <p className={`text-sm ${error.startsWith("Serveur en démarrage") ? "text-amber-600" : "text-red-600"}`}>
+                {error}
+              </p>
+            )}
 
             <button
               disabled={loading}

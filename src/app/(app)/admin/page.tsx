@@ -81,13 +81,14 @@ export default function AdminPage() {
       return;
     }
 
-    apiFetchClient<{ role?: string; orgName?: string }>("/auth/me")
-      .then((me) => {
+    apiFetchClient<{ role?: string }>("/auth/me")
+      .then(async (me) => {
         if (me?.role !== "admin") {
           setError("Accès réservé aux admins");
           router.push("/dashboard");
         } else {
-          setOrgName(me?.orgName || "");
+          const org = await apiFetchClient<{ name: string }>("/admin/organization").catch(() => null);
+          setOrgName(org?.name || "");
         }
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Erreur"))
@@ -111,11 +112,8 @@ export default function AdminPage() {
 
     try {
       const response = await apiFetchClient("/admin/organization", {
-        method: "POST",
-        body: JSON.stringify({
-          name: orgName || undefined,
-          logoUrl: logoPreview || undefined,
-        }),
+        method: "PATCH",
+        body: JSON.stringify({ name: orgName }),
       });
 
       if (response) {
