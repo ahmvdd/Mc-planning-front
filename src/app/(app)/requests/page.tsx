@@ -1,16 +1,15 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
-import { 
-  ClipboardList, Pencil, Trash2, Send, Clock, 
+import {
+  ClipboardList, Pencil, Trash2, Send, Clock,
   CheckCircle2, XCircle, MessageSquare, User,
-  FileText, Loader2, AlertCircle, Info, ChevronRight 
+  FileText, Loader2, Info, PlusCircle
 } from "lucide-react";
 
-// --- Types ---
 type RequestLog = {
   id: number;
   action: string;
@@ -27,12 +26,10 @@ type RequestItem = {
   status: string;
   message?: string | null;
   createdAt: string;
-  managerEmail?: string | null;
   adminMessage?: string | null;
   logs?: RequestLog[];
 };
 
-// --- Helpers ---
 const statusLabel: Record<string, string> = {
   pending: "En attente",
   approved: "Approuvée",
@@ -48,26 +45,22 @@ const logActionLabel = (action: string) => ({
   office: "Convocation bureau",
 }[action] ?? action);
 
-// --- Styles Dynamiques ---
-const statusConfig: Record<string, { bg: string, text: string, icon: any }> = {
-  approved: { bg: "bg-emerald-50 border-emerald-100", text: "text-emerald-700", icon: CheckCircle2 },
-  rejected: { bg: "bg-rose-50 border-rose-100", text: "text-rose-700", icon: XCircle },
-  office: { bg: "bg-blue-50 border-blue-100", text: "text-blue-700", icon: Info },
-  pending: { bg: "bg-amber-50 border-amber-100", text: "text-amber-700", icon: Clock },
+const statusConfig: Record<string, { bg: string; text: string; border: string; icon: any }> = {
+  approved: { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-100", icon: CheckCircle2 },
+  rejected:  { bg: "bg-rose-50",    text: "text-rose-700",    border: "border-rose-100",    icon: XCircle },
+  office:    { bg: "bg-blue-50",    text: "text-blue-700",    border: "border-blue-100",    icon: Info },
+  pending:   { bg: "bg-amber-50",   text: "text-amber-700",   border: "border-amber-100",   icon: Clock },
 };
 
 export default function RequestsPage() {
   const router = useRouter();
   const [requests, setRequests] = useState<RequestItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [me, setMe] = useState<{ role?: string; sub?: number } | null>(null);
   const [saving, setSaving] = useState(false);
-  
-  // Formulaires
   const [editId, setEditId] = useState<number | null>(null);
   const [createForm, setCreateForm] = useState({ type: "", message: "", documentUrl: "", employeeId: "" });
-  const [editForm, setEditForm] = useState({ status: "pending", message: "", documentUrl: "", adminMessage: "" });
+  const [editForm, setEditForm] = useState({ status: "pending", adminMessage: "" });
 
   const isAdmin = me?.role === "admin";
 
@@ -77,12 +70,9 @@ export default function RequestsPage() {
       apiFetchClient<RequestItem[]>("/requests"),
       apiFetchClient<{ role?: string; sub?: number }>("/auth/me").catch(() => null),
     ])
-    .then(([data, meData]) => {
-      setRequests(data);
-      setMe(meData);
-    })
-    .catch(err => setError(err.message))
-    .finally(() => setLoading(false));
+      .then(([data, meData]) => { setRequests(data); setMe(meData); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [router]);
 
   const refreshRequests = async () => {
@@ -98,7 +88,7 @@ export default function RequestsPage() {
         method: "POST",
         body: JSON.stringify({
           ...createForm,
-          employeeId: createForm.employeeId ? Number(createForm.employeeId) : undefined
+          employeeId: createForm.employeeId ? Number(createForm.employeeId) : undefined,
         }),
       });
       await refreshRequests();
@@ -120,10 +110,7 @@ export default function RequestsPage() {
     if (!editId) return;
     setSaving(true);
     try {
-      await apiFetchClient(`/requests/${editId}`, {
-        method: "PATCH",
-        body: JSON.stringify(editForm),
-      });
+      await apiFetchClient(`/requests/${editId}`, { method: "PATCH", body: JSON.stringify(editForm) });
       await refreshRequests();
       setEditId(null);
     } catch (err: any) { alert(err.message); }
@@ -131,208 +118,212 @@ export default function RequestsPage() {
   };
 
   if (loading) return (
-    <div className="flex h-96 items-center justify-center text-indigo-500">
-      <Loader2 className="animate-spin" size={40} />
+    <div className="flex h-screen items-center justify-center bg-slate-50">
+      <div className="text-center">
+        <Loader2 className="animate-spin text-indigo-600 mx-auto mb-4" size={48} />
+        <p className="text-slate-500 font-medium animate-pulse">Chargement des demandes...</p>
+      </div>
     </div>
   );
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8 p-4 md:p-6">
-      {/* Header Raffiné */}
-      <header className="relative overflow-hidden rounded-[2.5rem] border border-slate-200/60 bg-white p-8 md:p-10 shadow-xl shadow-indigo-500/5">
-        <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-indigo-50/50 blur-3xl" />
-        <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <span className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-indigo-600">
-              <ClipboardList size={12} /> Centre de requêtes
-            </span>
-            <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight md:text-5xl">Demandes & Docs</h1>
-            <p className="max-w-xl text-slate-500">Gérez les demandes de l'équipe et suivez les validations de documents en temps réel.</p>
+    <div className="min-h-screen bg-[#F8FAFC] pb-20">
+      {/* Header sticky */}
+      <div className="bg-white border-b border-slate-200 sticky top-0 z-30">
+        <div className="mx-auto max-w-7xl px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Demandes & Dossiers</h1>
+            <p className="text-sm text-slate-500">Gérez et suivez les demandes de l'équipe</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 rounded-full bg-indigo-50 px-4 py-1.5 text-xs font-bold text-indigo-700">
+              <ClipboardList size={13} /> {requests.length} demandes
+            </div>
+            <div className="flex items-center gap-1.5 rounded-full bg-amber-50 px-4 py-1.5 text-xs font-bold text-amber-700">
+              <Clock size={13} /> {requests.filter(r => r.status === "pending").length} en attente
+            </div>
           </div>
         </div>
-      </header>
+      </div>
 
-      <section className="grid gap-8 lg:grid-cols-12">
-        {/* Liste des demandes */}
-        <div className="lg:col-span-8 space-y-6">
-          <div className="flex items-center justify-between px-2">
-            <h2 className="text-xl font-bold text-slate-800">Flux d'activité</h2>
-            <div className="text-xs font-medium text-slate-400">{requests.length} éléments</div>
-          </div>
-          
-          <div className="space-y-4">
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        <div className="grid gap-8 lg:grid-cols-3">
+
+          {/* Liste des demandes */}
+          <div className="lg:col-span-2 space-y-4">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+              <FileText size={16} /> Flux d'activité
+            </h3>
+
             {requests.length === 0 ? (
-              <div className="rounded-[2rem] border border-dashed border-slate-200 py-20 text-center text-slate-400">
-                <Info className="mx-auto mb-3 opacity-20" size={48} />
-                <p className="font-medium">Aucune demande pour le moment.</p>
+              <div className="rounded-[2rem] border-2 border-dashed border-slate-200 bg-white p-12 text-center">
+                <div className="mx-auto w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
+                  <ClipboardList className="text-slate-300" size={28} />
+                </div>
+                <h4 className="font-bold text-slate-900">Aucune demande</h4>
+                <p className="text-slate-500 text-sm mt-1">Les demandes de votre équipe apparaîtront ici.</p>
               </div>
             ) : (
-              requests.map((item) => {
-                const config = statusConfig[item.status] || statusConfig.pending;
-                const StatusIcon = config.icon;
-                
-                return (
-                  <div key={item.id} className="group relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-6 transition-all hover:border-indigo-100 hover:shadow-lg hover:shadow-indigo-500/5">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div className="flex items-center gap-4">
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-slate-50 text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-500 transition-colors">
-                          <FileText size={22} />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
+              <div className="space-y-3">
+                {requests.map(item => {
+                  const config = statusConfig[item.status] ?? statusConfig.pending;
+                  const StatusIcon = config.icon;
+                  return (
+                    <div key={item.id} className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+                      <div className="px-6 py-4">
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">REQ-{item.id}</span>
-                            <h3 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{item.type}</h3>
+                            <h4 className="font-bold text-slate-900 mt-0.5">{item.type}</h4>
+                            <Link href={`/employees/${item.employeeId}`} className="mt-1 text-xs text-indigo-500 hover:underline flex items-center gap-1 w-fit">
+                              <User size={11} /> {item.employeeName ?? `Employé #${item.employeeId}`}
+                            </Link>
                           </div>
-                          <Link href={`/employees/${item.employeeId}`} className="text-xs text-indigo-500 hover:underline flex items-center gap-1 mt-0.5 w-fit">
-                            <User size={12} /> {item.employeeName ?? `Employé #${item.employeeId}`}
-                          </Link>
+                          <div className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-bold uppercase ${config.bg} ${config.text} ${config.border}`}>
+                            <StatusIcon size={12} />
+                            {statusLabel[item.status] ?? item.status}
+                          </div>
                         </div>
-                      </div>
-                      
-                      <div className={`flex items-center gap-2 rounded-full border px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider ${config.bg} ${config.text}`}>
-                        <StatusIcon size={14} />
-                        {statusLabel[item.status] ?? item.status}
-                      </div>
-                    </div>
 
-                    <div className="mt-5 rounded-2xl bg-slate-50/50 p-4 border border-slate-100/50">
-                      <p className="text-sm leading-relaxed text-slate-600 italic">
-                        "{item.message || "Aucune précision supplémentaire."}"
-                      </p>
-                    </div>
+                        {item.message && (
+                          <p className="mt-3 rounded-xl bg-slate-50 px-4 py-2.5 text-sm text-slate-600 italic">"{item.message}"</p>
+                        )}
 
-                    {item.adminMessage && (
-                      <div className="mt-4 flex items-start gap-3 rounded-2xl bg-indigo-50/40 p-4 border border-indigo-100/50">
-                        <MessageSquare size={16} className="mt-0.5 text-indigo-400 shrink-0" />
-                        <div>
-                          <p className="text-[10px] font-bold uppercase text-indigo-400 mb-1">Note de l'administration</p>
-                          <p className="text-xs font-medium text-indigo-700 leading-relaxed">{item.adminMessage}</p>
-                        </div>
-                      </div>
-                    )}
-
-                    {item.logs && item.logs.length > 0 && (
-                      <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50/50 p-4 space-y-2">
-                        <p className="text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-2">Historique</p>
-                        {item.logs.map((log) => (
-                          <div key={log.id} className="flex items-start gap-2 text-xs text-slate-600">
-                            <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-indigo-300" />
+                        {item.adminMessage && (
+                          <div className="mt-3 flex items-start gap-2 rounded-xl bg-indigo-50/50 border border-indigo-100/50 px-4 py-3">
+                            <MessageSquare size={14} className="mt-0.5 text-indigo-400 shrink-0" />
                             <div>
-                              <span className="font-semibold text-slate-700">{logActionLabel(log.action)}</span>
-                              {log.byEmployeeName && <span className="text-slate-400"> par {log.byEmployeeName}</span>}
-                              {log.note && <span className="italic text-slate-400"> — {log.note}</span>}
-                              <span className="block text-[10px] text-slate-400">{new Date(log.createdAt).toLocaleString("fr-FR")}</span>
+                              <p className="text-[10px] font-bold uppercase text-indigo-400 mb-0.5">Réponse admin</p>
+                              <p className="text-xs text-indigo-700">{item.adminMessage}</p>
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    )}
+                        )}
 
-                    {isAdmin && (
-                      <div className="mt-6 flex justify-end gap-2 border-t border-slate-50 pt-4">
-                        <button 
-                          onClick={() => {
-                            setEditId(item.id);
-                            setEditForm({ status: item.status, message: item.message || "", documentUrl: "", adminMessage: item.adminMessage || "" });
-                          }}
-                          className="flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors"
-                        >
-                          <Pencil size={14} /> Traiter la demande
-                        </button>
-                        <button onClick={() => handleDelete(item.id)} className="flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors">
-                          <Trash2 size={14} /> Supprimer
-                        </button>
+                        {item.logs && item.logs.length > 0 && (
+                          <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50/50 px-4 py-3 space-y-1.5">
+                            <p className="text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-2">Historique</p>
+                            {item.logs.map(log => (
+                              <div key={log.id} className="flex items-start gap-2 text-xs text-slate-600">
+                                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-300" />
+                                <div>
+                                  <span className="font-semibold text-slate-700">{logActionLabel(log.action)}</span>
+                                  {log.byEmployeeName && <span className="text-slate-400"> par {log.byEmployeeName}</span>}
+                                  {log.note && <span className="italic text-slate-400"> — {log.note}</span>}
+                                  <span className="block text-[10px] text-slate-400">{new Date(log.createdAt).toLocaleString("fr-FR")}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                );
-              })
+
+                      {isAdmin && (
+                        <div className="border-t border-slate-100 px-6 py-3 flex justify-end gap-2">
+                          <button
+                            onClick={() => { setEditId(item.id); setEditForm({ status: item.status, adminMessage: item.adminMessage || "" }); }}
+                            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors"
+                          >
+                            <Pencil size={13} /> Traiter
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors"
+                          >
+                            <Trash2 size={13} /> Supprimer
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             )}
           </div>
-        </div>
 
-        {/* Sidebar : Formulaires */}
-        <div className="lg:col-span-4 space-y-6">
-          {/* Fenêtre de Traitement (Visible uniquement si editId) */}
-          {isAdmin && editId && (
-            <div className="rounded-[2rem] border-2 border-indigo-500 bg-white p-6 shadow-2xl shadow-indigo-500/10 animate-in fade-in zoom-in duration-200">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="font-bold text-slate-900 flex items-center gap-2">
-                  <Pencil size={18} className="text-indigo-500" /> Action sur REQ-{editId}
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Formulaire de traitement */}
+            {isAdmin && editId && (
+              <section className="space-y-4">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                  <Pencil size={16} /> Traiter REQ-{editId}
                 </h3>
-                <button onClick={() => setEditId(null)} className="text-slate-400 hover:text-slate-600"><XCircle size={20} /></button>
-              </div>
-              <form onSubmit={handleUpdate} className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Nouveau Statut</label>
-                  <select 
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/20 transition-all cursor-pointer"
-                    value={editForm.status} onChange={e => setEditForm({...editForm, status: e.target.value})}
-                  >
-                    <option value="pending">⏳ En attente</option>
-                    <option value="approved">✅ Approuver</option>
-                    <option value="office">🏢 Convoquer au bureau</option>
-                    <option value="rejected">❌ Rejeter</option>
-                  </select>
+                <div className="rounded-2xl border-2 border-indigo-500 bg-white p-5 shadow-xl shadow-indigo-500/10 animate-in fade-in slide-in-from-top-4">
+                  <form onSubmit={handleUpdate} className="space-y-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-slate-400 uppercase ml-1">Nouveau statut</label>
+                      <select
+                        className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                        value={editForm.status} onChange={e => setEditForm({ ...editForm, status: e.target.value })}
+                      >
+                        <option value="pending">⏳ En attente</option>
+                        <option value="approved">✅ Approuver</option>
+                        <option value="office">🏢 Convoquer</option>
+                        <option value="rejected">❌ Rejeter</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-slate-400 uppercase ml-1">Réponse à l'employé</label>
+                      <textarea
+                        className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none resize-none"
+                        rows={3} placeholder="Ex: Document reçu, merci..."
+                        value={editForm.adminMessage} onChange={e => setEditForm({ ...editForm, adminMessage: e.target.value })}
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2 pt-1">
+                      <button
+                        type="submit" disabled={saving}
+                        className="w-full rounded-xl bg-indigo-600 py-3 text-sm font-bold text-white hover:bg-indigo-700 flex justify-center items-center gap-2 transition-colors"
+                      >
+                        {saving ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
+                        Confirmer
+                      </button>
+                      <button type="button" onClick={() => setEditId(null)} className="w-full text-xs font-bold text-slate-400 py-2 hover:text-slate-600">
+                        Annuler
+                      </button>
+                    </div>
+                  </form>
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase text-slate-400 ml-1">Réponse à l'employé</label>
-                  <textarea 
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/20 resize-none"
-                    rows={4} placeholder="Ex: Document reçu, merci..."
-                    value={editForm.adminMessage} onChange={e => setEditForm({...editForm, adminMessage: e.target.value})}
-                  />
-                </div>
-                <button 
-                  disabled={saving}
-                  className="w-full rounded-xl bg-indigo-600 py-3.5 text-sm font-bold text-white hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all flex justify-center items-center gap-2"
-                >
-                  {saving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
-                  Confirmer la mise à jour
-                </button>
-              </form>
-            </div>
-          )}
+              </section>
+            )}
 
-          {/* Formulaire de création standard */}
-          <div className="rounded-[2rem] border border-slate-200 bg-white p-7 shadow-sm">
-            <h3 className="font-bold text-slate-900 mb-6 flex items-center gap-2">
-              <PlusCircle size={18} className="text-indigo-500" /> Nouvelle Demande
-            </h3>
-            <form onSubmit={handleCreate} className="space-y-4">
-              <input 
-                placeholder="Type (ex: Congés, Matériel...)" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/20 transition-all"
-                value={createForm.type} onChange={e => setCreateForm({...createForm, type: e.target.value})} required
-              />
-              {isAdmin && (
-                <input 
-                  placeholder="ID Employé (laisser vide pour soi)" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
-                  value={createForm.employeeId} onChange={e => setCreateForm({...createForm, employeeId: e.target.value})}
-                />
-              )}
-              <textarea 
-                placeholder="Détails de votre requête..." rows={4}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/20 resize-none transition-all"
-                value={createForm.message} onChange={e => setCreateForm({...createForm, message: e.target.value})}
-              />
-              <button 
-                disabled={saving}
-                className="group w-full rounded-xl bg-slate-900 py-4 text-sm font-bold text-white hover:bg-indigo-600 transition-all shadow-xl shadow-slate-900/10 flex justify-center items-center gap-2"
-              >
-                {saving ? <Loader2 size={16} className="animate-spin" /> : <Send size={14} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />}
-                Envoyer le dossier
-              </button>
-            </form>
+            {/* Formulaire de création */}
+            <section className="space-y-4">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                <PlusCircle size={16} /> Nouvelle demande
+              </h3>
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <form onSubmit={handleCreate} className="space-y-3">
+                  <input
+                    className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
+                    placeholder="Type (ex: Congés, Matériel...)"
+                    value={createForm.type} onChange={e => setCreateForm({ ...createForm, type: e.target.value })} required
+                  />
+                  {isAdmin && (
+                    <input
+                      className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                      placeholder="ID Employé (laisser vide pour soi)"
+                      value={createForm.employeeId} onChange={e => setCreateForm({ ...createForm, employeeId: e.target.value })}
+                    />
+                  )}
+                  <textarea
+                    className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none resize-none transition-all"
+                    placeholder="Détails de votre demande..." rows={3}
+                    value={createForm.message} onChange={e => setCreateForm({ ...createForm, message: e.target.value })}
+                  />
+                  <button
+                    disabled={saving}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3 text-sm font-bold text-white hover:bg-black transition-colors"
+                  >
+                    {saving ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                    Envoyer
+                  </button>
+                </form>
+              </div>
+            </section>
           </div>
         </div>
-      </section>
+      </main>
     </div>
   );
 }
-
-// Composant icône manquant dans lucide imports pour l'exemple
-const PlusCircle = ({ size, className }: any) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
-  </svg>
-);
