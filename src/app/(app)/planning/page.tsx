@@ -41,10 +41,11 @@ export default function PlanningPage() {
   const [employees, setEmployees] = useState<EmployeeOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [me, setMe] = useState<{ role?: string } | null>(null);
-  const [planningImageUrl, setPlanningImageUrl] = useState<string | null>(null);
-  const [planningImageUrl2, setPlanningImageUrl2] = useState<string | null>(null);
-  const [imageUploading, setImageUploading] = useState(false);
-  const [imageUploading2, setImageUploading2] = useState(false);
+  type SlotData = { type: 'image'; url: string } | { type: 'excel'; rows: string[][]; name: string };
+  const [slot1, setSlot1] = useState<SlotData | null>(null);
+  const [slot2, setSlot2] = useState<SlotData | null>(null);
+  const [uploading1, setUploading1] = useState(false);
+  const [uploading2, setUploading2] = useState(false);
   const [csvImporting, setCsvImporting] = useState(false);
   const [csvResult, setCsvResult] = useState<{ ok: number; errors: string[] } | null>(null);
 
@@ -78,8 +79,19 @@ export default function PlanningPage() {
         setOrphanEntries(allEntries.filter(e => !periodEntryIds.has(e.id)));
         setEmployees(emps);
         setMe(meData);
-        setPlanningImageUrl(img.planningImageUrl);
-        setPlanningImageUrl2(img.planningImageUrl2 ?? null);
+        // Init slots: backend image takes priority, then localStorage excel
+        if (img.planningImageUrl) {
+          setSlot1({ type: 'image', url: img.planningImageUrl });
+        } else {
+          const saved = localStorage.getItem('planning_excel_1');
+          if (saved) try { setSlot1(JSON.parse(saved)); } catch {}
+        }
+        if (img.planningImageUrl2) {
+          setSlot2({ type: 'image', url: img.planningImageUrl2 });
+        } else {
+          const saved = localStorage.getItem('planning_excel_2');
+          if (saved) try { setSlot2(JSON.parse(saved)); } catch {}
+        }
         if (pds.length > 0) setExpandedIds(new Set([pds[0].id]));
       })
       .catch(() => {})
@@ -216,29 +228,76 @@ export default function PlanningPage() {
     }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, slot: number) => {
+  const handleSlotUpload = async (e: React.ChangeEvent<HTMLInputElement>, slot: 1 | 2) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const isSlot2 = slot === 2;
-    isSlot2 ? setImageUploading2(true) : setImageUploading(true);
-    
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = async () => {
-      try {
-        const endpoint = isSlot2 ? "/admin/planning-image2" : "/admin/planning-image";
-        const response = await apiFetchClient<any>(endpoint, {
-          method: "POST",
-          body: JSON.stringify({ imageData: reader.result }),
-        });
-        const url = isSlot2 ? response.planningImageUrl2 : response.planningImageUrl;
-        isSlot2 ? setPlanningImageUrl2(url ?? String(reader.result)) : setPlanningImageUrl(url ?? String(reader.result));
-      } catch (err: any) {
-        alert("Erreur upload image : " + err.message);
-      } finally {
-        isSlot2 ? setImageUploading2(false) : setImageUploading(false);
+    const setUploading = slot === 1 ? setUploading1 : setUploading2;
+    const setSlot = slot === 1 ? setSlot1 : setSlot2;
+    setUploading(true);
+
+    const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
+    const isCsv = file.name.endsWith('.csv');
+
+    try {
+      if (isExcel || isCsv) {
+        let rows: string[][];
+        if (isExcel) {
+          const buffer = await file.arrayBuffer();
+          const wb = XLSX.read(buffer, { type: 'array', cellDates: true });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          const data = XLSX.utils.sheet_to_json<any[]>(ws, { header: 1, raw: false, dateNF: 'yyyy-mm-dd' });
+          rows = data.filter((r: any[]) => r.length > 0).map((r: any[]) =>
+            r.map((c: any) => (c instanceof Date ? c.toISOString().slice(0, 10) : (c ?? '').toString()))
+          );
+        } else {
+          const text = await file.text();
+          rows = text.split('\n').filter(Boolean).map(l =>
+            l.split(',').map(c => c.trim().replace(/^"|"$/g, ''))
+          );
+        }
+        const slotData: SlotData = { type: 'excel', rows, name: file.name };
+        setSlot(slotData);
+        localStorage.setItem(`planning_excel_${slot}`, JSON.stringify(slotData));
+      } else {
+        // Image upload
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = async () => {
+          try {
+            const endpoint = slot === 2 ? '/admin/planning-image2' : '/admin/planning-image';
+            const response = await apiFetchClient<any>(endpoint, {
+              method: 'POST',
+              body: JSON.stringify({ imageData: reader.result }),
+            });
+            const url = slot === 2 ? response.planningImageUrl2 : response.planningImageUrl;
+            setSlot({ type: 'image', url: url ?? String(reader.result) });
+          } catch (err: any) {
+            alert('Erreur upload image : ' + err.message);
+          } finally {
+            setUploading(false);
+          }
+        };
+        return;
       }
-    };
+    } catch (err: any) {
+      alert('Erreur upload : ' + err.message);
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleDeleteSlot = async (slot: 1 | 2) => {
+    const current = slot === 1 ? slot1 : slot2;
+    const setSlot = slot === 1 ? setSlot1 : setSlot2;
+    if (current?.type === 'image') {
+      try {
+        await apiFetchClient(`/admin/planning-image${slot === 2 ? '2' : ''}`, { method: 'DELETE' });
+      } catch {}
+    } else {
+      localStorage.removeItem(`planning_excel_${slot}`);
+    }
+    setSlot(null);
   };
 
   const handleCsvImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -385,28 +444,71 @@ export default function PlanningPage() {
           {/* Main Content */}
           <div className="lg:col-span-8 space-y-8">
             
-            {/* Visual Planning Preview (Images) */}
-            {(planningImageUrl || planningImageUrl2) && (
+            {/* Planning Semaine 1 & 2 */}
+            {(slot1 || slot2 || isAdmin) && (
               <section className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                    <LayoutGrid size={16} /> Aperçus visuels
-                  </h3>
-                </div>
-                <div className="grid gap-6 md:grid-cols-2">
-                  {[planningImageUrl, planningImageUrl2].map((img, idx) => img && (
-                    <div key={idx} className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
-                      <div className="absolute top-3 left-3 z-10">
-                        <span className="bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-bold text-slate-700 shadow-sm border border-slate-100">
-                          SEMAINE {idx + 1}
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                  <LayoutGrid size={16} /> Planning visuel
+                </h3>
+                <div className="space-y-6">
+                  {([slot1, slot2] as const).map((slot, idx) => (
+                    <div key={idx}>
+                      {/* Séparateur semaine */}
+                      <div className="flex items-center gap-3 mb-3">
+                        <span className="text-xs font-extrabold uppercase tracking-widest text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">
+                          Semaine {idx + 1}
                         </span>
+                        <div className="flex-1 h-px bg-slate-200" />
+                        {isAdmin && slot && (
+                          <button
+                            onClick={() => handleDeleteSlot((idx + 1) as 1 | 2)}
+                            className="flex items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-bold text-rose-500 hover:bg-rose-50 transition-colors"
+                          >
+                            <Trash2 size={13} /> Supprimer
+                          </button>
+                        )}
                       </div>
-                      <img 
-                        src={img} 
-                        alt={`Planning Semaine ${idx+1}`} 
-                        className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105 cursor-zoom-in" 
-                        onClick={() => window.open(img, '_blank')}
-                      />
+
+                      {slot ? (
+                        slot.type === 'image' ? (
+                          <div className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                            <img
+                              src={slot.url}
+                              alt={`Planning Semaine ${idx + 1}`}
+                              className="w-full object-contain max-h-[420px] cursor-zoom-in"
+                              onClick={() => window.open(slot.url, '_blank')}
+                            />
+                          </div>
+                        ) : (
+                          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-auto">
+                            <div className="px-4 py-2 border-b border-slate-100 flex items-center gap-2">
+                              <FileSpreadsheet size={14} className="text-emerald-500" />
+                              <span className="text-xs font-semibold text-slate-500">{slot.name}</span>
+                            </div>
+                            <div className="overflow-x-auto p-4">
+                              <table className="w-full text-xs border-collapse">
+                                {slot.rows.map((row, ri) => (
+                                  <tr key={ri} className={ri === 0 ? 'bg-slate-50 font-bold' : 'border-t border-slate-100 hover:bg-slate-50/50'}>
+                                    {row.map((cell, ci) => (
+                                      <td key={ci} className="px-3 py-2 text-slate-700 whitespace-nowrap">{cell}</td>
+                                    ))}
+                                  </tr>
+                                ))}
+                              </table>
+                            </div>
+                          </div>
+                        )
+                      ) : isAdmin ? (
+                        <label className="flex cursor-pointer items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-slate-200 bg-white py-10 transition-all hover:border-indigo-300 hover:bg-indigo-50/30">
+                          <Upload size={20} className="text-slate-300" />
+                          <span className="text-sm font-medium text-slate-400">Déposer une image ou un fichier Excel</span>
+                          <input type="file" className="hidden" accept="image/*,.xlsx,.xls,.csv" onChange={e => handleSlotUpload(e, (idx + 1) as 1 | 2)} />
+                        </label>
+                      ) : (
+                        <div className="rounded-2xl border border-dashed border-slate-200 bg-white py-8 text-center text-slate-400 text-sm">
+                          Aucun planning pour cette semaine
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -716,19 +818,19 @@ export default function PlanningPage() {
                       )}
                    </div>
 
-                   {/* Image Upload Slots */}
+                   {/* Upload Semaine 1 & 2 */}
                    <div className="space-y-3">
-                      <h4 className="text-[11px] font-bold text-slate-400 uppercase">Captures Planning</h4>
+                      <h4 className="text-[11px] font-bold text-slate-400 uppercase">Planning visuel</h4>
                       <div className="grid grid-cols-2 gap-2">
                          <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-slate-200 bg-slate-50 py-3 transition-all hover:bg-indigo-50 hover:border-indigo-200">
-                            {imageUploading ? <Loader2 className="animate-spin text-indigo-500" size={14}/> : <ImageIcon className="text-slate-400" size={14}/>}
+                            {uploading1 ? <Loader2 className="animate-spin text-indigo-500" size={14}/> : <ImageIcon className="text-slate-400" size={14}/>}
                             <span className="text-[10px] font-bold text-slate-500 mt-1 uppercase">S1</span>
-                            <input type="file" className="hidden" onChange={e => handleImageUpload(e, 1)} />
+                            <input type="file" className="hidden" accept="image/*,.xlsx,.xls,.csv" onChange={e => handleSlotUpload(e, 1)} />
                          </label>
                          <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-slate-200 bg-slate-50 py-3 transition-all hover:bg-indigo-50 hover:border-indigo-200">
-                            {imageUploading2 ? <Loader2 className="animate-spin text-indigo-500" size={14}/> : <ImageIcon className="text-slate-400" size={14}/>}
+                            {uploading2 ? <Loader2 className="animate-spin text-indigo-500" size={14}/> : <ImageIcon className="text-slate-400" size={14}/>}
                             <span className="text-[10px] font-bold text-slate-500 mt-1 uppercase">S2</span>
-                            <input type="file" className="hidden" onChange={e => handleImageUpload(e, 2)} />
+                            <input type="file" className="hidden" accept="image/*,.xlsx,.xls,.csv" onChange={e => handleSlotUpload(e, 2)} />
                          </label>
                       </div>
                    </div>
