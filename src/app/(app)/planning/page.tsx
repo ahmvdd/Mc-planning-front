@@ -79,19 +79,16 @@ export default function PlanningPage() {
         setOrphanEntries(allEntries.filter(e => !periodEntryIds.has(e.id)));
         setEmployees(emps);
         setMe(meData);
-        // Init slots: backend image takes priority, then localStorage excel
-        if (img.planningImageUrl) {
-          setSlot1({ type: 'image', url: img.planningImageUrl });
-        } else {
-          const saved = localStorage.getItem('planning_excel_1');
-          if (saved) try { setSlot1(JSON.parse(saved)); } catch {}
-        }
-        if (img.planningImageUrl2) {
-          setSlot2({ type: 'image', url: img.planningImageUrl2 });
-        } else {
-          const saved = localStorage.getItem('planning_excel_2');
-          if (saved) try { setSlot2(JSON.parse(saved)); } catch {}
-        }
+        // Init slots depuis le backend
+        const parseSlot = (raw: string | null): SlotData | null => {
+          if (!raw) return null;
+          if (raw.startsWith('__EXCEL__')) {
+            try { return JSON.parse(raw.slice(9)); } catch { return null; }
+          }
+          return { type: 'image', url: raw };
+        };
+        setSlot1(parseSlot(img.planningImageUrl));
+        setSlot2(parseSlot(img.planningImageUrl2));
         if (pds.length > 0) setExpandedIds(new Set([pds[0].id]));
       })
       .catch(() => {})
@@ -256,8 +253,13 @@ export default function PlanningPage() {
           );
         }
         const slotData: SlotData = { type: 'excel', rows, name: file.name };
+        // Sauvegarder en DB via le même endpoint image (préfixe __EXCEL__)
+        const endpoint = slot === 2 ? '/admin/planning-image2' : '/admin/planning-image';
+        await apiFetchClient<any>(endpoint, {
+          method: 'POST',
+          body: JSON.stringify({ imageData: '__EXCEL__' + JSON.stringify(slotData) }),
+        });
         setSlot(slotData);
-        localStorage.setItem(`planning_excel_${slot}`, JSON.stringify(slotData));
       } else {
         // Image upload
         const reader = new FileReader();
@@ -288,15 +290,10 @@ export default function PlanningPage() {
   };
 
   const handleDeleteSlot = async (slot: 1 | 2) => {
-    const current = slot === 1 ? slot1 : slot2;
     const setSlot = slot === 1 ? setSlot1 : setSlot2;
-    if (current?.type === 'image') {
-      try {
-        await apiFetchClient(`/admin/planning-image${slot === 2 ? '2' : ''}`, { method: 'DELETE' });
-      } catch {}
-    } else {
-      localStorage.removeItem(`planning_excel_${slot}`);
-    }
+    try {
+      await apiFetchClient(`/admin/planning-image${slot === 2 ? '2' : ''}`, { method: 'DELETE' });
+    } catch {}
     setSlot(null);
   };
 
