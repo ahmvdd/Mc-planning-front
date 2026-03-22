@@ -132,7 +132,7 @@ export default function Navbar() {
   );
 
   return (
-    <div className="relative">
+    <div className="relative z-50">
       {/* Desktop nav */}
       <nav className="hidden md:flex flex-wrap items-center gap-1">
         {desktopLinks}
