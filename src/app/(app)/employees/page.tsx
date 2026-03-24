@@ -4,9 +4,12 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
 import {
-  Users, UserCheck, Pencil, Trash2,
-  UserPlus, Loader2, Mail, Shield, CheckCircle2, X
+  Users, Pencil, Trash2,
+  UserPlus, Loader2, Mail, Shield, CheckCircle2, X,
+  Search, ChevronLeft, ChevronRight
 } from "lucide-react";
+
+const PAGE_SIZE = 15;
 
 type Employee = { id: number; name: string; email: string; role: string; status: string };
 
@@ -19,6 +22,8 @@ export default function EmployeesPage() {
   const [editId, setEditId] = useState<number | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", role: "employee", status: "active", password: "" });
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
 
   const isAdmin = me?.role === "admin";
 
@@ -40,6 +45,21 @@ export default function EmployeesPage() {
     const active = employees.filter(e => e.status === "active").length;
     return { total: employees.length, active, inactive: employees.length - active };
   }, [employees]);
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    if (!q) return employees;
+    return employees.filter(e =>
+      e.name.toLowerCase().includes(q) ||
+      e.email.toLowerCase().includes(q) ||
+      e.role.toLowerCase().includes(q)
+    );
+  }, [employees, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const handleSearch = (v: string) => { setSearch(v); setPage(1); };
 
   const resetForm = () => {
     setForm({ name: "", email: "", role: "employee", status: "active", password: "" });
@@ -131,9 +151,36 @@ export default function EmployeesPage() {
 
           {/* Table */}
           <div className="lg:col-span-8 space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-              <Users size={16} /> Collaborateurs
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                <Users size={16} /> Collaborateurs
+                {search && (
+                  <span className="ml-1 rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-600">
+                    {filtered.length} résultat{filtered.length !== 1 ? "s" : ""}
+                  </span>
+                )}
+              </h3>
+            </div>
+
+            {/* Barre de recherche */}
+            <div className="relative">
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Rechercher par nom, email ou rôle…"
+                value={search}
+                onChange={e => handleSearch(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300 transition-all shadow-sm"
+              />
+              {search && (
+                <button
+                  onClick={() => handleSearch("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  <X size={15} />
+                </button>
+              )}
+            </div>
 
             {employees.length === 0 ? (
               <div className="rounded-[2rem] border-2 border-dashed border-slate-200 bg-white p-12 text-center">
@@ -143,68 +190,125 @@ export default function EmployeesPage() {
                 <h4 className="text-slate-900 font-bold text-lg">Aucun collaborateur</h4>
                 <p className="text-slate-500 max-w-xs mx-auto mt-2">Ajoutez votre premier membre via le bouton "Nouveau membre".</p>
               </div>
-            ) : (
-              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-50/50 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                    <tr>
-                      <th className="px-6 py-4">Collaborateur</th>
-                      <th className="hidden sm:table-cell px-6 py-4">Rôle / Statut</th>
-                      <th className="px-6 py-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {employees.map(emp => (
-                      <tr key={emp.id} className="group hover:bg-slate-50/50 transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 font-bold text-indigo-600 text-sm">
-                              {emp.name.charAt(0).toUpperCase()}
-                            </div>
-                            <div>
-                              <p className="font-bold text-slate-900">{emp.name}</p>
-                              <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
-                                <Mail size={11} /> {emp.email}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="hidden sm:table-cell px-6 py-4">
-                          <div className="flex flex-col gap-1.5">
-                            <span className="flex w-fit items-center gap-1 rounded-md bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
-                              <Shield size={10} /> {emp.role.toUpperCase()}
-                            </span>
-                            <span className={`text-[10px] font-medium ${emp.status === "active" ? "text-emerald-500" : "text-slate-400"}`}>
-                              ● {emp.status === "active" ? "En poste" : "Inactif"}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            {isAdmin && (
-                              <>
-                                <button
-                                  onClick={() => { setEditId(emp.id); setForm({ ...emp, password: "" }); setShowForm(true); }}
-                                  className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
-                                >
-                                  <Pencil size={15} />
-                                </button>
-                                <button
-                                  onClick={() => deleteEmployee(emp.id)}
-                                  disabled={saving}
-                                  className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                                >
-                                  <Trash2 size={15} />
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            ) : filtered.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center">
+                <Search className="mx-auto text-slate-300 mb-3" size={32} />
+                <p className="font-semibold text-slate-600">Aucun résultat pour "<span className="text-indigo-600">{search}</span>"</p>
+                <button onClick={() => handleSearch("")} className="mt-3 text-xs text-slate-400 hover:text-indigo-600 underline">Effacer la recherche</button>
               </div>
+            ) : (
+              <>
+                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-slate-50/50 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      <tr>
+                        <th className="px-6 py-4">Collaborateur</th>
+                        <th className="hidden sm:table-cell px-6 py-4">Rôle / Statut</th>
+                        <th className="px-6 py-4 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {paginated.map(emp => (
+                        <tr key={emp.id} className="group hover:bg-slate-50/50 transition-colors">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 font-bold text-indigo-600 text-sm">
+                                {emp.name.charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <p className="font-bold text-slate-900">{emp.name}</p>
+                                <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                                  <Mail size={11} /> {emp.email}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="hidden sm:table-cell px-6 py-4">
+                            <div className="flex flex-col gap-1.5">
+                              <span className="flex w-fit items-center gap-1 rounded-md bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
+                                <Shield size={10} /> {emp.role.toUpperCase()}
+                              </span>
+                              <span className={`text-[10px] font-medium ${emp.status === "active" ? "text-emerald-500" : "text-slate-400"}`}>
+                                ● {emp.status === "active" ? "En poste" : "Inactif"}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              {isAdmin && (
+                                <>
+                                  <button
+                                    onClick={() => { setEditId(emp.id); setForm({ ...emp, password: "" }); setShowForm(true); }}
+                                    className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                                  >
+                                    <Pencil size={15} />
+                                  </button>
+                                  <button
+                                    onClick={() => deleteEmployee(emp.id)}
+                                    disabled={saving}
+                                    className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                  >
+                                    <Trash2 size={15} />
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between pt-1">
+                    <p className="text-xs text-slate-400">
+                      {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} sur <span className="font-semibold text-slate-600">{filtered.length}</span>
+                    </p>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                        className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <ChevronLeft size={14} /> Préc.
+                      </button>
+
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1)
+                          .filter(n => n === 1 || n === totalPages || Math.abs(n - page) <= 1)
+                          .reduce<(number | "…")[]>((acc, n, i, arr) => {
+                            if (i > 0 && n - (arr[i - 1] as number) > 1) acc.push("…");
+                            acc.push(n);
+                            return acc;
+                          }, [])
+                          .map((n, i) =>
+                            n === "…" ? (
+                              <span key={`ellipsis-${i}`} className="px-1 text-xs text-slate-300">…</span>
+                            ) : (
+                              <button
+                                key={n}
+                                onClick={() => setPage(n as number)}
+                                className={`min-w-[28px] rounded-lg px-2 py-1.5 text-xs font-bold transition-colors ${page === n ? "bg-indigo-600 text-white shadow-sm" : "text-slate-500 hover:bg-slate-100"}`}
+                              >
+                                {n}
+                              </button>
+                            )
+                          )}
+                      </div>
+
+                      <button
+                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                        disabled={page === totalPages}
+                        className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      >
+                        Suiv. <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
 

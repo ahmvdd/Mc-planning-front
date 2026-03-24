@@ -7,7 +7,7 @@ import { apiFetchClient, getToken } from "@/lib/clientApi";
 import {
   ClipboardList, Pencil, Trash2, Send, Clock,
   CheckCircle2, XCircle, MessageSquare, User,
-  FileText, Loader2, Info, PlusCircle
+  FileText, Loader2, Info, PlusCircle, ChevronDown, ChevronUp
 } from "lucide-react";
 
 type RequestLog = {
@@ -52,6 +52,83 @@ const statusConfig: Record<string, { bg: string; text: string; border: string; i
   pending:   { bg: "bg-amber-50",   text: "text-amber-700",   border: "border-amber-100",   icon: Clock },
 };
 
+function RequestCard({ item, isAdmin, onEdit, onDelete }: {
+  item: RequestItem;
+  isAdmin: boolean;
+  onEdit: (id: number) => void;
+  onDelete: (id: number) => void;
+}) {
+  const config = statusConfig[item.status] ?? statusConfig.pending;
+  const StatusIcon = config.icon;
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div className="px-6 py-4">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">REQ-{item.id}</span>
+            <h4 className="font-bold text-slate-900 mt-0.5">{item.type}</h4>
+            <Link href={`/employees/${item.employeeId}`} className="mt-1 text-xs text-indigo-500 hover:underline flex items-center gap-1 w-fit">
+              <User size={11} /> {item.employeeName ?? `Employé #${item.employeeId}`}
+            </Link>
+          </div>
+          <div className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-bold uppercase ${config.bg} ${config.text} ${config.border}`}>
+            <StatusIcon size={12} />
+            {statusLabel[item.status] ?? item.status}
+          </div>
+        </div>
+
+        {item.message && (
+          <p className="mt-3 rounded-xl bg-slate-50 px-4 py-2.5 text-sm text-slate-600 italic">"{item.message}"</p>
+        )}
+
+        {item.adminMessage && (
+          <div className="mt-3 flex items-start gap-2 rounded-xl bg-indigo-50/50 border border-indigo-100/50 px-4 py-3">
+            <MessageSquare size={14} className="mt-0.5 text-indigo-400 shrink-0" />
+            <div>
+              <p className="text-[10px] font-bold uppercase text-indigo-400 mb-0.5">Réponse admin</p>
+              <p className="text-xs text-indigo-700">{item.adminMessage}</p>
+            </div>
+          </div>
+        )}
+
+        {item.logs && item.logs.length > 0 && (
+          <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50/50 px-4 py-3 space-y-1.5">
+            <p className="text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-2">Historique</p>
+            {item.logs.map(log => (
+              <div key={log.id} className="flex items-start gap-2 text-xs text-slate-600">
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-300" />
+                <div>
+                  <span className="font-semibold text-slate-700">{logActionLabel(log.action)}</span>
+                  {log.byEmployeeName && <span className="text-slate-400"> par {log.byEmployeeName}</span>}
+                  {log.note && <span className="italic text-slate-400"> — {log.note}</span>}
+                  <span className="block text-[10px] text-slate-400">{new Date(log.createdAt).toLocaleString("fr-FR")}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {isAdmin && (
+        <div className="border-t border-slate-100 px-6 py-3 flex justify-end gap-2">
+          <button
+            onClick={() => onEdit(item.id)}
+            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors"
+          >
+            <Pencil size={13} /> Traiter
+          </button>
+          <button
+            onClick={() => onDelete(item.id)}
+            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors"
+          >
+            <Trash2 size={13} /> Supprimer
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function RequestsPage() {
   const router = useRouter();
   const [requests, setRequests] = useState<RequestItem[]>([]);
@@ -61,8 +138,12 @@ export default function RequestsPage() {
   const [editId, setEditId] = useState<number | null>(null);
   const [createForm, setCreateForm] = useState({ type: "", message: "", documentUrl: "", employeeId: "" });
   const [editForm, setEditForm] = useState({ status: "pending", adminMessage: "" });
+  const [showProcessed, setShowProcessed] = useState(false);
 
   const isAdmin = me?.role === "admin";
+
+  const pendingRequests = requests.filter(r => r.status === "pending");
+  const processedRequests = requests.filter(r => r.status !== "pending");
 
   useEffect(() => {
     if (!getToken()) { router.push("/login"); return; }
@@ -150,92 +231,56 @@ export default function RequestsPage() {
         <div className="grid gap-8 lg:grid-cols-3">
 
           {/* Liste des demandes */}
-          <div className="lg:col-span-2 space-y-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-              <FileText size={16} /> Flux d'activité
-            </h3>
+          <div className="lg:col-span-2 space-y-6">
 
-            {requests.length === 0 ? (
-              <div className="rounded-[2rem] border-2 border-dashed border-slate-200 bg-white p-12 text-center">
-                <div className="mx-auto w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
-                  <ClipboardList className="text-slate-300" size={28} />
+            {/* — En attente — */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                <Clock size={16} /> En attente
+                <span className="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-600">
+                  {pendingRequests.length}
+                </span>
+              </h3>
+
+              {pendingRequests.length === 0 ? (
+                <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-white p-10 text-center">
+                  <CheckCircle2 className="mx-auto text-emerald-300 mb-3" size={32} />
+                  <p className="font-semibold text-slate-600">Tout est traité !</p>
+                  <p className="text-slate-400 text-xs mt-1">Aucune demande en attente.</p>
                 </div>
-                <h4 className="font-bold text-slate-900">Aucune demande</h4>
-                <p className="text-slate-500 text-sm mt-1">Les demandes de votre équipe apparaîtront ici.</p>
-              </div>
-            ) : (
+              ) : (
+                <div className="space-y-3">
+                  {pendingRequests.map(item => <RequestCard key={item.id} item={item} isAdmin={isAdmin} onEdit={(id) => { setEditId(id); setEditForm({ status: item.status, adminMessage: item.adminMessage || "" }); }} onDelete={handleDelete} />)}
+                </div>
+              )}
+            </div>
+
+            {/* — Déjà traitées — */}
+            {processedRequests.length > 0 && (
               <div className="space-y-3">
-                {requests.map(item => {
-                  const config = statusConfig[item.status] ?? statusConfig.pending;
-                  const StatusIcon = config.icon;
-                  return (
-                    <div key={item.id} className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-                      <div className="px-6 py-4">
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">REQ-{item.id}</span>
-                            <h4 className="font-bold text-slate-900 mt-0.5">{item.type}</h4>
-                            <Link href={`/employees/${item.employeeId}`} className="mt-1 text-xs text-indigo-500 hover:underline flex items-center gap-1 w-fit">
-                              <User size={11} /> {item.employeeName ?? `Employé #${item.employeeId}`}
-                            </Link>
-                          </div>
-                          <div className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-bold uppercase ${config.bg} ${config.text} ${config.border}`}>
-                            <StatusIcon size={12} />
-                            {statusLabel[item.status] ?? item.status}
-                          </div>
-                        </div>
+                <button
+                  onClick={() => setShowProcessed(v => !v)}
+                  className="w-full flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-slate-500 hover:bg-slate-50 transition-colors shadow-sm"
+                >
+                  <span className="flex items-center gap-2">
+                    <FileText size={15} />
+                    Demandes déjà traitées
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
+                      {processedRequests.length}
+                    </span>
+                  </span>
+                  {showProcessed ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
 
-                        {item.message && (
-                          <p className="mt-3 rounded-xl bg-slate-50 px-4 py-2.5 text-sm text-slate-600 italic">"{item.message}"</p>
-                        )}
-
-                        {item.adminMessage && (
-                          <div className="mt-3 flex items-start gap-2 rounded-xl bg-indigo-50/50 border border-indigo-100/50 px-4 py-3">
-                            <MessageSquare size={14} className="mt-0.5 text-indigo-400 shrink-0" />
-                            <div>
-                              <p className="text-[10px] font-bold uppercase text-indigo-400 mb-0.5">Réponse admin</p>
-                              <p className="text-xs text-indigo-700">{item.adminMessage}</p>
-                            </div>
-                          </div>
-                        )}
-
-                        {item.logs && item.logs.length > 0 && (
-                          <div className="mt-3 rounded-xl border border-slate-100 bg-slate-50/50 px-4 py-3 space-y-1.5">
-                            <p className="text-[10px] font-bold uppercase text-slate-400 tracking-wider mb-2">Historique</p>
-                            {item.logs.map(log => (
-                              <div key={log.id} className="flex items-start gap-2 text-xs text-slate-600">
-                                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-300" />
-                                <div>
-                                  <span className="font-semibold text-slate-700">{logActionLabel(log.action)}</span>
-                                  {log.byEmployeeName && <span className="text-slate-400"> par {log.byEmployeeName}</span>}
-                                  {log.note && <span className="italic text-slate-400"> — {log.note}</span>}
-                                  <span className="block text-[10px] text-slate-400">{new Date(log.createdAt).toLocaleString("fr-FR")}</span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                {showProcessed && (
+                  <div className="space-y-3">
+                    {processedRequests.map(item => (
+                      <div key={item.id} className="opacity-70 hover:opacity-100 transition-opacity">
+                        <RequestCard item={item} isAdmin={isAdmin} onEdit={(id) => { setEditId(id); setEditForm({ status: item.status, adminMessage: item.adminMessage || "" }); }} onDelete={handleDelete} />
                       </div>
-
-                      {isAdmin && (
-                        <div className="border-t border-slate-100 px-6 py-3 flex justify-end gap-2">
-                          <button
-                            onClick={() => { setEditId(item.id); setEditForm({ status: item.status, adminMessage: item.adminMessage || "" }); }}
-                            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors"
-                          >
-                            <Pencil size={13} /> Traiter
-                          </button>
-                          <button
-                            onClick={() => handleDelete(item.id)}
-                            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors"
-                          >
-                            <Trash2 size={13} /> Supprimer
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
