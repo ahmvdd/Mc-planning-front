@@ -15,6 +15,7 @@ import {
   Home,
   Menu,
   X,
+  UserCircle,
 } from "lucide-react";
 
 export default function Navbar() {
@@ -77,6 +78,7 @@ export default function Navbar() {
           <Link className={linkClass} href="/admin"><ShieldCheck size={14} /> Admin</Link>
         </>
       )}
+      <Link className={linkClass} href="/profile"><UserCircle size={14} /> Profil</Link>
       <button
         type="button"
         onClick={handleLogout}
@@ -109,6 +111,7 @@ export default function Navbar() {
           <Link className={mobileLinkClass} href="/admin" onClick={close}><ShieldCheck size={18} /> Admin</Link>
         </>
       )}
+      <Link className={mobileLinkClass} href="/profile" onClick={close}><UserCircle size={18} /> Profil</Link>
       <button
         type="button"
         onClick={handleLogout}
