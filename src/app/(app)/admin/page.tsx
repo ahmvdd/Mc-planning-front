@@ -6,13 +6,20 @@ import { useEffect, useRef, useState } from "react";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
 import {
   Building2, KeyRound, CalendarDays, Upload, Users, Send,
-  Check, AlertCircle, FileSpreadsheet, Loader2, X, Settings
+  Check, AlertCircle, FileSpreadsheet, Loader2, X, Settings, Mail, Trash2, Clock
 } from "lucide-react";
 
 type ImportResult = {
   total: number;
   invited: number;
   errors: { email: string; reason: string }[];
+};
+
+type PendingInvitation = {
+  id: number;
+  email: string;
+  createdAt: string;
+  expiresAt: string;
 };
 
 export default function AdminPage() {
@@ -31,6 +38,19 @@ export default function AdminPage() {
   const [importStatus, setImportStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
+
+  const [pendingInvitations, setPendingInvitations] = useState<PendingInvitation[]>([]);
+
+  const loadInvitations = async () => {
+    const data = await apiFetchClient<PendingInvitation[]>("/invitations").catch(() => []);
+    setPendingInvitations(data);
+  };
+
+  const cancelInvitation = async (id: number) => {
+    if (!confirm("Annuler cette invitation ?")) return;
+    await apiFetchClient(`/invitations/${id}`, { method: "DELETE" }).catch(() => null);
+    setPendingInvitations(prev => prev.filter(i => i.id !== id));
+  };
 
   const handleImport = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,6 +88,7 @@ export default function AdminPage() {
       });
       setInviteStatus("success");
       setInviteEmail("");
+      await loadInvitations();
       setTimeout(() => setInviteStatus("idle"), 4000);
     } catch (err) {
       setInviteError(err instanceof Error ? err.message : "Erreur lors de l'envoi");
@@ -90,6 +111,7 @@ export default function AdminPage() {
         } else {
           const org = await apiFetchClient<{ name: string }>("/admin/organization").catch(() => null);
           setOrgName(org?.name || "");
+          await loadInvitations();
         }
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Erreur"))
@@ -247,6 +269,37 @@ export default function AdminPage() {
                   </button>
                 </form>
               </div>
+
+              {/* Invitations en attente */}
+              {pendingInvitations.length > 0 && (
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2 mb-4">
+                    <Clock size={16} /> Invitations en attente
+                    <span className="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-600">{pendingInvitations.length}</span>
+                  </h3>
+                  <div className="space-y-2">
+                    {pendingInvitations.map(inv => (
+                      <div key={inv.id} className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 px-4 py-2.5">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Mail size={13} className="text-slate-400 shrink-0" />
+                          <span className="text-sm text-slate-700 truncate">{inv.email}</span>
+                        </div>
+                        <div className="flex items-center gap-3 shrink-0">
+                          <span className="text-[11px] text-slate-400">
+                            Expire le {new Date(inv.expiresAt).toLocaleDateString("fr-FR")}
+                          </span>
+                          <button
+                            onClick={() => cancelInvitation(inv.id)}
+                            className="text-rose-400 hover:text-rose-600 transition-colors"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Import CSV/Excel */}
               <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
