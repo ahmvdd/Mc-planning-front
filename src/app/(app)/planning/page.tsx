@@ -5,7 +5,7 @@ import * as XLSX from "xlsx";
 import { useRouter } from "next/navigation";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
 import {
-  Calendar, Clock, User, Users, Plus,
+  Calendar, Clock, Users, Plus,
   Trash2, Pencil, Upload, Download,
   Loader2, ChevronDown, Image as ImageIcon,
   LayoutGrid, List, FileSpreadsheet, X
@@ -40,7 +40,7 @@ export default function PlanningPage() {
   const [orphanEntries, setOrphanEntries] = useState<PlanningEntry[]>([]);
   const [employees, setEmployees] = useState<EmployeeOption[]>([]);
   const [loading, setLoading] = useState(true);
-  const [me, setMe] = useState<{ role?: string } | null>(null);
+  const [me, setMe] = useState<{ role?: string; sub?: number } | null>(null);
   type SlotData = { type: 'image'; url: string } | { type: 'excel'; rows: string[][]; name: string };
   const [slot1, setSlot1] = useState<SlotData | null>(null);
   const [slot2, setSlot2] = useState<SlotData | null>(null);
@@ -62,6 +62,11 @@ export default function PlanningPage() {
   const [confirmDeletePeriodId, setConfirmDeletePeriodId] = useState<number | null>(null);
 
   const isAdmin = me?.role === "admin";
+
+  const myName = useMemo(() => {
+    if (!me?.sub) return null;
+    return employees.find(e => e.id === me.sub)?.name?.toLowerCase() ?? null;
+  }, [me, employees]);
 
   useEffect(() => {
     if (!getToken()) { router.push("/login"); return; }
@@ -484,13 +489,27 @@ export default function PlanningPage() {
                             </div>
                             <div className="overflow-x-auto p-4">
                               <table className="w-full text-xs border-collapse">
-                                {slot.rows.map((row, ri) => (
-                                  <tr key={ri} className={ri === 0 ? 'bg-slate-50 font-bold' : 'border-t border-slate-100 hover:bg-slate-50/50'}>
-                                    {row.map((cell, ci) => (
-                                      <td key={ci} className="px-3 py-2 text-slate-700 whitespace-nowrap">{cell}</td>
-                                    ))}
-                                  </tr>
-                                ))}
+                                {slot.rows.map((row, ri) => {
+                                  const isMe = ri > 0 && myName !== null && row.some(cell => cell.toLowerCase().includes(myName));
+                                  return (
+                                    <tr key={ri} className={
+                                      ri === 0
+                                        ? 'bg-slate-50 font-bold'
+                                        : isMe
+                                          ? 'bg-indigo-50 border-t border-indigo-100 font-semibold'
+                                          : 'border-t border-slate-100 hover:bg-slate-50/50'
+                                    }>
+                                      {row.map((cell, ci) => (
+                                        <td key={ci} className={`px-3 py-2 whitespace-nowrap ${isMe ? 'text-indigo-700' : 'text-slate-700'}`}>
+                                          {cell}
+                                          {isMe && ci === 0 && (
+                                            <span className="ml-2 inline-block rounded-full bg-indigo-600 px-1.5 py-0.5 text-[9px] font-bold text-white uppercase tracking-wide">Vous</span>
+                                          )}
+                                        </td>
+                                      ))}
+                                    </tr>
+                                  );
+                                })}
                               </table>
                             </div>
                           </div>
