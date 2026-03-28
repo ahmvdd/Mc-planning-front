@@ -5,7 +5,7 @@ import * as XLSX from "xlsx";
 import { useRouter } from "next/navigation";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
 import {
-  Calendar, Clock, Users, Plus,
+  Calendar, Clock, Users, Plus, User,
   Trash2, Pencil, Upload, Download,
   Loader2, ChevronDown, Image as ImageIcon,
   LayoutGrid, List, FileSpreadsheet, X
@@ -487,6 +487,39 @@ export default function PlanningPage() {
                               <FileSpreadsheet size={14} className="text-emerald-500" />
                               <span className="text-xs font-semibold text-slate-500">{slot.name}</span>
                             </div>
+                            {(() => {
+                              if (!myName) return null;
+                              const myRowIdx = slot.rows.findIndex((row, i) => i > 0 && row.some(cell => cell.toLowerCase().includes(myName)));
+                              if (myRowIdx === -1) return null;
+                              const contextStart = Math.max(1, myRowIdx - 2);
+                              const previewRows = [slot.rows[0], ...slot.rows.slice(contextStart, myRowIdx + 1)];
+                              return (
+                                <div className="px-4 pt-4 pb-3 border-b border-slate-100 bg-indigo-50/40">
+                                  <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-500 mb-2 flex items-center gap-1.5">
+                                    <User size={11} /> Mon planning
+                                  </p>
+                                  <div className="overflow-x-auto">
+                                    <table className="w-full text-xs border-collapse">
+                                      {previewRows.map((row, ri) => {
+                                        const isMyRow = ri > 0 && row.some(cell => cell.toLowerCase().includes(myName));
+                                        return (
+                                          <tr key={ri} className={ri === 0 ? 'font-bold text-slate-500' : isMyRow ? 'bg-indigo-100 font-semibold rounded' : 'text-slate-500'}>
+                                            {row.map((cell, ci) => (
+                                              <td key={ci} className={`px-3 py-1.5 whitespace-nowrap ${isMyRow ? 'text-indigo-700' : ''}`}>
+                                                {cell}
+                                                {isMyRow && ci === 0 && (
+                                                  <span className="ml-1.5 inline-block rounded-full bg-indigo-600 px-1.5 py-0.5 text-[9px] font-bold text-white">Vous</span>
+                                                )}
+                                              </td>
+                                            ))}
+                                          </tr>
+                                        );
+                                      })}
+                                    </table>
+                                  </div>
+                                </div>
+                              );
+                            })()}
                             <div className="overflow-x-auto p-4">
                               <table className="w-full text-xs border-collapse">
                                 {slot.rows.map((row, ri) => {
