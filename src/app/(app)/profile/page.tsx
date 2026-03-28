@@ -6,6 +6,7 @@ import { apiFetchClient, getToken } from "@/lib/clientApi";
 import { User, KeyRound, Check, Loader2, AlertCircle } from "lucide-react";
 
 type Me = { sub: number; name?: string; email?: string; role?: string };
+type EmployeeData = { id: number; name: string; email: string; role: string };
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -20,7 +21,13 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!getToken()) { router.push("/login"); return; }
     apiFetchClient<Me>("/auth/me")
-      .then((data) => { setMe(data); setName(data.name ?? ""); })
+      .then(async (data) => {
+        setMe(data);
+        if (data.sub) {
+          const emp = await apiFetchClient<EmployeeData>(`/employees/${data.sub}`).catch(() => null);
+          if (emp) setName(emp.name);
+        }
+      })
       .catch(() => router.push("/login"));
   }, [router]);
 
