@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { User, Mail, Lock, Hash, Loader2, CheckCircle2, AlertCircle, ArrowRight } from "lucide-react";
+import { User, Mail, Lock, Hash, Loader2, CheckCircle2, AlertCircle, ArrowRight, ArrowLeft } from "lucide-react";
 
 function EmployeeSignupForm() {
   const router = useRouter();
@@ -22,7 +22,6 @@ function EmployeeSignupForm() {
     e.preventDefault();
     setStatus("loading");
     setErrorMsg("");
-
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:3000/api"}/auth/signup`,
@@ -39,12 +38,10 @@ function EmployeeSignupForm() {
           }),
         }
       );
-
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error((err as { message?: string }).message || "Erreur lors de l'inscription");
       }
-
       setStatus("success");
       setTimeout(() => router.push("/login"), 2500);
     } catch (err) {
@@ -55,103 +52,79 @@ function EmployeeSignupForm() {
 
   if (status === "success") {
     return (
-      <div className="rounded-[2.5rem] border border-emerald-100 bg-white p-8 shadow-2xl shadow-emerald-500/10 text-center space-y-4">
-        <div className="mx-auto w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
-          <CheckCircle2 size={36} className="text-emerald-600" />
+      <div className="space-y-4 text-center py-4">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
+          <CheckCircle2 size={28} className="text-emerald-600" />
         </div>
-        <h2 className="text-2xl font-bold text-slate-900">Compte créé !</h2>
-        <p className="text-slate-500 text-sm">Redirection vers la connexion...</p>
+        <h2 className="text-xl font-black text-slate-900">Compte créé !</h2>
+        <p className="text-sm text-slate-500">Redirection vers la connexion...</p>
       </div>
     );
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="rounded-[2.5rem] border border-slate-200/60 bg-white p-8 md:p-10 shadow-2xl shadow-indigo-500/5 space-y-5"
-    >
-      <div className="space-y-4">
-        <div className="relative">
-          <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {[
+        { icon: User, placeholder: "Votre nom complet", key: "name", type: "text" },
+        { icon: Mail, placeholder: "Votre email", key: "email", type: "email" },
+        { icon: Lock, placeholder: "Mot de passe (min. 6 car.)", key: "password", type: "password", minLength: 6 },
+      ].map(({ icon: Icon, placeholder, key, type, minLength }) => (
+        <div key={key} className="relative">
+          <Icon size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 pl-11 pr-4 py-3.5 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/20 transition-all"
-            placeholder="Votre nom complet"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-3 text-sm outline-none focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/15 transition-all"
+            placeholder={placeholder}
+            type={type}
             required
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            minLength={minLength}
+            value={form[key as keyof typeof form]}
+            onChange={(e) => setForm({ ...form, [key]: e.target.value })}
           />
         </div>
+      ))}
 
-        <div className="relative">
-          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input
-            type="email"
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 pl-11 pr-4 py-3.5 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/20 transition-all"
-            placeholder="Votre email"
-            required
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-          />
-        </div>
-
-        <div className="relative">
-          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input
-            type="password"
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 pl-11 pr-4 py-3.5 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/20 transition-all"
-            placeholder="Mot de passe"
-            required
-            minLength={6}
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-          />
-        </div>
-
-        <div className="relative">
-          <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input
-            className={`w-full rounded-2xl border pl-11 pr-4 py-3.5 text-sm font-mono uppercase outline-none transition-all ${
-              codeFromUrl
-                ? "border-indigo-200 bg-indigo-50 text-indigo-700 cursor-not-allowed"
-                : "border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
-            }`}
-            placeholder="Code organisation (ex: AB12CD)"
-            required
-            readOnly={Boolean(codeFromUrl)}
-            value={form.orgCode}
-            onChange={(e) => setForm({ ...form, orgCode: e.target.value })}
-          />
-          {codeFromUrl && (
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-indigo-500 uppercase tracking-wider">
-              Pré-rempli
-            </span>
-          )}
-        </div>
+      <div className="relative">
+        <Hash size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+        <input
+          className={`w-full rounded-xl border pl-10 pr-12 py-3 text-sm font-mono uppercase outline-none transition-all ${
+            codeFromUrl
+              ? "border-indigo-200 bg-indigo-50 text-indigo-700 cursor-not-allowed"
+              : "border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/15"
+          }`}
+          placeholder="Code organisation (ex: AB12CD)"
+          required
+          readOnly={Boolean(codeFromUrl)}
+          value={form.orgCode}
+          onChange={(e) => setForm({ ...form, orgCode: e.target.value })}
+        />
+        {codeFromUrl && (
+          <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-indigo-500 uppercase tracking-wider bg-indigo-100 px-2 py-0.5 rounded-md">
+            Auto
+          </span>
+        )}
       </div>
 
       {status === "error" && (
-        <div className="flex items-center gap-2 rounded-xl bg-rose-50 p-3 text-xs font-bold text-rose-600 border border-rose-100">
-          <AlertCircle size={14} /> {errorMsg}
+        <div className="flex items-center gap-2 rounded-xl border border-rose-100 bg-rose-50 px-3.5 py-3 text-sm text-rose-700">
+          <AlertCircle size={15} className="shrink-0" /> {errorMsg}
         </div>
       )}
 
       <button
         type="submit"
         disabled={status === "loading"}
-        className="w-full flex items-center justify-center gap-2 rounded-2xl bg-slate-900 py-4 text-sm font-bold text-white shadow-xl hover:bg-indigo-600 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:hover:translate-y-0"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-200 transition hover:bg-indigo-700 disabled:opacity-60"
       >
         {status === "loading" ? (
-          <><Loader2 className="animate-spin" size={18} /> Création du compte...</>
+          <><Loader2 size={16} className="animate-spin" /> Création...</>
         ) : (
-          <>Rejoindre l&apos;organisation <ArrowRight size={18} /></>
+          <>Rejoindre l&apos;organisation <ArrowRight size={15} /></>
         )}
       </button>
 
-      <p className="text-center text-sm text-slate-400 pt-2">
+      <p className="text-center text-xs text-slate-400">
         Déjà membre ?{" "}
-        <Link href="/login" className="text-indigo-600 font-bold hover:text-indigo-700 transition-colors">
-          Connectez-vous
-        </Link>
+        <Link href="/login" className="font-bold text-indigo-600 hover:text-indigo-700">Connexion</Link>
       </p>
     </form>
   );
@@ -159,19 +132,32 @@ function EmployeeSignupForm() {
 
 export default function EmployeeSignupPage() {
   return (
-    <div className="min-h-[80vh] flex items-center justify-center p-4">
-      <div className="w-full max-w-lg space-y-8">
-        <div className="text-center space-y-3">
-          <div className="mx-auto w-16 h-16 bg-slate-900 rounded-3xl flex items-center justify-center shadow-xl shadow-slate-900/20">
-            <User size={30} className="text-white" />
+    <div className="mx-auto w-full max-w-md">
+      <div className="overflow-hidden rounded-[28px] border border-white/10 bg-white shadow-2xl shadow-black/50">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-slate-800 to-slate-900 px-8 py-7">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15">
+              <User size={20} className="text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-black tracking-tight text-white">Rejoindre l&apos;équipe</h1>
+              <p className="text-xs text-slate-400">Entrez le code fourni par votre responsable</p>
+            </div>
           </div>
-          <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">Rejoindre l&apos;équipe</h1>
-          <p className="text-slate-500 font-medium">Entrez le code fourni par votre responsable.</p>
         </div>
 
-        <Suspense fallback={<div className="h-64 rounded-[2.5rem] border border-slate-200 bg-white animate-pulse" />}>
-          <EmployeeSignupForm />
-        </Suspense>
+        <div className="p-7">
+          <Suspense fallback={<div className="h-64 animate-pulse rounded-2xl bg-slate-50" />}>
+            <EmployeeSignupForm />
+          </Suspense>
+        </div>
+
+        <div className="border-t border-slate-100 px-7 py-4">
+          <Link href="/signup" className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 transition hover:text-slate-600">
+            <ArrowLeft size={13} /> Retour
+          </Link>
+        </div>
       </div>
     </div>
   );

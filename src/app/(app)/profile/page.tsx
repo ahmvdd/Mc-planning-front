@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
-import { User, KeyRound, Check, Loader2, AlertCircle } from "lucide-react";
+import { User, KeyRound, Check, Loader2, AlertCircle, Shield } from "lucide-react";
 
 type Me = { sub: number; name?: string; email?: string; role?: string };
 type EmployeeData = { id: number; name: string; email: string; role: string };
@@ -34,18 +34,12 @@ export default function ProfilePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (password && password !== confirm) {
-      setError("Les mots de passe ne correspondent pas");
-      return;
-    }
+    if (password && password !== confirm) { setError("Les mots de passe ne correspondent pas"); return; }
     setSaving(true);
     try {
       await apiFetchClient("/employees/me", {
         method: "PATCH",
-        body: JSON.stringify({
-          name: name || undefined,
-          password: password || undefined,
-        }),
+        body: JSON.stringify({ name: name || undefined, password: password || undefined }),
       });
       setSuccess(true);
       setPassword("");
@@ -59,98 +53,105 @@ export default function ProfilePage() {
   };
 
   if (!me) return (
-    <div className="flex h-screen items-center justify-center bg-slate-50">
-      <Loader2 className="animate-spin text-indigo-600" size={40} />
+    <div className="flex min-h-[60vh] items-center justify-center">
+      <div className="text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50">
+          <Loader2 className="animate-spin text-indigo-600" size={28} />
+        </div>
+        <p className="text-sm font-medium text-slate-500">Chargement du profil...</p>
+      </div>
     </div>
   );
 
+  const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/15 transition-all";
+
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-20">
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-30">
-        <div className="mx-auto max-w-xl px-6 py-4">
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Mon profil</h1>
-          <p className="text-sm text-slate-500">Modifiez vos informations personnelles</p>
-        </div>
+    <div className="space-y-8">
+      {/* Page title */}
+      <div>
+        <h1 className="text-2xl font-black tracking-tight text-slate-900">Mon profil</h1>
+        <p className="text-sm text-slate-500">Modifiez vos informations personnelles</p>
       </div>
 
-      <main className="mx-auto max-w-xl px-6 py-8 space-y-6">
-        {/* Avatar */}
-        <div className="flex items-center gap-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-100 to-indigo-200 text-2xl font-extrabold text-indigo-600">
-            {name.charAt(0).toUpperCase() || "?"}
-          </div>
-          <div>
-            <p className="font-bold text-slate-900 text-lg">{name || "—"}</p>
-            <p className="text-sm text-slate-400">{me.email}</p>
-            <span className="mt-1 inline-block rounded-full bg-indigo-50 px-3 py-0.5 text-xs font-bold text-indigo-700 uppercase">
-              {me.role}
-            </span>
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Profile card */}
+        <div className="lg:col-span-1">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm text-center">
+            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-100 to-indigo-200 text-3xl font-black text-indigo-600">
+              {name.charAt(0).toUpperCase() || "?"}
+            </div>
+            <h2 className="text-xl font-black text-slate-900">{name || "—"}</h2>
+            <p className="mt-1 text-sm text-slate-400">{me.email}</p>
+            <div className="mt-3 flex justify-center">
+              <span className="flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-700">
+                <Shield size={10} /> {me.role?.toUpperCase()}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Formulaire */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-bold text-slate-400 uppercase ml-1 flex items-center gap-1.5">
-                <User size={12} /> Nom complet
-              </label>
-              <input
-                className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                required
-              />
+        {/* Edit form */}
+        <div className="lg:col-span-2">
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
+              <User size={15} className="text-indigo-500" />
+              <h3 className="text-sm font-bold text-slate-700">Modifier mes informations</h3>
             </div>
 
-            <div className="border-t border-slate-100 pt-5 space-y-4">
-              <p className="text-[11px] font-bold text-slate-400 uppercase flex items-center gap-1.5">
-                <KeyRound size={12} /> Changer le mot de passe
-              </p>
+            <form onSubmit={handleSubmit} className="space-y-6 p-6">
+              {/* Name */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-slate-400 uppercase ml-1">Nouveau mot de passe</label>
-                <input
-                  type="password"
-                  className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                  placeholder="Laisser vide pour ne pas changer"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                />
+                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Nom complet</label>
+                <input className={inputClass} value={name} onChange={e => setName(e.target.value)} required />
               </div>
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-slate-400 uppercase ml-1">Confirmer</label>
-                <input
-                  type="password"
-                  className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                  placeholder="Confirmer le nouveau mot de passe"
-                  value={confirm}
-                  onChange={e => setConfirm(e.target.value)}
-                />
-              </div>
-            </div>
 
-            {error && (
-              <div className="flex items-center gap-2 rounded-xl bg-rose-50 border border-rose-100 px-4 py-2.5 text-sm font-medium text-rose-700">
-                <AlertCircle size={15} /> {error}
+              {/* Password section */}
+              <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-5 space-y-4">
+                <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  <KeyRound size={12} /> Changer le mot de passe
+                </div>
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Nouveau mot de passe</label>
+                    <input
+                      type="password" className={inputClass}
+                      placeholder="Laisser vide pour ne pas changer"
+                      value={password} onChange={e => setPassword(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Confirmer</label>
+                    <input
+                      type="password" className={inputClass}
+                      placeholder="Confirmer le nouveau mot de passe"
+                      value={confirm} onChange={e => setConfirm(e.target.value)}
+                    />
+                  </div>
+                </div>
               </div>
-            )}
-            {success && (
-              <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-2.5 text-sm font-medium text-emerald-700">
-                <Check size={15} /> Profil mis à jour !
-              </div>
-            )}
 
-            <button
-              type="submit"
-              disabled={saving}
-              className="w-full rounded-xl bg-indigo-600 py-3 text-sm font-bold text-white hover:bg-indigo-700 disabled:opacity-50 transition-all flex justify-center items-center gap-2"
-            >
-              {saving ? <Loader2 className="animate-spin" size={16} /> : <Check size={16} />}
-              {saving ? "Enregistrement..." : "Enregistrer"}
-            </button>
-          </form>
+              {error && (
+                <div className="flex items-center gap-2 rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+                  <AlertCircle size={14} className="shrink-0" /> {error}
+                </div>
+              )}
+              {success && (
+                <div className="flex items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+                  <Check size={14} className="shrink-0" /> Profil mis à jour avec succès !
+                </div>
+              )}
+
+              <button
+                type="submit" disabled={saving}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3.5 text-sm font-bold text-white shadow-md shadow-indigo-200 hover:bg-indigo-700 disabled:opacity-60 transition-all"
+              >
+                {saving ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}
+                {saving ? "Enregistrement..." : "Enregistrer les modifications"}
+              </button>
+            </form>
+          </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
