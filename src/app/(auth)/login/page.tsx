@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion"; // Installe framer-motion si possible
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Mail, Lock, ArrowRight, Loader2, AlertCircle, Calendar, Users, BarChart3 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,7 +13,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Ping silencieux au montage pour réveiller le serveur (cold start Render)
   useEffect(() => {
     const API = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:3001/api";
     fetch(API).catch(() => {});
@@ -34,10 +35,7 @@ export default function LoginPage() {
           body: JSON.stringify({ email, password }),
         });
 
-        if (!response.ok) {
-          // Erreur HTTP (ex: 401 mauvais identifiants) → pas la peine de retry
-          throw new Error("Identifiants invalides");
-        }
+        if (!response.ok) throw new Error("Identifiants invalides");
 
         const data = (await response.json()) as { accessToken: string; refreshToken?: string };
         localStorage.setItem("shiftly_token", data.accessToken);
@@ -51,8 +49,7 @@ export default function LoginPage() {
           setError(err instanceof Error ? err.message : "Erreur inconnue");
           break;
         }
-        // Serveur en cold start → on attend et on réessaie
-        setError(`Serveur en démarrage... nouvelle tentative (${attempt}/${MAX_RETRIES})`);
+        setError(`Serveur en démarrage... (${attempt}/${MAX_RETRIES})`);
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
       }
     }
@@ -61,91 +58,126 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[600px] w-full max-w-5xl relative overflow-hidden rounded-[40px] border border-slate-200/60 bg-white/20 backdrop-blur-2xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] md:flex">
-      
-      {/* Côté Gauche : Visuel & Branding */}
-      <div className="relative hidden w-1/2 flex-col justify-between bg-gradient-to-br from-indigo-600 to-violet-700 p-12 text-white md:flex">
-        <div className="relative z-10">
-          <div className="h-10 w-10 rounded-xl overflow-hidden">
-            <img src="/logo.png" alt="Shiftly" className="h-full w-full object-cover" />
-          </div>
+    <div className="mx-auto flex w-full max-w-5xl overflow-hidden rounded-[28px] border border-white/10 shadow-2xl shadow-black/50 min-h-[560px]">
+
+      {/* Left — Branding */}
+      <div className="relative hidden w-[45%] flex-col justify-between bg-gradient-to-br from-indigo-600 to-violet-700 p-10 md:flex overflow-hidden">
+        <div className="relative z-10 flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 text-sm font-black text-white">S</div>
+          <span className="text-lg font-black tracking-tighter text-white">Shiftly</span>
         </div>
-        
+
         <div className="relative z-10 space-y-6">
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-5xl font-bold leading-tight"
+            transition={{ duration: 0.6 }}
+            className="text-4xl font-black leading-tight tracking-tight text-white"
           >
-            Le pilotage <br /> <span className="text-indigo-200">réinventé.</span>
+            Vos équipes,<br />
+            <span className="text-indigo-200">sous contrôle.</span>
           </motion.h1>
-          <p className="text-indigo-100/80 text-lg">
-            Gérez vos équipes et vos plannings avec une interface pensée pour la performance.
+          <p className="text-base text-indigo-100/80 leading-relaxed">
+            Plannings, demandes, RH — tout au même endroit.
           </p>
+          <div className="flex flex-col gap-3 pt-2">
+            {[
+              { icon: Calendar, text: "Planning en temps réel" },
+              { icon: Users, text: "Gestion d'équipe centralisée" },
+              { icon: BarChart3, text: "Statistiques & rapports" },
+            ].map(({ icon: Icon, text }) => (
+              <div key={text} className="flex items-center gap-2.5 text-sm text-indigo-100/90">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/15">
+                  <Icon size={14} />
+                </div>
+                {text}
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Décorations abstraites */}
-        <div className="absolute top-0 right-0 h-full w-full overflow-hidden">
-          <div className="absolute -top-10 -right-10 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
-          <div className="absolute bottom-20 -left-10 h-40 w-40 rounded-full bg-indigo-400/20 blur-2xl" />
-        </div>
+        {/* Decorations */}
+        <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
+        <div className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-indigo-400/20 blur-2xl" />
       </div>
 
-      {/* Côté Droit : Formulaire */}
-      <div className="flex flex-1 flex-col justify-center p-8 md:p-16 bg-white">
-        <div className="mx-auto w-full max-w-sm space-y-8">
-          <div className="space-y-2">
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900">Content de vous revoir</h2>
-            <p className="text-slate-500">Entrez vos accès pour continuer</p>
+      {/* Right — Form */}
+      <div className="flex flex-1 flex-col justify-center bg-white p-8 sm:p-12">
+        <div className="mx-auto w-full max-w-sm">
+          {/* Mobile logo */}
+          <div className="mb-8 flex items-center gap-2 md:hidden">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-black text-white">S</div>
+            <span className="text-lg font-black tracking-tighter text-slate-900">Shiftly</span>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-400 ml-1">Email Professionnel</label>
-              <input
-                className="block w-full rounded-2xl border-0 bg-slate-100 px-4 py-4 text-slate-900 ring-1 ring-inset ring-slate-200 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm transition-all"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                type="email"
-                placeholder="nom@entreprise.com"
-              />
+          <div className="mb-8">
+            <h2 className="text-2xl font-black tracking-tight text-slate-900">Content de vous revoir</h2>
+            <p className="mt-1.5 text-sm text-slate-500">Entrez vos identifiants pour continuer</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Email</label>
+              <div className="relative">
+                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/15 transition-all"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  type="email"
+                  placeholder="nom@entreprise.com"
+                  required
+                />
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between ml-1">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Mot de passe</label>
-                <a href="#" className="text-xs font-semibold text-indigo-600 hover:text-indigo-500">Oublié ?</a>
+                <a href="#" className="text-xs font-semibold text-indigo-600 hover:text-indigo-700">Oublié ?</a>
               </div>
-              <input
-                className="block w-full rounded-2xl border-0 bg-slate-100 px-4 py-4 text-slate-900 ring-1 ring-inset ring-slate-200 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm transition-all"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                type="password"
-              />
+              <div className="relative">
+                <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-3 text-sm text-slate-900 outline-none focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/15 transition-all"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  type="password"
+                  required
+                />
+              </div>
             </div>
 
             {error && (
-              <p className={`text-sm ${error.startsWith("Serveur en démarrage") ? "text-amber-600" : "text-red-600"}`}>
+              <div className={`flex items-start gap-2 rounded-xl border px-3.5 py-3 text-sm ${
+                error.startsWith("Serveur en démarrage")
+                  ? "border-amber-100 bg-amber-50 text-amber-700"
+                  : "border-rose-100 bg-rose-50 text-rose-700"
+              }`}>
+                <AlertCircle size={15} className="mt-0.5 shrink-0" />
                 {error}
-              </p>
+              </div>
             )}
 
             <button
+              type="submit"
               disabled={loading}
-              className="relative group w-full overflow-hidden rounded-2xl bg-slate-900 px-4 py-4 text-sm font-semibold text-white shadow-2xl transition-all hover:bg-slate-800 active:scale-[0.98]"
+              className="group mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-200 transition-all hover:bg-indigo-700 active:scale-[0.98] disabled:opacity-60"
             >
-              <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-12deg)_translateX(-100%)] group-hover:duration-1000 group-hover:[transform:skew(-12deg)_translateX(100%)]">
-                <div className="relative h-full w-8 bg-white/20" />
-              </div>
-              <span className="relative">{loading ? "Authentification..." : "Se connecter"}</span>
+              {loading ? (
+                <><Loader2 size={16} className="animate-spin" /> Connexion...</>
+              ) : (
+                <>Se connecter <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" /></>
+              )}
             </button>
           </form>
 
-          <div className="pt-4 text-center">
-            <p className="text-sm text-slate-500">
-              Pas encore de compte ? <span className="font-semibold text-indigo-600 cursor-pointer">Contactez l'admin</span>
-            </p>
-          </div>
+          <p className="mt-6 text-center text-sm text-slate-500">
+            Pas encore de compte ?{" "}
+            <Link href="/signup" className="font-bold text-indigo-600 hover:text-indigo-700">
+              S&apos;inscrire
+            </Link>
+          </p>
         </div>
       </div>
     </div>

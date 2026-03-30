@@ -33,10 +33,7 @@ export default function EmployeesPage() {
       apiFetchClient<Employee[]>("/employees"),
       apiFetchClient<{ role?: string }>("/auth/me").catch(() => null),
     ])
-    .then(([data, meData]) => {
-      setEmployees(data);
-      if (meData) setMe(meData);
-    })
+    .then(([data, meData]) => { setEmployees(data); if (meData) setMe(meData); })
     .catch(() => {})
     .finally(() => setLoading(false));
   }, [router]);
@@ -85,8 +82,8 @@ export default function EmployeesPage() {
         setEmployees(prev => [created, ...prev]);
       }
       resetForm();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Erreur");
     } finally {
       setSaving(false);
     }
@@ -98,303 +95,278 @@ export default function EmployeesPage() {
     try {
       await apiFetchClient(`/employees/${id}`, { method: "DELETE" });
       setEmployees(prev => prev.filter(e => e.id !== id));
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Erreur");
     } finally {
       setSaving(false);
     }
   };
 
   if (loading) return (
-    <div className="flex h-screen items-center justify-center bg-slate-50">
+    <div className="flex min-h-[60vh] items-center justify-center">
       <div className="text-center">
-        <Loader2 className="animate-spin text-indigo-600 mx-auto mb-4" size={48} />
-        <p className="text-slate-500 font-medium animate-pulse">Chargement de l'équipe...</p>
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50">
+          <Loader2 className="animate-spin text-indigo-600" size={28} />
+        </div>
+        <p className="text-sm font-medium text-slate-500">Chargement de l&apos;équipe...</p>
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-20">
-      {/* Header sticky */}
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-30">
-        <div className="mx-auto max-w-7xl px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Gestion d'Équipe</h1>
-            <p className="text-sm text-slate-500">Pilotez vos effectifs et gérez les accès</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="flex gap-3">
-              <div className="rounded-xl bg-indigo-50 px-4 py-2 text-center">
-                <p className="text-lg font-bold text-indigo-600">{stats.total}</p>
-                <p className="text-[10px] font-bold uppercase text-indigo-400">Total</p>
-              </div>
-              <div className="rounded-xl bg-emerald-50 px-4 py-2 text-center">
-                <p className="text-lg font-bold text-emerald-600">{stats.active}</p>
-                <p className="text-[10px] font-bold uppercase text-emerald-400">Actifs</p>
-              </div>
+    <div className="space-y-8">
+      {/* Page title */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-black tracking-tight text-slate-900">Gestion d&apos;Équipe</h1>
+          <p className="text-sm text-slate-500">Pilotez vos effectifs et gérez les accès</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex gap-2">
+            <div className="rounded-xl bg-indigo-50 px-4 py-2 text-center">
+              <p className="text-lg font-black text-indigo-600">{stats.total}</p>
+              <p className="text-[10px] font-bold uppercase text-indigo-400">Total</p>
             </div>
-            {isAdmin && (
-              <button
-                onClick={() => { resetForm(); setShowForm(true); }}
-                className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-200"
-              >
-                <UserPlus size={16} /> Nouveau membre
-              </button>
-            )}
+            <div className="rounded-xl bg-emerald-50 px-4 py-2 text-center">
+              <p className="text-lg font-black text-emerald-600">{stats.active}</p>
+              <p className="text-[10px] font-bold uppercase text-emerald-400">Actifs</p>
+            </div>
           </div>
+          {isAdmin && (
+            <button
+              onClick={() => { resetForm(); setShowForm(true); }}
+              className="flex items-center gap-2 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-200 transition hover:bg-indigo-700 active:scale-95"
+            >
+              <UserPlus size={15} /> Nouveau membre
+            </button>
+          )}
         </div>
       </div>
 
-      <main className="mx-auto max-w-7xl px-6 py-8">
-        <div className="grid gap-8 lg:grid-cols-12">
-
-          {/* Table */}
-          <div className="lg:col-span-8 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                <Users size={16} /> Collaborateurs
-                {search && (
-                  <span className="ml-1 rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-600">
-                    {filtered.length} résultat{filtered.length !== 1 ? "s" : ""}
-                  </span>
-                )}
-              </h3>
-            </div>
-
-            {/* Barre de recherche */}
-            <div className="relative">
-              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Rechercher par nom, email ou rôle…"
-                value={search}
-                onChange={e => handleSearch(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300 transition-all shadow-sm"
-              />
-              {search && (
-                <button
-                  onClick={() => handleSearch("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                >
-                  <X size={15} />
-                </button>
-              )}
-            </div>
-
-            {employees.length === 0 ? (
-              <div className="rounded-[2rem] border-2 border-dashed border-slate-200 bg-white p-12 text-center">
-                <div className="mx-auto w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
-                  <Users className="text-slate-300" size={32} />
-                </div>
-                <h4 className="text-slate-900 font-bold text-lg">Aucun collaborateur</h4>
-                <p className="text-slate-500 max-w-xs mx-auto mt-2">Ajoutez votre premier membre via le bouton "Nouveau membre".</p>
-              </div>
-            ) : filtered.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center">
-                <Search className="mx-auto text-slate-300 mb-3" size={32} />
-                <p className="font-semibold text-slate-600">Aucun résultat pour "<span className="text-indigo-600">{search}</span>"</p>
-                <button onClick={() => handleSearch("")} className="mt-3 text-xs text-slate-400 hover:text-indigo-600 underline">Effacer la recherche</button>
-              </div>
-            ) : (
-              <>
-                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                  <table className="w-full text-left text-sm">
-                    <thead className="bg-slate-50/50 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                      <tr>
-                        <th className="px-6 py-4">Collaborateur</th>
-                        <th className="hidden sm:table-cell px-6 py-4">Rôle / Statut</th>
-                        <th className="px-6 py-4 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {paginated.map(emp => (
-                        <tr key={emp.id} className="group hover:bg-slate-50/50 transition-colors">
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 font-bold text-indigo-600 text-sm">
-                                {emp.name.charAt(0).toUpperCase()}
-                              </div>
-                              <div>
-                                <p className="font-bold text-slate-900">{emp.name}</p>
-                                <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
-                                  <Mail size={11} /> {emp.email}
-                                </p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="hidden sm:table-cell px-6 py-4">
-                            <div className="flex flex-col gap-1.5">
-                              <span className="flex w-fit items-center gap-1 rounded-md bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
-                                <Shield size={10} /> {emp.role.toUpperCase()}
-                              </span>
-                              <span className={`text-[10px] font-medium ${emp.status === "active" ? "text-emerald-500" : "text-slate-400"}`}>
-                                ● {emp.status === "active" ? "En poste" : "Inactif"}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              {isAdmin && (
-                                <>
-                                  <button
-                                    onClick={() => { setEditId(emp.id); setForm({ ...emp, password: "" }); setShowForm(true); }}
-                                    className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
-                                  >
-                                    <Pencil size={15} />
-                                  </button>
-                                  <button
-                                    onClick={() => deleteEmployee(emp.id)}
-                                    disabled={saving}
-                                    className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                                  >
-                                    <Trash2 size={15} />
-                                  </button>
-                                </>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-between pt-1">
-                    <p className="text-xs text-slate-400">
-                      {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} sur <span className="font-semibold text-slate-600">{filtered.length}</span>
-                    </p>
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => setPage(p => Math.max(1, p - 1))}
-                        disabled={page === 1}
-                        className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                      >
-                        <ChevronLeft size={14} /> Préc.
-                      </button>
-
-                      <div className="flex items-center gap-1">
-                        {Array.from({ length: totalPages }, (_, i) => i + 1)
-                          .filter(n => n === 1 || n === totalPages || Math.abs(n - page) <= 1)
-                          .reduce<(number | "…")[]>((acc, n, i, arr) => {
-                            if (i > 0 && n - (arr[i - 1] as number) > 1) acc.push("…");
-                            acc.push(n);
-                            return acc;
-                          }, [])
-                          .map((n, i) =>
-                            n === "…" ? (
-                              <span key={`ellipsis-${i}`} className="px-1 text-xs text-slate-300">…</span>
-                            ) : (
-                              <button
-                                key={n}
-                                onClick={() => setPage(n as number)}
-                                className={`min-w-[28px] rounded-lg px-2 py-1.5 text-xs font-bold transition-colors ${page === n ? "bg-indigo-600 text-white shadow-sm" : "text-slate-500 hover:bg-slate-100"}`}
-                              >
-                                {n}
-                              </button>
-                            )
-                          )}
-                      </div>
-
-                      <button
-                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                        disabled={page === totalPages}
-                        className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                      >
-                        Suiv. <ChevronRight size={14} />
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </>
+      <div className="grid gap-6 lg:grid-cols-12">
+        {/* Table */}
+        <div className="lg:col-span-8 space-y-4">
+          {/* Search */}
+          <div className="relative">
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Rechercher par nom, email ou rôle…"
+              value={search}
+              onChange={e => handleSearch(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 bg-white pl-10 pr-10 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/15 shadow-sm transition-all"
+            />
+            {search && (
+              <button onClick={() => handleSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                <X size={14} />
+              </button>
             )}
           </div>
 
-          {/* Form sidebar */}
-          {(showForm && isAdmin) && (
-            <aside className="lg:col-span-4">
-              <div className="rounded-2xl border-2 border-indigo-500 bg-white p-6 shadow-xl shadow-indigo-500/10 sticky top-24 animate-in fade-in slide-in-from-top-4">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${editId ? "bg-amber-50 text-amber-600" : "bg-indigo-50 text-indigo-600"}`}>
-                      {editId ? <Pencil size={18} /> : <UserPlus size={18} />}
-                    </div>
-                    <h3 className="font-bold text-slate-900">{editId ? "Modifier le profil" : "Nouveau membre"}</h3>
-                  </div>
-                  <button onClick={resetForm} className="text-slate-400 hover:text-slate-600">
-                    <X size={20} />
-                  </button>
-                </div>
-
-                <form onSubmit={handleAction} className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-slate-400 uppercase ml-1">Nom complet</label>
-                    <input
-                      className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                      value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold text-slate-400 uppercase ml-1">Email</label>
-                    <input
-                      type="email"
-                      className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                      value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-bold text-slate-400 uppercase ml-1">Rôle</label>
-                      <select
-                        className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                        value={form.role} onChange={e => setForm({ ...form, role: e.target.value })}
-                      >
-                        <option value="employee">Employé</option>
-                        <option value="admin">Admin</option>
-                      </select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-bold text-slate-400 uppercase ml-1">Statut</label>
-                      <select
-                        className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                        value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}
-                      >
-                        <option value="active">Actif</option>
-                        <option value="inactive">Inactif</option>
-                      </select>
-                    </div>
-                  </div>
-                  {!editId && (
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-bold text-slate-400 uppercase ml-1">Mot de passe</label>
-                      <input
-                        type="password"
-                        className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                        value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required
-                      />
-                    </div>
-                  )}
-                  <div className="pt-2 flex flex-col gap-2">
-                    <button
-                      type="submit"
-                      disabled={saving}
-                      className={`w-full rounded-xl py-3 text-sm font-bold text-white flex justify-center items-center gap-2 transition-all ${editId ? "bg-amber-500 hover:bg-amber-600" : "bg-slate-900 hover:bg-black shadow-lg shadow-slate-200"}`}
-                    >
-                      {saving ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle2 size={16} />}
-                      {editId ? "Enregistrer" : "Créer le compte"}
-                    </button>
-                    <button type="button" onClick={resetForm} className="w-full text-xs font-bold text-slate-400 py-2 hover:text-slate-600">
-                      Annuler
-                    </button>
-                  </div>
-                </form>
+          {employees.length === 0 ? (
+            <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-white p-12 text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-slate-50">
+                <Users className="text-slate-300" size={28} />
               </div>
-            </aside>
+              <h4 className="font-bold text-slate-900">Aucun collaborateur</h4>
+              <p className="mx-auto mt-1.5 max-w-xs text-sm text-slate-400">Ajoutez votre premier membre via le bouton &quot;Nouveau membre&quot;.</p>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center">
+              <Search className="mx-auto mb-3 text-slate-300" size={28} />
+              <p className="font-bold text-slate-600">Aucun résultat pour &quot;<span className="text-indigo-600">{search}</span>&quot;</p>
+              <button onClick={() => handleSearch("")} className="mt-2 text-xs text-slate-400 underline hover:text-indigo-600">Effacer</button>
+            </div>
+          ) : (
+            <>
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-100 bg-slate-50/70">
+                      <th className="px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">Collaborateur</th>
+                      <th className="hidden sm:table-cell px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">Rôle / Statut</th>
+                      {isAdmin && <th className="px-6 py-3.5 text-right text-[11px] font-bold uppercase tracking-wider text-slate-400">Actions</th>}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {paginated.map(emp => (
+                      <tr key={emp.id} className="group hover:bg-slate-50/60 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 text-sm font-bold text-indigo-700">
+                              {emp.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <p className="font-bold text-slate-900">{emp.name}</p>
+                              <p className="flex items-center gap-1 text-xs text-slate-400 mt-0.5">
+                                <Mail size={10} /> {emp.email}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="hidden sm:table-cell px-6 py-4">
+                          <div className="flex flex-col gap-1">
+                            <span className="flex w-fit items-center gap-1 rounded-md bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
+                              <Shield size={9} /> {emp.role.toUpperCase()}
+                            </span>
+                            <span className={`text-[10px] font-medium ${emp.status === "active" ? "text-emerald-500" : "text-slate-400"}`}>
+                              ● {emp.status === "active" ? "En poste" : "Inactif"}
+                            </span>
+                          </div>
+                        </td>
+                        {isAdmin && (
+                          <td className="px-6 py-4 text-right">
+                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button
+                                onClick={() => { setEditId(emp.id); setForm({ ...emp, password: "" }); setShowForm(true); }}
+                                className="rounded-lg p-2 text-slate-400 transition hover:bg-amber-50 hover:text-amber-600"
+                              >
+                                <Pencil size={14} />
+                              </button>
+                              <button
+                                onClick={() => deleteEmployee(emp.id)}
+                                disabled={saving}
+                                className="rounded-lg p-2 text-slate-400 transition hover:bg-rose-50 hover:text-rose-600"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-slate-400">
+                    {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} sur{" "}
+                    <span className="font-bold text-slate-600">{filtered.length}</span>
+                  </p>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-100 disabled:opacity-30 transition-colors"
+                    >
+                      <ChevronLeft size={13} /> Préc.
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter(n => n === 1 || n === totalPages || Math.abs(n - page) <= 1)
+                      .reduce<(number | "…")[]>((acc, n, i, arr) => {
+                        if (i > 0 && n - (arr[i - 1] as number) > 1) acc.push("…");
+                        acc.push(n);
+                        return acc;
+                      }, [])
+                      .map((n, i) =>
+                        n === "…" ? (
+                          <span key={`e-${i}`} className="px-1 text-xs text-slate-300">…</span>
+                        ) : (
+                          <button
+                            key={n}
+                            onClick={() => setPage(n as number)}
+                            className={`min-w-[28px] rounded-lg px-2 py-1.5 text-xs font-bold transition ${page === n ? "bg-indigo-600 text-white shadow-sm" : "text-slate-500 hover:bg-slate-100"}`}
+                          >
+                            {n}
+                          </button>
+                        )
+                      )}
+                    <button
+                      onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                      disabled={page === totalPages}
+                      className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-100 disabled:opacity-30 transition-colors"
+                    >
+                      Suiv. <ChevronRight size={13} />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
-      </main>
+
+        {/* Form sidebar */}
+        {showForm && isAdmin && (
+          <aside className="lg:col-span-4">
+            <div className="sticky top-24 rounded-2xl border-2 border-indigo-500 bg-white shadow-xl shadow-indigo-500/10 overflow-hidden">
+              <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+                <div className="flex items-center gap-2.5">
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${editId ? "bg-amber-50 text-amber-600" : "bg-indigo-50 text-indigo-600"}`}>
+                    {editId ? <Pencil size={15} /> : <UserPlus size={15} />}
+                  </div>
+                  <h3 className="font-bold text-slate-900">{editId ? "Modifier le profil" : "Nouveau membre"}</h3>
+                </div>
+                <button onClick={resetForm} className="text-slate-400 hover:text-slate-600 transition">
+                  <X size={18} />
+                </button>
+              </div>
+
+              <form onSubmit={handleAction} className="space-y-4 p-6">
+                {[
+                  { label: "Nom complet", key: "name", type: "text" },
+                  { label: "Email", key: "email", type: "email" },
+                ].map(({ label, key, type }) => (
+                  <div key={key} className="space-y-1.5">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{label}</label>
+                    <input
+                      type={type}
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/15 transition-all"
+                      value={form[key as keyof typeof form]}
+                      onChange={e => setForm({ ...form, [key]: e.target.value })}
+                      required
+                    />
+                  </div>
+                ))}
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { label: "Rôle", key: "role", options: [{ v: "employee", l: "Employé" }, { v: "admin", l: "Admin" }] },
+                    { label: "Statut", key: "status", options: [{ v: "active", l: "Actif" }, { v: "inactive", l: "Inactif" }] },
+                  ].map(({ label, key, options }) => (
+                    <div key={key} className="space-y-1.5">
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{label}</label>
+                      <select
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/15"
+                        value={form[key as keyof typeof form]}
+                        onChange={e => setForm({ ...form, [key]: e.target.value })}
+                      >
+                        {options.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
+                      </select>
+                    </div>
+                  ))}
+                </div>
+                {!editId && (
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Mot de passe</label>
+                    <input
+                      type="password"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/15 transition-all"
+                      value={form.password}
+                      onChange={e => setForm({ ...form, password: e.target.value })}
+                      required
+                    />
+                  </div>
+                )}
+                <div className="flex flex-col gap-2 pt-1">
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className={`flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white transition-all ${editId ? "bg-amber-500 hover:bg-amber-600" : "bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-200"} disabled:opacity-60`}
+                  >
+                    {saving ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
+                    {editId ? "Enregistrer" : "Créer le compte"}
+                  </button>
+                  <button type="button" onClick={resetForm} className="w-full py-2 text-xs font-bold text-slate-400 hover:text-slate-600">
+                    Annuler
+                  </button>
+                </div>
+              </form>
+            </div>
+          </aside>
+        )}
+      </div>
     </div>
   );
 }

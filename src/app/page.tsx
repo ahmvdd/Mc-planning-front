@@ -2,347 +2,492 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { motion } from "framer-motion";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
-import { 
-  LayoutDashboard, Users, Calendar, ShieldCheck, 
-  ArrowRight, Sparkles, CheckCircle2, Zap, Layout,
-  MousePointer2, BarChart3, Globe, AlignLeft, X
+import {
+  ArrowRight, Calendar, Users, ClipboardCheck,
+  ShieldCheck, Zap, BarChart3, CheckCircle2,
+  ChevronRight, Star, AlignLeft, X
 } from "lucide-react";
 
-// Animations fluides et réactives
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.1 }
-  }
-};
+const fadeHidden = { opacity: 0, y: 20 };
+const fadeShow = (delay = 0) => ({
+  opacity: 1,
+  y: 0,
+  transition: { duration: 0.55, delay, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
+});
 
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 15 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } 
-  }
-};
+const FEATURES = [
+  {
+    icon: Calendar,
+    color: "bg-indigo-500",
+    light: "bg-indigo-50 text-indigo-600",
+    title: "Planning intelligent",
+    desc: "Construisez des plannings en quelques clics. Visualisez les disponibilités, gérez les conflits et exportez en Excel instantanément.",
+  },
+  {
+    icon: ClipboardCheck,
+    color: "bg-violet-500",
+    light: "bg-violet-50 text-violet-600",
+    title: "Demandes & congés",
+    desc: "Vos employés soumettent leurs demandes directement depuis l'app. Validez ou refusez en un clic, avec historique complet.",
+  },
+  {
+    icon: Users,
+    color: "bg-sky-500",
+    light: "bg-sky-50 text-sky-600",
+    title: "Gestion d'équipe",
+    desc: "Onboardez vos collaborateurs par invitation email. Gérez les rôles, profils et accès depuis un tableau de bord centralisé.",
+  },
+  {
+    icon: ShieldCheck,
+    color: "bg-emerald-500",
+    light: "bg-emerald-50 text-emerald-600",
+    title: "Sécurité & conformité",
+    desc: "Données chiffrées, hébergement cloud RGPD, tokens JWT rotatifs. Votre sécurité est notre priorité numéro un.",
+  },
+  {
+    icon: Zap,
+    color: "bg-amber-500",
+    light: "bg-amber-50 text-amber-600",
+    title: "Rapide & responsive",
+    desc: "Interface optimisée mobile et bureau. Accès instantané au planning depuis n'importe quel appareil, n'importe où.",
+  },
+  {
+    icon: BarChart3,
+    color: "bg-rose-500",
+    light: "bg-rose-50 text-rose-600",
+    title: "Statistiques en temps réel",
+    desc: "Suivez le taux de présence, les heures travaillées et les tendances de demandes. Prenez de meilleures décisions.",
+  },
+];
+
+const STEPS = [
+  { n: "01", title: "Créez votre organisation", desc: "Inscrivez-vous et obtenez votre code organisation unique en 30 secondes." },
+  { n: "02", title: "Invitez votre équipe", desc: "Partagez le code ou envoyez des invitations email à vos collaborateurs." },
+  { n: "03", title: "Gérez en temps réel", desc: "Plannings, demandes, profils — tout au même endroit, tout de suite." },
+];
 
 export default function Home() {
-  const [me, setMe] = useState<{ email?: string; role?: string; orgId?: number } | null>(null);
-  const [loadingMe, setLoadingMe] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [me, setMe] = useState<{ email?: string; role?: string } | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     if (!getToken()) return;
-    setLoadingMe(true);
-    apiFetchClient<{ email?: string; role?: string; orgId?: number }>("/auth/me")
-      .then((data) => setMe(data))
-      .catch(() => setMe(null))
-      .finally(() => setLoadingMe(false));
+    apiFetchClient<{ email?: string; role?: string }>("/auth/me")
+      .then(setMe)
+      .catch(() => setMe(null));
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#fafafa] text-slate-900 selection:bg-indigo-500 selection:text-white font-sans overflow-x-hidden">
-      
-      {/* Overlay de grain pour texture "Premium" */}
-      <div className="fixed inset-0 pointer-events-none z-50 opacity-[0.025] hidden sm:block" style={{backgroundImage:"url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")"}}></div>
+    <div className="min-h-screen bg-white text-slate-900 overflow-x-hidden font-sans selection:bg-indigo-500 selection:text-white">
 
-      {/* --- NAVIGATION RESPONSIVE --- */}
-      <nav className="fixed top-0 w-full z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center">
-
-          {/* Gauche — Logo */}
-          <div className="flex-1 flex items-center gap-2 font-black text-xl tracking-tighter">
-            <div className="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">S</div>
-            SHIFTLY
+      {/* ── NAV ── */}
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-100 bg-white/90 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-black text-white shadow-md shadow-indigo-200">S</div>
+            <span className="text-lg font-black tracking-tighter text-slate-900">Shiftly</span>
           </div>
 
-          {/* Centre — liens desktop (invisible sur mobile = largeur 0) */}
-          <div className="flex items-center gap-8">
-            <a href="#features" className="hidden lg:block text-sm font-semibold text-slate-800 hover:text-indigo-600 transition-colors">Produit</a>
-            <a href="#solutions" className="hidden lg:block text-sm font-semibold text-slate-800 hover:text-indigo-600 transition-colors">Solutions</a>
-            <a href="#pricing"   className="hidden lg:block text-sm font-semibold text-slate-800 hover:text-indigo-600 transition-colors">Tarifs</a>
-          </div>
+          <nav className="hidden items-center gap-7 md:flex">
+            {["Fonctionnalités", "Comment ça marche", "Tarifs"].map((l, i) => (
+              <a key={l} href={["#features", "#how", "#pricing"][i]} className="text-sm font-semibold text-slate-500 transition hover:text-slate-900">
+                {l}
+              </a>
+            ))}
+          </nav>
 
-          {/* Droite — actions desktop + hamburger mobile */}
-          <div className="flex-1 flex items-center justify-end gap-3">
-            <div className="hidden lg:flex items-center gap-3">
-              {!me && (
-                <Link href="/login" className="text-sm font-bold text-slate-700 hover:text-indigo-600 transition-colors px-3">Connexion</Link>
-              )}
-              <Link
-                href={me ? "/dashboard" : "/signup"}
-                className="bg-slate-900 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-indigo-600 transition-all shadow-md active:scale-95"
-              >
-                {me ? "Mon Dashboard" : "Essai gratuit"}
+          <div className="hidden items-center gap-3 md:flex">
+            {!me && (
+              <Link href="/login" className="text-sm font-bold text-slate-600 transition hover:text-slate-900">
+                Connexion
               </Link>
-            </div>
-            <button className="lg:hidden p-2 text-slate-700" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-              {mobileMenuOpen ? <X size={24}/> : <AlignLeft size={24} />}
-            </button>
+            )}
+            <Link
+              href={me ? "/dashboard" : "/signup"}
+              className="flex items-center gap-1.5 rounded-full bg-indigo-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-indigo-200 transition hover:bg-indigo-700 active:scale-95"
+            >
+              {me ? "Dashboard" : "Essai gratuit"} <ChevronRight size={14} />
+            </Link>
           </div>
 
+          <button className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600 md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
+            {mobileOpen ? <X size={18} /> : <AlignLeft size={18} />}
+          </button>
         </div>
 
-        {/* Menu Mobile Déroulant */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div 
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="absolute top-full left-0 w-full bg-white shadow-xl border-b border-slate-100 p-8 flex flex-col gap-6 lg:hidden"
-            >
-              <a href="#features" className="font-semibold text-lg text-slate-800" onClick={() => setMobileMenuOpen(false)}>Produit</a>
-              <a href="#solutions" className="font-semibold text-lg text-slate-800" onClick={() => setMobileMenuOpen(false)}>Solutions</a>
-              <a href="#pricing" className="font-semibold text-lg text-slate-800" onClick={() => setMobileMenuOpen(false)}>Tarifs</a>
-              <div className="h-px bg-slate-100 my-2" />
-              {!me ? (
-                <Link href="/login" className="font-bold text-slate-900" onClick={() => setMobileMenuOpen(false)}>Connexion</Link>
-              ) : null}
-              <Link 
-                href={me ? "/dashboard" : "/signup"} 
-                className="w-full text-center bg-indigo-600 text-white p-4 rounded-xl font-bold shadow-lg"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {me ? "Mon Dashboard" : "Démarrer l'essai gratuit"}
-              </Link>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </nav>
-
-      <motion.main 
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="pt-28 pb-16 px-5 sm:px-6 max-w-7xl mx-auto space-y-24 sm:space-y-32"
-      >
-        {/* --- HERO SECTION --- */}
-        <section className="relative grid md:grid-cols-12 gap-10 md:gap-12 items-center">
-          
-          {/* IMAGE AU DÉBUT (sur mobile elle est en haut, sur bureau elle est à gauche) */}
-          <motion.div variants={itemVariants} className="md:col-span-5 relative h-[300px] sm:h-[400px] md:h-[550px] rounded-[32px] sm:rounded-[40px] overflow-hidden shadow-2xl border-4 border-white bg-slate-100">
-            <img 
-              src="/image_0.jpg"
-              alt="Shiftly Platform Core"
-              className="w-full h-full object-cover opacity-90 hover:scale-105 transition-transform duration-1000"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 via-transparent to-transparent" />
-            
-            {/* Tag flottant */}
-            <motion.div 
-              animate={{ y: [0, -12, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute bottom-6 left-6 bg-white/20 backdrop-blur-md px-4 py-2 rounded-xl text-white text-xs font-bold flex gap-2 items-center"
-            >
-              <CheckCircle2 size={16} className="text-emerald-300"/> Plateforme Certifiée
-            </motion.div>
-          </motion.div>
-
-          <motion.div variants={itemVariants} className="md:col-span-7 space-y-6 sm:space-y-8 z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-[11px] sm:text-xs font-bold uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5" />
-              Nouveau : Scheduling v2.0
-            </div>
-            
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.9] text-slate-900">
-              Pilotez vos <br />
-              <span className="text-indigo-600 font-serif italic font-light lowercase">équipes</span> avec brio.
-            </h1>
-            
-            <p className="text-base sm:text-lg md:text-xl text-slate-500 leading-relaxed max-w-xl">
-              La plateforme de gestion nouvelle génération qui transforme vos feuilles Excel complexes en un tableau de bord intuitif et automatisé.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 pt-2">
-              <Link
-                href="/signup"
-                className="group flex items-center justify-center gap-3 bg-indigo-600 text-white px-8 py-4 sm:py-5 rounded-2xl font-bold text-lg hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 active:scale-98"
-              >
-                Démarrer maintenant
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <div className="flex items-center justify-center gap-3 px-2 sm:px-4">
-                <div className="flex -space-x-3.5">
-                  {["bg-indigo-400","bg-sky-400","bg-violet-400"].map((c, i) => (
-                    <div key={i} className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full border-4 border-white shadow-sm ${c} flex items-center justify-center text-white text-xs font-bold`}>
-                      {["J","M","A"][i]}
-                    </div>
-                  ))}
-                </div>
-                <p className="text-sm text-slate-400 font-medium leading-tight">
-                  <span className="text-slate-900 font-bold">+15 managers</span> <br/> nous font confiance
-                </p>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="border-t border-slate-100 bg-white px-5 pb-6 pt-4 md:hidden"
+          >
+            <div className="flex flex-col gap-4">
+              <a href="#features" className="font-semibold text-slate-700" onClick={() => setMobileOpen(false)}>Fonctionnalités</a>
+              <a href="#how" className="font-semibold text-slate-700" onClick={() => setMobileOpen(false)}>Comment ça marche</a>
+              <a href="#pricing" className="font-semibold text-slate-700" onClick={() => setMobileOpen(false)}>Tarifs</a>
+              <div className="mt-2 flex flex-col gap-3 border-t border-slate-100 pt-4">
+                {!me && <Link href="/login" className="font-bold text-slate-800" onClick={() => setMobileOpen(false)}>Connexion</Link>}
+                <Link href={me ? "/dashboard" : "/signup"} className="rounded-xl bg-indigo-600 py-3 text-center font-bold text-white" onClick={() => setMobileOpen(false)}>
+                  {me ? "Mon Dashboard" : "Commencer gratuitement"}
+                </Link>
               </div>
             </div>
           </motion.div>
-        </section>
+        )}
+      </header>
 
-        {/* --- BENTO GRID STATS --- */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-6 sm:gap-8">
-          <motion.div 
-            variants={itemVariants}
-            className="sm:col-span-2 lg:col-span-8 p-8 sm:p-10 rounded-[32px] sm:rounded-[40px] bg-white border border-slate-200 flex flex-col justify-center relative overflow-hidden group shadow-sm hover:shadow-xl transition-all"
-          >
-            <div className="relative z-10">
-              {loadingMe ? (
-                <div className="animate-pulse flex gap-4 items-center">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-slate-100 rounded-3xl" />
-                  <div className="space-y-2.5">
-                    <div className="h-4 bg-slate-100 rounded w-24" />
-                    <div className="h-9 bg-slate-100 rounded w-48 sm:w-64" />
-                  </div>
-                </div>
-              ) : me ? (
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 sm:gap-10">
-                  <div className="flex items-center gap-6 sm:gap-8">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-indigo-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg shadow-indigo-200">
-                      {me.email?.[0].toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="text-indigo-600 font-black text-xs uppercase tracking-[0.2em] mb-1.5">Session active</p>
-                      <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">Salut, {me.email?.split('@')[0]} 👋</h2>
-                    </div>
-                  </div>
-                  <Link href="/dashboard" className="w-full md:w-auto text-center bg-slate-900 text-white px-7 py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2.5 hover:bg-indigo-600 transition-colors">
-                    Dashboard <MousePointer2 size={19} />
-                  </Link>
-                </div>
-              ) : (
-                <div className="space-y-4 sm:space-y-5">
-                  <h3 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">Prêt à centraliser ?</h3>
-                  <p className="text-slate-500 text-lg max-w-lg leading-relaxed">Rejoignez les entreprises qui ont réduit de 40% leur temps de gestion administrative grâce à Shiftly.</p>
-                </div>
-              )}
-            </div>
-            
-            {/* Décoration de fond subtile */}
-            <div className="absolute top-0 right-0 w-64 h-64 sm:w-80 sm:h-80 bg-indigo-50 rounded-full blur-[80px] -mr-32 -mt-32 opacity-60 transition-opacity" />
+      {/* ── HERO ── */}
+      <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-5 pb-20 pt-32 sm:px-8">
+        {/* bg gradient blobs */}
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[600px] w-[900px] rounded-full bg-indigo-500/10 blur-[120px]" />
+          <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-violet-400/10 blur-[100px]" />
+        </div>
+
+        <div className="mx-auto max-w-4xl text-center">
+          <motion.div initial={fadeHidden} animate={fadeShow(0)} className="mb-7 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-indigo-600">
+            <Star size={11} className="fill-indigo-500 text-indigo-500" /> Nouveau — Scheduling v2.0 disponible
           </motion.div>
 
-          <motion.div variants={itemVariants} className="lg:col-span-4 p-8 sm:p-10 rounded-[32px] sm:rounded-[40px] bg-indigo-600 text-white flex flex-col justify-between shadow-xl shadow-indigo-100 relative overflow-hidden">
-            <BarChart3 size={36} className="mb-10 sm:mb-12 opacity-50" />
-            <div className="relative z-10">
-              <p className="text-5xl sm:text-6xl font-black mb-3">100%</p>
-              <p className="text-indigo-100 font-medium text-lg">Cloud, Sécurisé & RGPD</p>
-            </div>
-             <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
-          </motion.div>
-        </section>
+          <motion.h1 initial={fadeHidden} animate={fadeShow(0.08)} className="mb-6 text-5xl font-black leading-[1.05] tracking-tight text-slate-900 sm:text-6xl md:text-7xl lg:text-[80px]">
+            Gérez vos équipes<br />
+            <span className="bg-gradient-to-r from-indigo-600 via-violet-500 to-sky-500 bg-clip-text text-transparent">
+              sans friction.
+            </span>
+          </motion.h1>
 
-        {/* --- DYNAMIC FEATURES --- */}
-        <section id="features" className="space-y-16 sm:space-y-20">
-          <div className="max-w-3xl text-center mx-auto space-y-4 sm:space-y-6">
-            <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 tracking-tight leading-tight">Tout ce qu'il vous faut pour <span className="text-indigo-600">scaler</span>.</h2>
-            <p className="text-slate-500 text-lg sm:text-xl leading-relaxed max-w-xl mx-auto">Oubliez les logiciels datant de 2010. Profitez d'une interface pensée pour la rapidité et la collaboration.</p>
+          <motion.p initial={fadeHidden} animate={fadeShow(0.16)} className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-slate-500 sm:text-xl">
+            Shiftly centralise vos plannings, vos demandes de congés et la gestion de vos collaborateurs dans une seule plateforme moderne — pensée pour les managers qui vont vite.
+          </motion.p>
+
+          <motion.div initial={fadeHidden} animate={fadeShow(0.24)} className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+            <Link
+              href="/signup"
+              className="group flex items-center gap-2.5 rounded-2xl bg-indigo-600 px-8 py-4 text-base font-bold text-white shadow-xl shadow-indigo-200 transition hover:bg-indigo-700 active:scale-95"
+            >
+              Démarrer gratuitement
+              <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+            </Link>
+            <Link href="/login" className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-8 py-4 text-base font-bold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50">
+              Voir la démo
+            </Link>
+          </motion.div>
+
+          <motion.div initial={fadeHidden} animate={fadeShow(0.32)} className="mt-12 flex flex-wrap items-center justify-center gap-6 text-sm text-slate-400">
+            {["Aucune CB requise", "Déploiement en 2 min", "RGPD Friendly"].map((t) => (
+              <span key={t} className="flex items-center gap-1.5">
+                <CheckCircle2 size={14} className="text-emerald-500" /> {t}
+              </span>
+            ))}
+          </motion.div>
+        </div>
+
+        {/* ── PRODUCT MOCKUP ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
+          className="relative mx-auto mt-20 w-full max-w-5xl"
+        >
+          <div className="rounded-[28px] border border-slate-200 bg-white p-2 shadow-[0_30px_100px_-20px_rgba(79,70,229,0.25)]">
+            {/* browser bar */}
+            <div className="mb-2 flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-2.5">
+              <div className="flex gap-1.5">
+                <div className="h-3 w-3 rounded-full bg-rose-400" />
+                <div className="h-3 w-3 rounded-full bg-amber-400" />
+                <div className="h-3 w-3 rounded-full bg-emerald-400" />
+              </div>
+              <div className="mx-auto flex-1 max-w-xs rounded-md bg-white border border-slate-200 px-3 py-1 text-xs text-slate-400 text-center">
+                app.shiftly.io/planning
+              </div>
+            </div>
+
+            {/* fake dashboard */}
+            <div className="overflow-hidden rounded-xl bg-[#F8FAFC]">
+              {/* top bar */}
+              <div className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-7 w-7 rounded-lg bg-indigo-600 text-white text-xs font-black flex items-center justify-center">S</div>
+                  <span className="text-sm font-bold text-slate-800">Shiftly</span>
+                </div>
+                <div className="hidden sm:flex items-center gap-6 text-xs font-semibold text-slate-400">
+                  <span className="text-indigo-600">Planning</span>
+                  <span>Demandes</span>
+                  <span>Employés</span>
+                  <span>Admin</span>
+                </div>
+                <div className="h-7 w-7 rounded-full bg-indigo-100 text-indigo-600 text-xs font-bold flex items-center justify-center">A</div>
+              </div>
+
+              {/* content */}
+              <div className="grid grid-cols-1 gap-4 p-6 sm:grid-cols-3">
+                {/* stat cards */}
+                {[
+                  { label: "Employés actifs", val: "24", color: "text-indigo-600", bg: "bg-indigo-50" },
+                  { label: "Demandes en attente", val: "3", color: "text-amber-600", bg: "bg-amber-50" },
+                  { label: "Jours planifiés", val: "180", color: "text-emerald-600", bg: "bg-emerald-50" },
+                ].map((s) => (
+                  <div key={s.label} className={`rounded-xl ${s.bg} px-5 py-4`}>
+                    <p className="mb-1 text-xs font-semibold text-slate-500">{s.label}</p>
+                    <p className={`text-3xl font-black ${s.color}`}>{s.val}</p>
+                  </div>
+                ))}
+
+                {/* planning grid */}
+                <div className="sm:col-span-3 rounded-xl border border-slate-200 bg-white overflow-hidden">
+                  <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
+                    <span className="text-sm font-bold text-slate-800">Planning — Semaine 14</span>
+                    <span className="rounded-full bg-indigo-50 px-3 py-0.5 text-xs font-bold text-indigo-600">Mars 2026</span>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="border-b border-slate-100">
+                          <th className="py-2.5 pl-5 pr-4 text-left font-semibold text-slate-400">Employé</th>
+                          {["Lun", "Mar", "Mer", "Jeu", "Ven"].map(d => (
+                            <th key={d} className="px-3 py-2.5 text-center font-semibold text-slate-400">{d}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[
+                          { name: "Alice M.", shifts: ["M", "M", "—", "S", "M"] },
+                          { name: "Bob D.", shifts: ["S", "—", "S", "M", "S"], me: true },
+                          { name: "Clara P.", shifts: ["M", "S", "M", "—", "M"] },
+                        ].map((row) => (
+                          <tr key={row.name} className={row.me ? "bg-indigo-50" : "border-t border-slate-50 hover:bg-slate-50"}>
+                            <td className="py-2.5 pl-5 pr-4 font-semibold text-slate-700 whitespace-nowrap">
+                              {row.name}
+                              {row.me && <span className="ml-2 rounded-full bg-indigo-200 px-2 py-0.5 text-[10px] font-bold text-indigo-700">Vous</span>}
+                            </td>
+                            {row.shifts.map((s, i) => (
+                              <td key={i} className="px-3 py-2.5 text-center">
+                                <span className={`inline-block rounded-md px-2 py-0.5 font-bold ${s === "M" ? "bg-sky-100 text-sky-700" : s === "S" ? "bg-violet-100 text-violet-700" : "text-slate-300"}`}>
+                                  {s}
+                                </span>
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
-            {[
-              {
-                title: "Planification Intelligente",
-                desc: "Notre algorithme IA suggère le meilleur planning selon les compétences, disponibilités et règles.",
-                icon: <Zap className="text-amber-500 w-7 h-7" />,
-                gradient: "from-amber-50 via-orange-50 to-yellow-100",
-                iconBig: <Zap className="text-amber-300 w-20 h-20 opacity-40" />,
-              },
-              {
-                title: "Équipe Ultra-Connectée",
-                desc: "Une application mobile dédiée pour vos employés : pointeuse, demandes de congés et planning live.",
-                icon: <Users className="text-indigo-500 w-7 h-7" />,
-                gradient: "from-indigo-50 via-blue-50 to-sky-100",
-                iconBig: <Users className="text-indigo-300 w-20 h-20 opacity-40" />,
-              },
-              {
-                title: "Conformité Légale",
-                desc: "Contrats, temps de repos, alertes heures sup. : dormez sur vos deux oreilles.",
-                icon: <ShieldCheck className="text-emerald-500 w-7 h-7" />,
-                gradient: "from-emerald-50 via-teal-50 to-green-100",
-                iconBig: <ShieldCheck className="text-emerald-300 w-20 h-20 opacity-40" />,
-              },
-            ].map((f, i) => (
+
+          {/* floating badge */}
+          <motion.div
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -right-4 top-1/3 hidden rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-xl sm:block"
+          >
+            <p className="text-xs font-bold text-emerald-500">↑ 40%</p>
+            <p className="text-[11px] text-slate-500 font-medium">productivité</p>
+          </motion.div>
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+            className="absolute -left-4 bottom-1/4 hidden rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-xl sm:block"
+          >
+            <p className="text-xs font-bold text-indigo-600">✓ Planning validé</p>
+            <p className="text-[11px] text-slate-500 font-medium">il y a 2 min</p>
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* ── LOGOS / SOCIAL PROOF ── */}
+      <section className="border-y border-slate-100 bg-slate-50 py-10">
+        <div className="mx-auto max-w-5xl px-5 sm:px-8">
+          <p className="mb-8 text-center text-xs font-bold uppercase tracking-widest text-slate-400">Ils utilisent Shiftly au quotidien</p>
+          <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6">
+            {["Hôtel Riviera", "Clinic Pro", "RestauGroup", "LogiTeam", "SportZen"].map((name) => (
+              <span key={name} className="text-sm font-black text-slate-300 tracking-tight">{name.toUpperCase()}</span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FEATURES ── */}
+      <section id="features" className="mx-auto max-w-6xl px-5 py-24 sm:px-8 sm:py-32">
+        <div className="mb-16 text-center">
+          <motion.p
+            initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            className="mb-3 text-xs font-bold uppercase tracking-widest text-indigo-500"
+          >
+            Fonctionnalités
+          </motion.p>
+          <motion.h2
+            initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.05 }}
+            className="mb-5 text-4xl font-black tracking-tight text-slate-900 sm:text-5xl"
+          >
+            Tout ce dont vous avez besoin.
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}
+            className="mx-auto max-w-xl text-lg text-slate-500"
+          >
+            Une suite d'outils pensés pour les managers modernes qui veulent reprendre le contrôle de leur temps.
+          </motion.p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map((f, i) => (
+            <motion.div
+              key={f.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.07, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="group rounded-2xl border border-slate-100 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-slate-200"
+            >
+              <div className={`mb-5 flex h-11 w-11 items-center justify-center rounded-xl ${f.light}`}>
+                <f.icon size={20} />
+              </div>
+              <h3 className="mb-2.5 text-lg font-bold text-slate-900">{f.title}</h3>
+              <p className="text-sm leading-relaxed text-slate-500">{f.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS ── */}
+      <section id="how" className="bg-slate-950 py-24 sm:py-32">
+        <div className="mx-auto max-w-5xl px-5 sm:px-8">
+          <div className="mb-16 text-center">
+            <p className="mb-3 text-xs font-bold uppercase tracking-widest text-indigo-400">Comment ça marche</p>
+            <h2 className="text-4xl font-black tracking-tight text-white sm:text-5xl">Opérationnel en 3 étapes.</h2>
+          </div>
+
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            {STEPS.map((s, i) => (
               <motion.div
-                key={i}
-                variants={itemVariants}
-                className="group bg-white rounded-[32px] p-5 border border-slate-100 hover:border-indigo-100 hover:shadow-2xl transition-all duration-500"
+                key={s.n}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="relative rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur"
               >
-                <div className={`h-48 sm:h-56 rounded-2xl overflow-hidden mb-6 sm:mb-8 bg-gradient-to-br ${f.gradient} flex items-center justify-center group-hover:scale-[1.02] transition-transform duration-500`}>
-                  {f.iconBig}
-                </div>
-                <div className="px-3 pb-3">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100 group-hover:bg-indigo-50 transition-colors">
-                      {f.icon}
-                    </div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{f.title}</h3>
+                <span className="mb-6 block text-5xl font-black text-white/10">{s.n}</span>
+                <h3 className="mb-3 text-xl font-bold text-white">{s.title}</h3>
+                <p className="text-sm leading-relaxed text-slate-400">{s.desc}</p>
+                {i < STEPS.length - 1 && (
+                  <div className="absolute -right-4 top-1/2 hidden -translate-y-1/2 text-white/20 md:block">
+                    <ChevronRight size={24} />
                   </div>
-                  <p className="text-slate-600 text-sm sm:text-base leading-relaxed">{f.desc}</p>
-                </div>
+                )}
               </motion.div>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* --- CALL TO ACTION --- */}
-        <section className="relative rounded-[40px] sm:rounded-[60px] bg-slate-950 p-10 sm:p-16 md:p-24 overflow-hidden">
-          {/* Cercles de fond */}
-          <div className="absolute top-0 right-0 -mr-24 -mt-24 w-80 h-80 sm:w-96 sm:h-96 bg-indigo-500/20 rounded-full blur-[100px] sm:blur-[120px]" />
-          <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-80 h-80 sm:w-96 sm:h-96 bg-sky-500/10 rounded-full blur-[100px] sm:blur-[120px]" />
-          
-          <div className="relative z-10 text-center max-w-3xl mx-auto space-y-10 sm:space-y-12">
-            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white tracking-tight leading-tight">Prêt à gagner 10h par semaine ?</h2>
-            <p className="text-slate-400 text-lg sm:text-xl leading-relaxed max-w-2xl mx-auto">L'installation prend moins de 2 minutes. Vos employés vont adorer la simplicité de l'application.</p>
-            <div className="flex justify-center pt-3">
-              <Link href="/signup" className="px-12 py-5 bg-white text-slate-950 rounded-2xl font-black text-lg hover:bg-indigo-500 hover:text-white transition-all shadow-2xl active:scale-98">
+      {/* ── STATS BAND ── */}
+      <section className="border-y border-slate-100 py-16">
+        <div className="mx-auto max-w-5xl px-5 sm:px-8">
+          <div className="grid grid-cols-2 gap-8 text-center md:grid-cols-4">
+            {[
+              { val: "10h", label: "économisées / semaine" },
+              { val: "100%", label: "cloud & sécurisé" },
+              { val: "< 2min", label: "pour démarrer" },
+              { val: "7j/7", label: "support disponible" },
+            ].map((s) => (
+              <motion.div
+                key={s.label}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4 }}
+              >
+                <p className="text-4xl font-black text-indigo-600 sm:text-5xl">{s.val}</p>
+                <p className="mt-1.5 text-sm font-medium text-slate-400">{s.label}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ── */}
+      <section className="mx-auto max-w-6xl px-5 py-24 sm:px-8 sm:py-32">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="relative overflow-hidden rounded-[36px] bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-600 px-10 py-20 text-center shadow-2xl shadow-indigo-200 sm:px-16"
+        >
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute right-0 top-0 h-80 w-80 -translate-y-1/2 translate-x-1/2 rounded-full bg-white/10 blur-[80px]" />
+            <div className="absolute bottom-0 left-0 h-80 w-80 -translate-x-1/2 translate-y-1/2 rounded-full bg-violet-400/20 blur-[80px]" />
+          </div>
+
+          <div className="relative z-10 mx-auto max-w-2xl">
+            <h2 className="mb-5 text-4xl font-black leading-tight tracking-tight text-white sm:text-5xl">
+              Prêt à simplifier la gestion de votre équipe ?
+            </h2>
+            <p className="mb-10 text-lg text-indigo-100">
+              Rejoignez Shiftly dès aujourd'hui. Gratuit, sans carte bancaire, opérationnel en moins de 2 minutes.
+            </p>
+            <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+              <Link
+                href="/signup"
+                className="group flex items-center gap-2.5 rounded-2xl bg-white px-9 py-4 text-base font-bold text-indigo-600 shadow-lg transition hover:bg-indigo-50 active:scale-95"
+              >
                 Commencer gratuitement
+                <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
+              </Link>
+              <Link href="/login" className="rounded-2xl border border-white/25 px-9 py-4 text-base font-bold text-white transition hover:bg-white/10">
+                Connexion
               </Link>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 pt-10 sm:pt-12 border-t border-white/10">
-               <div className="flex items-center gap-2.5 text-white/50 text-sm font-medium"><Globe size={17}/> Multilingue (FR, EN, ES)</div>
-               <div className="flex items-center gap-2.5 text-white/50 text-sm font-medium"><CheckCircle2 size={17}/> RGPD Friendly</div>
-               <div className="flex items-center gap-2.5 text-white/50 text-sm font-medium"><Zap size={17}/> Support 7j/7</div>
-            </div>
           </div>
-        </section>
+        </motion.div>
+      </section>
 
-        {/* --- FOOTER RESPONSIVE --- */}
-        <footer className="pt-16 sm:pt-20 border-t border-slate-200">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-12 gap-y-10 mb-16 sm:mb-20">
-            <div className="sm:col-span-2 md:col-span-2 space-y-6">
-              <div className="flex items-center gap-2.5 font-black text-2xl sm:text-3xl tracking-tighter text-slate-900">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg">S</div>
-                SHIFTLY
+      {/* ── FOOTER ── */}
+      <footer className="border-t border-slate-100 bg-white">
+        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8">
+          <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
+            <div className="col-span-2 md:col-span-2">
+              <div className="mb-4 flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-black text-white">S</div>
+                <span className="text-lg font-black tracking-tighter text-slate-900">Shiftly</span>
               </div>
-              <p className="text-slate-500 max-w-sm text-base leading-relaxed">La solution complète pour la gestion des forces de travail modernes. Conçue pour les entreprises qui bougent vite.</p>
+              <p className="max-w-xs text-sm leading-relaxed text-slate-400">
+                La plateforme de gestion d'équipe nouvelle génération. Conçue pour les entreprises qui bougent vite.
+              </p>
             </div>
-            <div className="space-y-4 sm:space-y-5">
-              <h4 className="font-bold text-slate-900 text-sm uppercase tracking-widest">Liens</h4>
-              <ul className="space-y-2.5 sm:space-y-3 text-slate-500 text-sm sm:text-base font-medium">
-                <li><a href="#" className="hover:text-indigo-600">Fonctionnalités</a></li>
-                <li><a href="#" className="hover:text-indigo-600">Tarification</a></li>
-                <li><a href="#" className="hover:text-indigo-600">Sécurité</a></li>
+            <div>
+              <h4 className="mb-4 text-xs font-bold uppercase tracking-widest text-slate-400">Produit</h4>
+              <ul className="space-y-2.5 text-sm text-slate-500">
+                <li><a href="#features" className="transition hover:text-slate-900">Fonctionnalités</a></li>
+                <li><a href="#pricing" className="transition hover:text-slate-900">Tarifs</a></li>
+                <li><a href="#" className="transition hover:text-slate-900">Sécurité</a></li>
               </ul>
             </div>
-            <div className="space-y-4 sm:space-y-5">
-              <h4 className="font-bold text-slate-900 text-sm uppercase tracking-widest">Support</h4>
-              <ul className="space-y-2.5 sm:space-y-3 text-slate-500 text-sm sm:text-base font-medium">
-                <li><a href="#" className="hover:text-indigo-600">Centre d'aide</a></li>
-                <li><a href="#" className="hover:text-indigo-600">Contact</a></li>
-                <li><a href="#" className="hover:text-indigo-600">API</a></li>
+            <div>
+              <h4 className="mb-4 text-xs font-bold uppercase tracking-widest text-slate-400">Support</h4>
+              <ul className="space-y-2.5 text-sm text-slate-500">
+                <li><a href="#" className="transition hover:text-slate-900">Centre d'aide</a></li>
+                <li><a href="#" className="transition hover:text-slate-900">Contact</a></li>
+                <li><a href="#" className="transition hover:text-slate-900">Statut</a></li>
               </ul>
             </div>
           </div>
-          <div className="pb-10 flex flex-col sm:flex-row justify-between items-center gap-6 text-slate-400 text-xs sm:text-sm font-medium border-t border-slate-100 pt-8">
-            <p>© 2026 SHIFTLY App. All rights reserved. <span className="hidden sm:inline">Made in France.</span></p>
-            <div className="flex gap-6 sm:gap-8">
-              <a href="#" className="hover:text-slate-900 transition-colors">Confidentialité</a>
-              <a href="#" className="hover:text-slate-900 transition-colors">Termes</a>
+          <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-100 pt-8 sm:flex-row">
+            <p className="text-xs text-slate-400">© 2026 Shiftly. Tous droits réservés. Made in France.</p>
+            <div className="flex gap-6 text-xs text-slate-400">
+              <a href="#" className="transition hover:text-slate-700">Confidentialité</a>
+              <a href="#" className="transition hover:text-slate-700">Conditions</a>
+              <a href="#" className="transition hover:text-slate-700">RGPD</a>
             </div>
           </div>
-        </footer>
-      </motion.main>
+        </div>
+      </footer>
     </div>
   );
 }

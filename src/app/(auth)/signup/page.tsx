@@ -1,68 +1,60 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronLeft, ShieldCheck, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, ShieldCheck, Users } from "lucide-react";
 
 export default function SignupPage() {
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
-      {/* Bouton Retour */}
-      <Link
-        href="/"
-        className="group inline-flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors mb-12 font-medium"
-      >
-        <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-        Retour à l'accueil
-      </Link>
+    <div className="mx-auto w-full max-w-lg">
+      <div className="overflow-hidden rounded-[28px] border border-white/10 bg-white shadow-2xl shadow-black/50">
+        {/* Top */}
+        <div className="bg-gradient-to-r from-indigo-600 to-violet-600 px-8 py-8 text-center">
+          <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 text-lg font-black text-white">S</div>
+          <h1 className="text-2xl font-black tracking-tight text-white">Créer un compte</h1>
+          <p className="mt-1.5 text-sm text-indigo-100/80">Choisissez votre type de compte</p>
+        </div>
 
-      <div className="space-y-12">
-        {/* Header Section */}
-        <header className="max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-bold uppercase tracking-widest mb-6">
-            Inscription
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight">
-            Créez votre <br />
-            <span className="text-indigo-600">organisation</span>
-          </h1>
-          <p className="mt-6 text-lg text-slate-500 leading-relaxed">
-            Créez votre compte administrateur pour gérer vos équipes et plannings.
-          </p>
-        </header>
-
-        {/* Carte ADMIN uniquement */}
-        <section className="max-w-md">
+        {/* Options */}
+        <div className="space-y-3 p-6">
           <Link
             href="/signup/admin"
-            className="group relative p-8 rounded-[32px] bg-white border border-slate-200 hover:border-indigo-500 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 overflow-hidden flex flex-col"
+            className="group flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 transition-all hover:border-indigo-300 hover:shadow-md hover:shadow-indigo-50"
           >
-            <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-              <ShieldCheck className="w-32 h-32" />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition-colors group-hover:bg-indigo-100">
+              <ShieldCheck size={22} />
             </div>
-
-            <div className="relative z-10">
-              <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 mb-6 group-hover:scale-110 transition-transform">
-                <ShieldCheck className="w-8 h-8" />
-              </div>
-              <h2 className="text-2xl font-bold text-slate-900 mb-3">Compte Administrateur</h2>
-              <p className="text-slate-500 text-sm leading-relaxed mb-8">
-                Pour les gérants et RH. Créez votre organisation, invitez vos équipes et gérez les plannings de A à Z.
-              </p>
-              <div className="flex items-center gap-2 text-indigo-600 font-bold text-sm">
-                Créer une organisation
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
-              </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-slate-900">Administrateur</p>
+              <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">Créez votre organisation et gérez vos équipes</p>
             </div>
+            <ArrowRight size={16} className="shrink-0 text-slate-300 transition-all group-hover:translate-x-1 group-hover:text-indigo-500" />
           </Link>
-        </section>
 
-        {/* Footer info */}
-        <p className="text-sm text-slate-400">
-          Vous avez déjà un compte ?{" "}
-          <Link href="/login" className="text-indigo-600 font-semibold hover:underline">
-            Connectez-vous ici
+          <Link
+            href="/signup/employee"
+            className="group flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 transition-all hover:border-indigo-300 hover:shadow-md hover:shadow-indigo-50"
+          >
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition-colors group-hover:bg-indigo-50 group-hover:text-indigo-600">
+              <Users size={22} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-slate-900">Employé</p>
+              <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">Rejoignez une organisation avec votre code</p>
+            </div>
+            <ArrowRight size={16} className="shrink-0 text-slate-300 transition-all group-hover:translate-x-1 group-hover:text-indigo-500" />
           </Link>
-        </p>
+        </div>
+
+        {/* Footer */}
+        <div className="border-t border-slate-100 px-6 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 transition hover:text-slate-600">
+            <ArrowLeft size={13} /> Accueil
+          </Link>
+          <p className="text-xs text-slate-400">
+            Déjà membre ?{" "}
+            <Link href="/login" className="font-bold text-indigo-600 hover:text-indigo-700">Connexion</Link>
+          </p>
+        </div>
       </div>
     </div>
   );
