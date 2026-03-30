@@ -409,48 +409,44 @@ export default function PlanningPage() {
     new Date(iso).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
 
   if (loading) return (
-    <div className="flex h-screen items-center justify-center bg-slate-50">
-      <div className="text-center">
-        <Loader2 className="animate-spin text-indigo-600 mx-auto mb-4" size={48} />
-        <p className="text-slate-500 font-medium animate-pulse">Chargement de votre espace...</p>
+    <div className="flex min-h-[60vh] items-center justify-center">
+      <div className="text-center space-y-3">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-200">
+          <Loader2 className="animate-spin text-white" size={28} />
+        </div>
+        <p className="text-sm font-medium text-slate-500">Chargement du planning...</p>
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-20">
-      {/* Navbar / Header Style */}
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-30">
-        <div className="mx-auto max-w-7xl px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Gestion du Planning</h1>
-            <p className="text-sm text-slate-500">Organisation et suivi des effectifs</p>
-          </div>
-          <div className="flex items-center gap-3">
-             {isAdmin && (
-                <button
-                  onClick={() => setShowPeriodForm(!showPeriodForm)}
-                  className="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-200"
-                >
-                  <Plus size={18} />
-                  <span>Nouveau Planning</span>
-                </button>
-             )}
-          </div>
+    <div className="space-y-6">
+      {/* Page header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-black tracking-tight text-slate-900">Gestion du Planning</h1>
+          <p className="text-sm text-slate-500">Organisation et suivi des effectifs</p>
         </div>
+        {isAdmin && (
+          <button
+            onClick={() => setShowPeriodForm(!showPeriodForm)}
+            className="flex items-center gap-2 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-200 transition hover:bg-indigo-700 active:scale-95"
+          >
+            <Plus size={16} /> Nouvelle période
+          </button>
+        )}
       </div>
 
-      <main className="mx-auto max-w-7xl px-6 py-8">
-        <div className="grid gap-8 lg:grid-cols-12">
+      <div className="grid gap-6 lg:grid-cols-12">
           
           {/* Main Content */}
-          <div className="lg:col-span-8 space-y-8">
-            
-            {/* Planning Semaine 1 & 2 */}
+          <div className="lg:col-span-8 space-y-6">
+
+            {/* Planning visuel semaines */}
             {(slot1 || slot2 || isAdmin) && (
               <section className="space-y-4">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                  <LayoutGrid size={16} /> Planning visuel
+                <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+                  <LayoutGrid size={14} /> Planning visuel
                 </h3>
                 <div className="space-y-6">
                   {([slot1, slot2] as const).map((slot, idx) => (
@@ -564,61 +560,58 @@ export default function PlanningPage() {
               </section>
             )}
 
-            {/* List of Periods */}
+            {/* Périodes */}
             <section className="space-y-4">
-               <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                    <List size={16} /> Périodes actives
-                  </h3>
-                </div>
+                <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+                  <List size={14} /> Périodes actives
+                </h3>
 
                 {periods.length === 0 && orphanEntries.length === 0 ? (
-                  <div className="rounded-[2rem] border-2 border-dashed border-slate-200 bg-white p-12 text-center">
-                    <div className="mx-auto w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
-                      <Calendar className="text-slate-300" size={32} />
+                  <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-white p-12 text-center">
+                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-slate-50">
+                      <Calendar className="text-slate-300" size={28} />
                     </div>
-                    <h4 className="text-slate-900 font-bold text-lg">Aucun planning pour le moment</h4>
-                    <p className="text-slate-500 max-w-xs mx-auto mt-2">Commencez par créer une nouvelle période ou importer un fichier Excel.</p>
+                    <h4 className="font-bold text-slate-800">Aucun planning pour le moment</h4>
+                    <p className="mt-1.5 text-sm text-slate-400 max-w-xs mx-auto">Créez une nouvelle période ou importez un fichier Excel.</p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {periods.map(period => (
-                      <div key={period.id} className="group rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:border-indigo-200">
-                        <div 
-                          className="flex cursor-pointer items-center justify-between p-5"
+                      <div key={period.id} className="group rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:border-indigo-200 hover:shadow-md overflow-hidden">
+                        <div
+                          className="flex cursor-pointer items-center justify-between p-4 sm:p-5"
                           onClick={() => toggleExpand(period.id)}
                         >
-                          <div className="flex items-center gap-4">
-                            <div className={`flex h-12 w-12 items-center justify-center rounded-xl transition-colors ${expandedIds.has(period.id) ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-600'}`}>
-                              <Calendar size={22} />
+                          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                            <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors ${expandedIds.has(period.id) ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200' : 'bg-slate-100 text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-600'}`}>
+                              <Calendar size={18} />
                             </div>
-                            <div>
-                              <h2 className="font-bold text-slate-900 text-lg">{period.name}</h2>
-                              <div className="flex items-center gap-3 mt-0.5">
-                                <span className="text-sm text-slate-500">{fmtDate(period.startDate)} — {fmtDate(period.endDate)}</span>
-                                <span className="h-1 w-1 rounded-full bg-slate-300"></span>
-                                <span className="text-sm font-semibold text-indigo-600">{period.entries.length} créneaux</span>
+                            <div className="min-w-0">
+                              <h2 className="font-bold text-slate-900 truncate">{period.name}</h2>
+                              <div className="flex flex-wrap items-center gap-2 mt-0.5">
+                                <span className="text-xs text-slate-400">{fmtDate(period.startDate)} — {fmtDate(period.endDate)}</span>
+                                <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-600">{period.entries.length} créneaux</span>
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 shrink-0">
                             {isAdmin && (
                               confirmDeletePeriodId === period.id ? (
                                 <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
                                   <button onClick={() => handleDeletePeriod(period.id)} className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-rose-700">Supprimer</button>
-                                  <button onClick={() => setConfirmDeletePeriodId(null)} className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-200">Annuler</button>
+                                  <button onClick={() => setConfirmDeletePeriodId(null)} className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">Annuler</button>
                                 </div>
                               ) : (
                                 <button
                                   onClick={e => { e.stopPropagation(); setConfirmDeletePeriodId(period.id); }}
-                                  className="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                                  className="rounded-lg p-2 text-slate-300 opacity-0 transition-all group-hover:opacity-100 hover:bg-rose-50 hover:text-rose-500"
                                 >
-                                  <Trash2 size={18} />
+                                  <Trash2 size={15} />
                                 </button>
                               )
                             )}
-                            <div className={`p-2 rounded-lg transition-transform ${expandedIds.has(period.id) ? 'rotate-180 text-indigo-600' : 'text-slate-400'}`}>
-                              <ChevronDown size={20} />
+                            <div className={`rounded-lg p-1.5 transition-transform ${expandedIds.has(period.id) ? 'rotate-180 text-indigo-600' : 'text-slate-300'}`}>
+                              <ChevronDown size={18} />
                             </div>
                           </div>
                         </div>
@@ -888,7 +881,6 @@ export default function PlanningPage() {
             </aside>
           )}
         </div>
-      </main>
     </div>
   );
 }
