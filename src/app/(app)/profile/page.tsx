@@ -55,21 +55,21 @@ export default function ProfilePage() {
   if (!me) return (
     <div className="flex min-h-[60vh] items-center justify-center">
       <div className="text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50">
-          <Loader2 className="animate-spin text-indigo-600" size={28} />
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50">
+          <Loader2 className="animate-spin text-blue-600" size={28} />
         </div>
         <p className="text-sm font-medium text-slate-500">Chargement du profil...</p>
       </div>
     </div>
   );
 
-  const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/15 transition-all";
+  const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:bg-white focus:border-blue-300 focus:ring-2 focus:ring-blue-500/15 transition-all";
 
   return (
     <div className="space-y-8">
       {/* Page title */}
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-slate-900">Mon profil</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Mon profil</h1>
         <p className="text-sm text-slate-500">Modifiez vos informations personnelles</p>
       </div>
 
@@ -77,13 +77,13 @@ export default function ProfilePage() {
         {/* Profile card */}
         <div className="lg:col-span-1">
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm text-center">
-            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-100 to-indigo-200 text-3xl font-black text-indigo-600">
+            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-blue-100 text-3xl font-bold text-blue-600">
               {name.charAt(0).toUpperCase() || "?"}
             </div>
-            <h2 className="text-xl font-black text-slate-900">{name || "—"}</h2>
+            <h2 className="text-xl font-bold text-slate-900">{name || "—"}</h2>
             <p className="mt-1 text-sm text-slate-400">{me.email}</p>
             <div className="mt-3 flex justify-center">
-              <span className="flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-700">
+              <span className="flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
                 <Shield size={10} /> {me.role?.toUpperCase()}
               </span>
             </div>
@@ -94,7 +94,7 @@ export default function ProfilePage() {
         <div className="lg:col-span-2">
           <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
             <div className="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
-              <User size={15} className="text-indigo-500" />
+              <User size={15} className="text-blue-500" />
               <h3 className="text-sm font-bold text-slate-700">Modifier mes informations</h3>
             </div>
 
@@ -143,7 +143,7 @@ export default function ProfilePage() {
 
               <button
                 type="submit" disabled={saving}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3.5 text-sm font-bold text-white shadow-md shadow-indigo-200 hover:bg-indigo-700 disabled:opacity-60 transition-all"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 text-sm font-bold text-white shadow-md shadow-gray-200 hover:bg-blue-700 disabled:opacity-60 transition-all"
               >
                 {saving ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}
                 {saving ? "Enregistrement..." : "Enregistrer les modifications"}

@@ -56,7 +56,7 @@ function EmployeeSignupForm() {
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
           <CheckCircle2 size={28} className="text-emerald-600" />
         </div>
-        <h2 className="text-xl font-black text-slate-900">Compte créé !</h2>
+        <h2 className="text-xl font-bold text-slate-900">Compte créé !</h2>
         <p className="text-sm text-slate-500">Redirection vers la connexion...</p>
       </div>
     );
@@ -72,7 +72,7 @@ function EmployeeSignupForm() {
         <div key={key} className="relative">
           <Icon size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-3 text-sm outline-none focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/15 transition-all"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-3 text-sm outline-none focus:bg-white focus:border-blue-300 focus:ring-2 focus:ring-blue-500/15 transition-all"
             placeholder={placeholder}
             type={type}
             required
@@ -88,8 +88,8 @@ function EmployeeSignupForm() {
         <input
           className={`w-full rounded-xl border pl-10 pr-12 py-3 text-sm font-mono uppercase outline-none transition-all ${
             codeFromUrl
-              ? "border-indigo-200 bg-indigo-50 text-indigo-700 cursor-not-allowed"
-              : "border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/15"
+              ? "border-blue-200 bg-blue-50 text-blue-700 cursor-not-allowed"
+              : "border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-300 focus:ring-2 focus:ring-blue-500/15"
           }`}
           placeholder="Code organisation (ex: AB12CD)"
           required
@@ -98,7 +98,7 @@ function EmployeeSignupForm() {
           onChange={(e) => setForm({ ...form, orgCode: e.target.value })}
         />
         {codeFromUrl && (
-          <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-indigo-500 uppercase tracking-wider bg-indigo-100 px-2 py-0.5 rounded-md">
+          <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-blue-500 uppercase tracking-wider bg-blue-100 px-2 py-0.5 rounded-md">
             Auto
           </span>
         )}
@@ -113,7 +113,7 @@ function EmployeeSignupForm() {
       <button
         type="submit"
         disabled={status === "loading"}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-200 transition hover:bg-indigo-700 disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-gray-200 transition hover:bg-blue-700 disabled:opacity-60"
       >
         {status === "loading" ? (
           <><Loader2 size={16} className="animate-spin" /> Création...</>
@@ -124,7 +124,7 @@ function EmployeeSignupForm() {
 
       <p className="text-center text-xs text-slate-400">
         Déjà membre ?{" "}
-        <Link href="/login" className="font-bold text-indigo-600 hover:text-indigo-700">Connexion</Link>
+        <Link href="/login" className="font-bold text-blue-600 hover:text-blue-700">Connexion</Link>
       </p>
     </form>
   );
@@ -141,7 +141,7 @@ export default function EmployeeSignupPage() {
               <User size={20} className="text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-black tracking-tight text-white">Rejoindre l&apos;équipe</h1>
+              <h1 className="text-xl font-bold tracking-tight text-white">Rejoindre l&apos;équipe</h1>
               <p className="text-xs text-slate-400">Entrez le code fourni par votre responsable</p>
             </div>
           </div>

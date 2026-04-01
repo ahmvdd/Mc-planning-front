@@ -105,8 +105,8 @@ export default function EmployeesPage() {
   if (loading) return (
     <div className="flex min-h-[60vh] items-center justify-center">
       <div className="text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50">
-          <Loader2 className="animate-spin text-indigo-600" size={28} />
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50">
+          <Loader2 className="animate-spin text-blue-600" size={28} />
         </div>
         <p className="text-sm font-medium text-slate-500">Chargement de l&apos;équipe...</p>
       </div>
@@ -118,24 +118,24 @@ export default function EmployeesPage() {
       {/* Page title */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900">Gestion d&apos;Équipe</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Gestion d&apos;Équipe</h1>
           <p className="text-sm text-slate-500">Pilotez vos effectifs et gérez les accès</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex gap-2">
-            <div className="rounded-xl bg-indigo-50 px-4 py-2 text-center">
-              <p className="text-lg font-black text-indigo-600">{stats.total}</p>
-              <p className="text-[10px] font-bold uppercase text-indigo-400">Total</p>
+            <div className="rounded-xl bg-blue-50 px-4 py-2 text-center">
+              <p className="text-lg font-bold text-blue-600">{stats.total}</p>
+              <p className="text-[10px] font-bold uppercase text-blue-400">Total</p>
             </div>
             <div className="rounded-xl bg-emerald-50 px-4 py-2 text-center">
-              <p className="text-lg font-black text-emerald-600">{stats.active}</p>
+              <p className="text-lg font-bold text-emerald-600">{stats.active}</p>
               <p className="text-[10px] font-bold uppercase text-emerald-400">Actifs</p>
             </div>
           </div>
           {isAdmin && (
             <button
               onClick={() => { resetForm(); setShowForm(true); }}
-              className="flex items-center gap-2 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-200 transition hover:bg-indigo-700 active:scale-95"
+              className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-gray-200 transition hover:bg-blue-700 active:scale-95"
             >
               <UserPlus size={15} /> Nouveau membre
             </button>
@@ -154,7 +154,7 @@ export default function EmployeesPage() {
               placeholder="Rechercher par nom, email ou rôle…"
               value={search}
               onChange={e => handleSearch(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white pl-10 pr-10 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/15 shadow-sm transition-all"
+              className="w-full rounded-xl border border-slate-200 bg-white pl-10 pr-10 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-500/15 shadow-sm transition-all"
             />
             {search && (
               <button onClick={() => handleSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -174,8 +174,8 @@ export default function EmployeesPage() {
           ) : filtered.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center">
               <Search className="mx-auto mb-3 text-slate-300" size={28} />
-              <p className="font-bold text-slate-600">Aucun résultat pour &quot;<span className="text-indigo-600">{search}</span>&quot;</p>
-              <button onClick={() => handleSearch("")} className="mt-2 text-xs text-slate-400 underline hover:text-indigo-600">Effacer</button>
+              <p className="font-bold text-slate-600">Aucun résultat pour &quot;<span className="text-blue-600">{search}</span>&quot;</p>
+              <button onClick={() => handleSearch("")} className="mt-2 text-xs text-slate-400 underline hover:text-blue-600">Effacer</button>
             </div>
           ) : (
             <>
@@ -193,7 +193,7 @@ export default function EmployeesPage() {
                       <tr key={emp.id} className="group hover:bg-slate-50/60 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 text-sm font-bold text-indigo-700">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
                               {emp.name.charAt(0).toUpperCase()}
                             </div>
                             <div>
@@ -206,7 +206,7 @@ export default function EmployeesPage() {
                         </td>
                         <td className="hidden sm:table-cell px-6 py-4">
                           <div className="flex flex-col gap-1">
-                            <span className="flex w-fit items-center gap-1 rounded-md bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
+                            <span className="flex w-fit items-center gap-1 rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700">
                               <Shield size={9} /> {emp.role.toUpperCase()}
                             </span>
                             <span className={`text-[10px] font-medium ${emp.status === "active" ? "text-emerald-500" : "text-slate-400"}`}>
@@ -268,7 +268,7 @@ export default function EmployeesPage() {
                           <button
                             key={n}
                             onClick={() => setPage(n as number)}
-                            className={`min-w-[28px] rounded-lg px-2 py-1.5 text-xs font-bold transition ${page === n ? "bg-indigo-600 text-white shadow-sm" : "text-slate-500 hover:bg-slate-100"}`}
+                            className={`min-w-[28px] rounded-lg px-2 py-1.5 text-xs font-bold transition ${page === n ? "bg-blue-600 text-white shadow-sm" : "text-slate-500 hover:bg-slate-100"}`}
                           >
                             {n}
                           </button>
@@ -291,10 +291,10 @@ export default function EmployeesPage() {
         {/* Form sidebar */}
         {showForm && isAdmin && (
           <aside className="lg:col-span-4">
-            <div className="sticky top-24 rounded-2xl border-2 border-indigo-500 bg-white shadow-xl shadow-indigo-500/10 overflow-hidden">
+            <div className="sticky top-24 rounded-2xl border-2 border-blue-500 bg-white shadow-xl shadow-gray-200 overflow-hidden">
               <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
                 <div className="flex items-center gap-2.5">
-                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${editId ? "bg-amber-50 text-amber-600" : "bg-indigo-50 text-indigo-600"}`}>
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${editId ? "bg-amber-50 text-amber-600" : "bg-blue-50 text-blue-600"}`}>
                     {editId ? <Pencil size={15} /> : <UserPlus size={15} />}
                   </div>
                   <h3 className="font-bold text-slate-900">{editId ? "Modifier le profil" : "Nouveau membre"}</h3>
@@ -313,7 +313,7 @@ export default function EmployeesPage() {
                     <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{label}</label>
                     <input
                       type={type}
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/15 transition-all"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:bg-white focus:border-blue-300 focus:ring-2 focus:ring-blue-500/15 transition-all"
                       value={form[key as keyof typeof form]}
                       onChange={e => setForm({ ...form, [key]: e.target.value })}
                       required
@@ -328,7 +328,7 @@ export default function EmployeesPage() {
                     <div key={key} className="space-y-1.5">
                       <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{label}</label>
                       <select
-                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/15"
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:bg-white focus:border-blue-300 focus:ring-2 focus:ring-blue-500/15"
                         value={form[key as keyof typeof form]}
                         onChange={e => setForm({ ...form, [key]: e.target.value })}
                       >
@@ -342,7 +342,7 @@ export default function EmployeesPage() {
                     <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Mot de passe</label>
                     <input
                       type="password"
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/15 transition-all"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:bg-white focus:border-blue-300 focus:ring-2 focus:ring-blue-500/15 transition-all"
                       value={form.password}
                       onChange={e => setForm({ ...form, password: e.target.value })}
                       required
@@ -353,7 +353,7 @@ export default function EmployeesPage() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className={`flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white transition-all ${editId ? "bg-amber-500 hover:bg-amber-600" : "bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-200"} disabled:opacity-60`}
+                    className={`flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white transition-all ${editId ? "bg-amber-500 hover:bg-amber-600" : "bg-blue-600 hover:bg-blue-700 shadow-md shadow-gray-200"} disabled:opacity-60`}
                   >
                     {saving ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
                     {editId ? "Enregistrer" : "Créer le compte"}

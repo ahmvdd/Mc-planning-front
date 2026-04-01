@@ -61,10 +61,10 @@ export default function LoginPage() {
     <div className="mx-auto flex w-full max-w-5xl overflow-hidden rounded-[28px] border border-white/10 shadow-2xl shadow-black/50 min-h-[560px]">
 
       {/* Left — Branding */}
-      <div className="relative hidden w-[45%] flex-col justify-between bg-gradient-to-br from-indigo-600 to-violet-700 p-10 md:flex overflow-hidden">
+      <div className="relative hidden w-[45%] flex-col justify-between bg-blue-600 p-10 md:flex overflow-hidden">
         <div className="relative z-10 flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 text-sm font-black text-white">S</div>
-          <span className="text-lg font-black tracking-tighter text-white">Shiftly</span>
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 text-sm font-bold text-white">S</div>
+          <span className="text-lg font-bold tracking-tighter text-white">Shiftly</span>
         </div>
 
         <div className="relative z-10 space-y-6">
@@ -72,12 +72,12 @@ export default function LoginPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-4xl font-black leading-tight tracking-tight text-white"
+            className="text-4xl font-bold leading-tight tracking-tight text-white"
           >
             Vos équipes,<br />
-            <span className="text-indigo-200">sous contrôle.</span>
+            <span className="text-blue-200">sous contrôle.</span>
           </motion.h1>
-          <p className="text-base text-indigo-100/80 leading-relaxed">
+          <p className="text-base text-blue-100/80 leading-relaxed">
             Plannings, demandes, RH — tout au même endroit.
           </p>
           <div className="flex flex-col gap-3 pt-2">
@@ -86,7 +86,7 @@ export default function LoginPage() {
               { icon: Users, text: "Gestion d'équipe centralisée" },
               { icon: BarChart3, text: "Statistiques & rapports" },
             ].map(({ icon: Icon, text }) => (
-              <div key={text} className="flex items-center gap-2.5 text-sm text-indigo-100/90">
+              <div key={text} className="flex items-center gap-2.5 text-sm text-blue-100/90">
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/15">
                   <Icon size={14} />
                 </div>
@@ -98,7 +98,7 @@ export default function LoginPage() {
 
         {/* Decorations */}
         <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-indigo-400/20 blur-2xl" />
+        <div className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-blue-400/20 blur-2xl" />
       </div>
 
       {/* Right — Form */}
@@ -106,12 +106,12 @@ export default function LoginPage() {
         <div className="mx-auto w-full max-w-sm">
           {/* Mobile logo */}
           <div className="mb-8 flex items-center gap-2 md:hidden">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-black text-white">S</div>
-            <span className="text-lg font-black tracking-tighter text-slate-900">Shiftly</span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white">S</div>
+            <span className="text-lg font-bold tracking-tighter text-slate-900">Shiftly</span>
           </div>
 
           <div className="mb-8">
-            <h2 className="text-2xl font-black tracking-tight text-slate-900">Content de vous revoir</h2>
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900">Content de vous revoir</h2>
             <p className="mt-1.5 text-sm text-slate-500">Entrez vos identifiants pour continuer</p>
           </div>
 
@@ -121,7 +121,7 @@ export default function LoginPage() {
               <div className="relative">
                 <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/15 transition-all"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:bg-white focus:border-blue-300 focus:ring-2 focus:ring-blue-500/15 transition-all"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   type="email"
@@ -134,12 +134,12 @@ export default function LoginPage() {
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Mot de passe</label>
-                <a href="#" className="text-xs font-semibold text-indigo-600 hover:text-indigo-700">Oublié ?</a>
+                <a href="#" className="text-xs font-semibold text-blue-600 hover:text-blue-700">Oublié ?</a>
               </div>
               <div className="relative">
                 <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-3 text-sm text-slate-900 outline-none focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/15 transition-all"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-3 text-sm text-slate-900 outline-none focus:bg-white focus:border-blue-300 focus:ring-2 focus:ring-blue-500/15 transition-all"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   type="password"
@@ -162,7 +162,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="group mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-200 transition-all hover:bg-indigo-700 active:scale-[0.98] disabled:opacity-60"
+              className="group mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-gray-200 transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-60"
             >
               {loading ? (
                 <><Loader2 size={16} className="animate-spin" /> Connexion...</>
@@ -174,7 +174,7 @@ export default function LoginPage() {
 
           <p className="mt-6 text-center text-sm text-slate-500">
             Pas encore de compte ?{" "}
-            <Link href="/signup" className="font-bold text-indigo-600 hover:text-indigo-700">
+            <Link href="/signup" className="font-bold text-blue-600 hover:text-blue-700">
               S&apos;inscrire
             </Link>
           </p>

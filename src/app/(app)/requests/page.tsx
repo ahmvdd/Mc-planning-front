@@ -45,7 +45,7 @@ function RequestCard({ item, isAdmin, onEdit, onDelete }: {
           <div>
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">REQ-{item.id}</span>
             <h4 className="mt-0.5 font-bold text-slate-900">{item.type}</h4>
-            <Link href={`/employees/${item.employeeId}`} className="mt-1 flex w-fit items-center gap-1 text-xs text-indigo-500 hover:underline">
+            <Link href={`/employees/${item.employeeId}`} className="mt-1 flex w-fit items-center gap-1 text-xs text-blue-500 hover:underline">
               <User size={10} /> {item.employeeName ?? `Employé #${item.employeeId}`}
             </Link>
           </div>
@@ -60,11 +60,11 @@ function RequestCard({ item, isAdmin, onEdit, onDelete }: {
         )}
 
         {item.adminMessage && (
-          <div className="mt-3 flex items-start gap-2 rounded-xl border border-indigo-100/60 bg-indigo-50/50 px-4 py-3">
-            <MessageSquare size={13} className="mt-0.5 shrink-0 text-indigo-400" />
+          <div className="mt-3 flex items-start gap-2 rounded-xl border border-blue-100/60 bg-blue-50/50 px-4 py-3">
+            <MessageSquare size={13} className="mt-0.5 shrink-0 text-blue-400" />
             <div>
-              <p className="mb-0.5 text-[10px] font-bold uppercase text-indigo-400">Réponse admin</p>
-              <p className="text-xs text-indigo-700">{item.adminMessage}</p>
+              <p className="mb-0.5 text-[10px] font-bold uppercase text-blue-400">Réponse admin</p>
+              <p className="text-xs text-blue-700">{item.adminMessage}</p>
             </div>
           </div>
         )}
@@ -74,7 +74,7 @@ function RequestCard({ item, isAdmin, onEdit, onDelete }: {
             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Historique</p>
             {item.logs.map(log => (
               <div key={log.id} className="flex items-start gap-2 text-xs text-slate-600">
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-300" />
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-300" />
                 <div>
                   <span className="font-semibold text-slate-700">{logActionLabel(log.action)}</span>
                   {log.byEmployeeName && <span className="text-slate-400"> par {log.byEmployeeName}</span>}
@@ -185,26 +185,26 @@ export default function RequestsPage() {
   if (loading) return (
     <div className="flex min-h-[60vh] items-center justify-center">
       <div className="text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50">
-          <Loader2 className="animate-spin text-indigo-600" size={28} />
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50">
+          <Loader2 className="animate-spin text-blue-600" size={28} />
         </div>
         <p className="text-sm font-medium text-slate-500">Chargement des demandes...</p>
       </div>
     </div>
   );
 
-  const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/15 transition-all";
+  const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:bg-white focus:border-blue-300 focus:ring-2 focus:ring-blue-500/15 transition-all";
 
   return (
     <div className="space-y-8">
       {/* Page title */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900">Demandes & Dossiers</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Demandes & Dossiers</h1>
           <p className="text-sm text-slate-500">Gérez et suivez les demandes de l&apos;équipe</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <div className="flex items-center gap-1.5 rounded-full bg-indigo-50 px-3.5 py-1.5 text-xs font-bold text-indigo-700">
+          <div className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3.5 py-1.5 text-xs font-bold text-blue-700">
             <ClipboardList size={12} /> {requests.length} demandes
           </div>
           <div className="flex items-center gap-1.5 rounded-full bg-amber-50 px-3.5 py-1.5 text-xs font-bold text-amber-700">
@@ -223,7 +223,7 @@ export default function RequestsPage() {
               <input
                 type="text" placeholder="Rechercher par type ou employé…"
                 value={filterSearch} onChange={e => setFilterSearch(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white pl-9 pr-8 py-2.5 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/15 shadow-sm transition-all"
+                className="w-full rounded-xl border border-slate-200 bg-white pl-9 pr-8 py-2.5 text-sm outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-500/15 shadow-sm transition-all"
               />
               {filterSearch && (
                 <button onClick={() => setFilterSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -238,8 +238,8 @@ export default function RequestsPage() {
                   onClick={() => setFilterStatus(s)}
                   className={`rounded-full border px-3 py-1.5 text-xs font-bold transition-all ${
                     filterStatus === s
-                      ? "bg-indigo-600 border-indigo-600 text-white shadow-sm"
-                      : "border-slate-200 bg-white text-slate-500 hover:border-indigo-300"
+                      ? "bg-blue-600 border-blue-600 text-white shadow-sm"
+                      : "border-slate-200 bg-white text-slate-500 hover:border-blue-300"
                   }`}
                 >
                   {s === "all" ? "Tous" : statusLabel[s]}
@@ -301,10 +301,10 @@ export default function RequestsPage() {
         <div className="space-y-5">
           {/* Edit form */}
           {isAdmin && editId && (
-            <div className="rounded-2xl border-2 border-indigo-500 bg-white shadow-xl shadow-indigo-500/10 overflow-hidden">
+            <div className="rounded-2xl border-2 border-blue-500 bg-white shadow-xl shadow-gray-200 overflow-hidden">
               <div className="border-b border-slate-100 px-5 py-4 flex items-center justify-between">
                 <h3 className="flex items-center gap-2 text-sm font-bold text-slate-700">
-                  <Pencil size={13} className="text-indigo-500" /> Traiter REQ-{editId}
+                  <Pencil size={13} className="text-blue-500" /> Traiter REQ-{editId}
                 </h3>
                 <button onClick={() => setEditId(null)} className="text-slate-400 hover:text-slate-600">
                   <X size={16} />
@@ -331,7 +331,7 @@ export default function RequestsPage() {
                 <div className="flex flex-col gap-2">
                   <button
                     type="submit" disabled={saving}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 text-sm font-bold text-white shadow-md shadow-indigo-200 hover:bg-indigo-700 transition disabled:opacity-60"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-bold text-white shadow-md shadow-gray-200 hover:bg-blue-700 transition disabled:opacity-60"
                   >
                     {saving ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
                     Confirmer
@@ -347,7 +347,7 @@ export default function RequestsPage() {
           {/* Create form */}
           <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
             <div className="border-b border-slate-100 px-5 py-4 flex items-center gap-2">
-              <PlusCircle size={14} className="text-indigo-500" />
+              <PlusCircle size={14} className="text-blue-500" />
               <h3 className="text-sm font-bold text-slate-700">Nouvelle demande</h3>
             </div>
             <div className="p-5">
@@ -368,7 +368,7 @@ export default function RequestsPage() {
                 />
                 <button
                   disabled={saving}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3 text-sm font-bold text-white hover:bg-indigo-600 transition-colors"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3 text-sm font-bold text-white hover:bg-blue-600 transition-colors"
                 >
                   {saving ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
                   Envoyer

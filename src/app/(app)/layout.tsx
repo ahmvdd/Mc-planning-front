@@ -11,7 +11,7 @@ export default function AppLayout({
       <div className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-xl" style={{ paddingTop: "env(safe-area-inset-top)" }}>
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-3 sm:px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden shadow-lg shadow-indigo-500/25">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden shadow-lg shadow-gray-200">
               <img src="/logo.png" alt="Shiftly" className="h-full w-full object-cover" />
             </div>
             <div>
@@ -33,7 +33,7 @@ export default function AppLayout({
               href="https://www.sayehahmed.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-semibold text-indigo-500 hover:text-indigo-700 transition-colors"
+              className="font-semibold text-blue-500 hover:text-blue-700 transition-colors"
             >
               Sayeh Ahmed
             </a>
