@@ -78,7 +78,7 @@ export default function DashboardPage() {
   if (loading) return (
     <div className="flex min-h-[60vh] items-center justify-center">
       <div className="text-center space-y-3">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-200">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-600 shadow-lg shadow-gray-200">
           <Loader2 className="animate-spin text-white" size={28} />
         </div>
         <p className="text-sm font-medium text-slate-500">Chargement de votre espace...</p>
@@ -90,7 +90,7 @@ export default function DashboardPage() {
     <div className="flex min-h-[60vh] items-center justify-center">
       <div className="rounded-2xl border border-rose-100 bg-white p-8 text-center shadow-sm max-w-sm">
         <p className="mb-4 text-slate-600">{error}</p>
-        <Link href="/login" className="rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-bold text-white">Connexion</Link>
+        <Link href="/login" className="rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-bold text-white">Connexion</Link>
       </div>
     </div>
   );
@@ -101,16 +101,16 @@ export default function DashboardPage() {
     <div className="space-y-8">
 
       {/* ── Hero greeting ── */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 p-6 sm:p-8 text-white shadow-xl shadow-indigo-200">
+      <div className="relative overflow-hidden rounded-2xl bg-blue-600 p-6 sm:p-8 text-white shadow-xl shadow-gray-200">
         <div className="relative z-10">
-          <p className="text-xs font-bold uppercase tracking-widest text-indigo-200 mb-1">Tableau de bord</p>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Bonjour 👋</h1>
-          <p className="mt-1 text-sm text-indigo-100/80">Vue d&apos;ensemble de votre organisation</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-blue-200 mb-1">Tableau de bord</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Bonjour 👋</h1>
+          <p className="mt-1 text-sm text-blue-100/80">Vue d&apos;ensemble de votre organisation</p>
           <div className="mt-4 flex flex-wrap gap-3">
-            <Link href="/planning" className="flex items-center gap-1.5 rounded-full bg-white/20 px-4 py-1.5 text-xs font-bold text-white backdrop-blur transition hover:bg-white/30">
+            <Link href="/planning" className="flex items-center gap-1.5 rounded-lg bg-white/20 px-4 py-1.5 text-xs font-bold text-white backdrop-blur transition hover:bg-white/30">
               <CalendarDays size={12} /> Voir le planning
             </Link>
-            <Link href="/requests" className="flex items-center gap-1.5 rounded-full bg-white/20 px-4 py-1.5 text-xs font-bold text-white backdrop-blur transition hover:bg-white/30">
+            <Link href="/requests" className="flex items-center gap-1.5 rounded-lg bg-white/20 px-4 py-1.5 text-xs font-bold text-white backdrop-blur transition hover:bg-white/30">
               <ClipboardList size={12} /> Voir les demandes
             </Link>
           </div>
@@ -126,14 +126,14 @@ export default function DashboardPage() {
         {[
           { label: "Employés", value: stats.activeEmployees, icon: Users, color: "from-emerald-400 to-teal-500", bg: "bg-emerald-50", text: "text-emerald-700", href: "/employees" },
           { label: "En attente", value: stats.pending, icon: Clock, color: "from-amber-400 to-orange-500", bg: "bg-amber-50", text: "text-amber-700", href: "/requests" },
-          { label: "Créneaux", value: data.planning.length, icon: CalendarDays, color: "from-indigo-400 to-violet-500", bg: "bg-indigo-50", text: "text-indigo-700", href: "/planning" },
-          { label: "Demandes", value: stats.total, icon: ClipboardList, color: "from-sky-400 to-blue-500", bg: "bg-sky-50", text: "text-sky-700", href: "/requests" },
+          { label: "Créneaux", value: data.planning.length, icon: CalendarDays, color: "from-blue-400 to-blue-500", bg: "bg-blue-50", text: "text-blue-700", href: "/planning" },
+          { label: "Demandes", value: stats.total, icon: ClipboardList, color: "from-blue-400 to-blue-500", bg: "bg-blue-50", text: "text-blue-700", href: "/requests" },
         ].map(({ label, value, icon: Icon, color, bg, text, href }) => (
           <Link key={label} href={href} className={`group rounded-2xl ${bg} p-5 transition hover:-translate-y-0.5 hover:shadow-md`}>
             <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${color} shadow-md`}>
               <Icon size={18} className="text-white" />
             </div>
-            <p className={`text-3xl font-black ${text}`}>{value}</p>
+            <p className={`text-3xl font-bold ${text}`}>{value}</p>
             <p className="mt-0.5 text-xs font-semibold text-slate-500">{label}</p>
           </Link>
         ))}
@@ -148,10 +148,10 @@ export default function DashboardPage() {
             <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
               <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/60 px-5 py-4">
                 <h3 className="flex items-center gap-2 text-sm font-bold text-slate-700">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-100"><CalendarDays size={14} className="text-indigo-600" /></div>
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-100"><CalendarDays size={14} className="text-blue-600" /></div>
                   Mon planning à venir
                 </h3>
-                <Link href="/planning" className="flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-700 transition">
+                <Link href="/planning" className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 transition">
                   Tout voir <ArrowRight size={12} />
                 </Link>
               </div>
@@ -167,11 +167,11 @@ export default function DashboardPage() {
                 <div className="divide-y divide-slate-100">
                   {stats.upcomingShifts.map(slot => (
                     <div key={slot.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50/60 transition-colors">
-                      <div className="flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-xl bg-indigo-50 text-center">
-                        <span className="text-xs font-black text-indigo-700 leading-none">
+                      <div className="flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-xl bg-blue-50 text-center">
+                        <span className="text-xs font-bold text-blue-700 leading-none">
                           {new Date(slot.date).getDate()}
                         </span>
-                        <span className="text-[9px] font-bold uppercase text-indigo-400">
+                        <span className="text-[9px] font-bold uppercase text-blue-400">
                           {new Date(slot.date).toLocaleDateString("fr-FR", { month: "short" })}
                         </span>
                       </div>
@@ -180,7 +180,7 @@ export default function DashboardPage() {
                         <p className="text-xs text-slate-400 mt-0.5">{fmtDate(slot.date)}</p>
                       </div>
                       {slot.note && (
-                        <span className="shrink-0 rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-600">{slot.note}</span>
+                        <span className="shrink-0 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-600">{slot.note}</span>
                       )}
                     </div>
                   ))}
@@ -193,8 +193,8 @@ export default function DashboardPage() {
           {isAdmin && (
             <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
               <div className="flex items-center gap-2.5 border-b border-slate-100 bg-slate-50/60 px-5 py-4">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-100">
-                  <TrendingUp size={14} className="text-indigo-600" />
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-100">
+                  <TrendingUp size={14} className="text-blue-600" />
                 </div>
                 <h3 className="text-sm font-bold text-slate-700">Activité de l&apos;organisation</h3>
               </div>
@@ -202,10 +202,10 @@ export default function DashboardPage() {
                 <div className="grid grid-cols-2 gap-4">
                   {[
                     { label: "Employés actifs", value: stats.activeEmployees, color: "text-emerald-600", bg: "from-emerald-50 to-teal-50", border: "border-emerald-100" },
-                    { label: "Demandes totales", value: stats.total, color: "text-indigo-600", bg: "from-indigo-50 to-violet-50", border: "border-indigo-100" },
+                    { label: "Demandes totales", value: stats.total, color: "text-blue-600", bg: "from-blue-50 to-blue-50", border: "border-blue-100" },
                   ].map(({ label, value, color, bg, border }) => (
                     <div key={label} className={`rounded-2xl border ${border} bg-gradient-to-br ${bg} p-5 text-center`}>
-                      <p className={`text-4xl font-black ${color}`}>{value}</p>
+                      <p className={`text-4xl font-bold ${color}`}>{value}</p>
                       <p className="text-xs font-medium text-slate-500 mt-1">{label}</p>
                     </div>
                   ))}
@@ -247,7 +247,7 @@ export default function DashboardPage() {
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-50"><Bell size={14} className="text-rose-500" /></div>
                 Demandes récentes
               </h3>
-              <Link href="/requests" className="flex items-center gap-1 text-xs font-bold text-indigo-600 hover:text-indigo-700 transition">
+              <Link href="/requests" className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 transition">
                 Voir tout <ArrowRight size={12} />
               </Link>
             </div>
@@ -279,22 +279,22 @@ export default function DashboardPage() {
           {/* Quick message */}
           <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
             <div className="flex items-center gap-2.5 border-b border-slate-100 bg-slate-50/60 px-5 py-4">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-50">
-                <Send size={14} className="text-sky-500" />
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50">
+                <Send size={14} className="text-blue-500" />
               </div>
               <h3 className="text-sm font-bold text-slate-700">Message rapide</h3>
             </div>
             <div className="p-4 space-y-2.5">
               <input
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/15 transition-all"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:bg-white focus:border-blue-300 focus:ring-2 focus:ring-blue-500/15 transition-all"
                 placeholder="Destinataire..."
               />
               <textarea
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/15 resize-none transition-all"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:bg-white focus:border-blue-300 focus:ring-2 focus:ring-blue-500/15 resize-none transition-all"
                 placeholder="Votre message..."
                 rows={3}
               />
-              <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-2.5 text-sm font-bold text-white transition hover:bg-indigo-600">
+              <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-2.5 text-sm font-bold text-white transition hover:bg-blue-600">
                 <Send size={13} /> Envoyer
               </button>
             </div>

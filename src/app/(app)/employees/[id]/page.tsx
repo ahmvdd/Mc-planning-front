@@ -57,8 +57,8 @@ export default function EmployeeProfilePage() {
   if (loading) return (
     <div className="flex min-h-[60vh] items-center justify-center">
       <div className="text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50">
-          <Loader2 className="animate-spin text-indigo-600" size={28} />
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50">
+          <Loader2 className="animate-spin text-blue-600" size={28} />
         </div>
         <p className="text-sm font-medium text-slate-500">Chargement du profil...</p>
       </div>
@@ -71,11 +71,11 @@ export default function EmployeeProfilePage() {
     <div className="space-y-8">
       {/* Back + title */}
       <div className="flex items-center gap-3">
-        <Link href="/employees" className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:border-indigo-300 hover:text-indigo-600">
+        <Link href="/employees" className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:border-blue-300 hover:text-blue-600">
           <ArrowLeft size={16} />
         </Link>
         <div>
-          <h1 className="text-xl font-black tracking-tight text-slate-900">{employee.name}</h1>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900">{employee.name}</h1>
           <p className="text-xs text-slate-400">Profil employé</p>
         </div>
         <span className={`ml-auto rounded-full px-3 py-1 text-xs font-bold ${employee.status === "active" ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
@@ -87,15 +87,15 @@ export default function EmployeeProfilePage() {
         {/* Profile card */}
         <div className="lg:col-span-1 space-y-4">
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm text-center">
-            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-100 to-indigo-200 text-3xl font-black text-indigo-600">
+            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-blue-100 text-3xl font-bold text-blue-600">
               {employee.name.charAt(0).toUpperCase()}
             </div>
-            <h2 className="text-xl font-black text-slate-900">{employee.name}</h2>
+            <h2 className="text-xl font-bold text-slate-900">{employee.name}</h2>
             <p className="mt-1.5 flex items-center justify-center gap-1.5 text-sm text-slate-500">
               <Mail size={13} /> {employee.email}
             </p>
             <div className="mt-3 flex justify-center">
-              <span className="flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-700">
+              <span className="flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
                 <Shield size={10} /> {employee.role.toUpperCase()}
               </span>
             </div>
@@ -110,7 +110,7 @@ export default function EmployeeProfilePage() {
                   <Star key={i} size={18} className={i <= score.stars ? "fill-amber-400 text-amber-400" : "text-slate-200"} />
                 ))}
               </div>
-              <p className="text-4xl font-black text-slate-900">{score.pct}%</p>
+              <p className="text-4xl font-bold text-slate-900">{score.pct}%</p>
               <p className="mt-1 text-xs text-slate-400">{score.approved} / {score.total} approuvées</p>
             </div>
           )}
@@ -118,11 +118,11 @@ export default function EmployeeProfilePage() {
           {/* Requests count */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50">
-                <ClipboardList size={15} className="text-indigo-600" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50">
+                <ClipboardList size={15} className="text-blue-600" />
               </div>
               <div>
-                <p className="text-xl font-black text-slate-900">{requests.length}</p>
+                <p className="text-xl font-bold text-slate-900">{requests.length}</p>
                 <p className="text-xs text-slate-400">Demande{requests.length !== 1 ? "s" : ""} au total</p>
               </div>
             </div>
@@ -169,9 +169,9 @@ export default function EmployeeProfilePage() {
                         <p className="rounded-xl bg-slate-50 px-4 py-3 text-sm italic text-slate-600">&quot;{req.message}&quot;</p>
                       )}
                       {req.adminMessage && (
-                        <div className="rounded-xl border border-indigo-100/60 bg-indigo-50/50 px-4 py-3">
-                          <p className="mb-1 text-[10px] font-bold uppercase text-indigo-400">Réponse admin</p>
-                          <p className="text-xs text-indigo-700">{req.adminMessage}</p>
+                        <div className="rounded-xl border border-blue-100/60 bg-blue-50/50 px-4 py-3">
+                          <p className="mb-1 text-[10px] font-bold uppercase text-blue-400">Réponse admin</p>
+                          <p className="text-xs text-blue-700">{req.adminMessage}</p>
                         </div>
                       )}
                     </div>

@@ -60,7 +60,7 @@ export default function Navbar() {
   };
 
   const linkClass =
-    "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900";
+    "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900";
 
   const mobileLinkClass =
     "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-900";
@@ -82,7 +82,7 @@ export default function Navbar() {
       <button
         type="button"
         onClick={handleLogout}
-        className="flex items-center gap-1.5 rounded-full bg-slate-900 px-4 py-1.5 text-sm font-semibold text-white shadow-md shadow-slate-900/20 transition hover:bg-slate-700"
+        className="flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-1.5 text-sm font-semibold text-white shadow-md shadow-gray-900/10 transition hover:bg-slate-700"
       >
         <LogOut size={14} /> Déconnexion
       </button>
@@ -92,7 +92,7 @@ export default function Navbar() {
       <Link className={linkClass} href="/"><Home size={14} /> Accueil</Link>
       <Link className={linkClass} href="/signup"><UserPlus size={14} /> Inscription</Link>
       <Link
-        className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-sky-500 px-4 py-1.5 text-sm font-semibold text-white shadow-md shadow-indigo-500/20"
+        className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-semibold text-white shadow-md shadow-gray-200"
         href="/login"
       >
         <LogIn size={14} /> Connexion
@@ -125,7 +125,7 @@ export default function Navbar() {
       <Link className={mobileLinkClass} href="/" onClick={close}><Home size={18} /> Accueil</Link>
       <Link className={mobileLinkClass} href="/signup" onClick={close}><UserPlus size={18} /> Inscription</Link>
       <Link
-        className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-sky-500 px-4 py-3 text-sm font-semibold text-white"
+        className="flex items-center gap-3 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white"
         href="/login"
         onClick={close}
       >
@@ -159,7 +159,7 @@ export default function Navbar() {
             className="fixed inset-0 z-40 bg-black/10 md:hidden"
             onClick={close}
           />
-          <nav className="absolute right-0 top-12 z-50 w-64 rounded-3xl border border-slate-200 bg-white p-3 shadow-2xl shadow-slate-900/10 space-y-1 md:hidden">
+          <nav className="absolute right-0 top-12 z-50 w-64 rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl shadow-gray-900/10 space-y-1 md:hidden">
             {mobileLinks}
           </nav>
         </>

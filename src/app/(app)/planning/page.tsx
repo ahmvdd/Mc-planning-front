@@ -411,7 +411,7 @@ export default function PlanningPage() {
   if (loading) return (
     <div className="flex min-h-[60vh] items-center justify-center">
       <div className="text-center space-y-3">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-200">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-600 shadow-lg shadow-gray-200">
           <Loader2 className="animate-spin text-white" size={28} />
         </div>
         <p className="text-sm font-medium text-slate-500">Chargement du planning...</p>
@@ -424,13 +424,13 @@ export default function PlanningPage() {
       {/* Page header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900">Gestion du Planning</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Gestion du Planning</h1>
           <p className="text-sm text-slate-500">Organisation et suivi des effectifs</p>
         </div>
         {isAdmin && (
           <button
             onClick={() => setShowPeriodForm(!showPeriodForm)}
-            className="flex items-center gap-2 rounded-full bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-200 transition hover:bg-indigo-700 active:scale-95"
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-gray-200 transition hover:bg-blue-700 active:scale-95"
           >
             <Plus size={16} /> Nouvelle période
           </button>
@@ -453,7 +453,7 @@ export default function PlanningPage() {
                     <div key={idx}>
                       {/* Séparateur semaine */}
                       <div className="flex items-center gap-3 mb-3">
-                        <span className="text-xs font-extrabold uppercase tracking-widest text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">
+                        <span className="text-xs font-extrabold uppercase tracking-widest text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
                           Semaine {idx + 1}
                         </span>
                         <div className="flex-1 h-px bg-slate-200" />
@@ -490,8 +490,8 @@ export default function PlanningPage() {
                               const contextStart = Math.max(1, myRowIdx - 2);
                               const previewRows = [slot.rows[0], ...slot.rows.slice(contextStart, myRowIdx + 1)];
                               return (
-                                <div className="px-4 pt-4 pb-3 border-b border-slate-100 bg-indigo-50/40">
-                                  <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-500 mb-2 flex items-center gap-1.5">
+                                <div className="px-4 pt-4 pb-3 border-b border-slate-100 bg-blue-50/40">
+                                  <p className="text-[10px] font-bold uppercase tracking-wider text-blue-500 mb-2 flex items-center gap-1.5">
                                     <User size={11} /> Mon planning
                                   </p>
                                   <div className="overflow-x-auto">
@@ -499,12 +499,12 @@ export default function PlanningPage() {
                                       {previewRows.map((row, ri) => {
                                         const isMyRow = ri > 0 && row.some(cell => cell.toLowerCase().includes(myName));
                                         return (
-                                          <tr key={ri} className={ri === 0 ? 'font-bold text-slate-500' : isMyRow ? 'bg-indigo-100 font-semibold rounded' : 'text-slate-500'}>
+                                          <tr key={ri} className={ri === 0 ? 'font-bold text-slate-500' : isMyRow ? 'bg-blue-100 font-semibold rounded' : 'text-slate-500'}>
                                             {row.map((cell, ci) => (
-                                              <td key={ci} className={`px-3 py-1.5 whitespace-nowrap ${isMyRow ? 'text-indigo-700' : ''}`}>
+                                              <td key={ci} className={`px-3 py-1.5 whitespace-nowrap ${isMyRow ? 'text-blue-700' : ''}`}>
                                                 {cell}
                                                 {isMyRow && ci === 0 && (
-                                                  <span className="ml-1.5 inline-block rounded-full bg-indigo-600 px-1.5 py-0.5 text-[9px] font-bold text-white">Vous</span>
+                                                  <span className="ml-1.5 inline-block rounded-full bg-blue-600 px-1.5 py-0.5 text-[9px] font-bold text-white">Vous</span>
                                                 )}
                                               </td>
                                             ))}
@@ -525,14 +525,14 @@ export default function PlanningPage() {
                                       ri === 0
                                         ? 'bg-slate-50 font-bold'
                                         : isMe
-                                          ? 'bg-indigo-50 border-t border-indigo-100 font-semibold'
+                                          ? 'bg-blue-50 border-t border-blue-100 font-semibold'
                                           : 'border-t border-slate-100 hover:bg-slate-50/50'
                                     }>
                                       {row.map((cell, ci) => (
-                                        <td key={ci} className={`px-3 py-2 whitespace-nowrap ${isMe ? 'text-indigo-700' : 'text-slate-700'}`}>
+                                        <td key={ci} className={`px-3 py-2 whitespace-nowrap ${isMe ? 'text-blue-700' : 'text-slate-700'}`}>
                                           {cell}
                                           {isMe && ci === 0 && (
-                                            <span className="ml-2 inline-block rounded-full bg-indigo-600 px-1.5 py-0.5 text-[9px] font-bold text-white uppercase tracking-wide">Vous</span>
+                                            <span className="ml-2 inline-block rounded-full bg-blue-600 px-1.5 py-0.5 text-[9px] font-bold text-white uppercase tracking-wide">Vous</span>
                                           )}
                                         </td>
                                       ))}
@@ -544,7 +544,7 @@ export default function PlanningPage() {
                           </div>
                         )
                       ) : isAdmin ? (
-                        <label className="flex cursor-pointer items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-slate-200 bg-white py-10 transition-all hover:border-indigo-300 hover:bg-indigo-50/30">
+                        <label className="flex cursor-pointer items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-slate-200 bg-white py-10 transition-all hover:border-blue-300 hover:bg-blue-50/30">
                           <Upload size={20} className="text-slate-300" />
                           <span className="text-sm font-medium text-slate-400">Déposer une image ou un fichier Excel</span>
                           <input type="file" className="hidden" accept="image/*,.xlsx,.xls,.csv" onChange={e => handleSlotUpload(e, (idx + 1) as 1 | 2)} />
@@ -577,20 +577,20 @@ export default function PlanningPage() {
                 ) : (
                   <div className="space-y-3">
                     {periods.map(period => (
-                      <div key={period.id} className="group rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:border-indigo-200 hover:shadow-md overflow-hidden">
+                      <div key={period.id} className="group rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:border-blue-200 hover:shadow-md overflow-hidden">
                         <div
                           className="flex cursor-pointer items-center justify-between p-4 sm:p-5"
                           onClick={() => toggleExpand(period.id)}
                         >
                           <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                            <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors ${expandedIds.has(period.id) ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200' : 'bg-slate-100 text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-600'}`}>
+                            <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors ${expandedIds.has(period.id) ? 'bg-blue-600 text-white shadow-md shadow-gray-200' : 'bg-slate-100 text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600'}`}>
                               <Calendar size={18} />
                             </div>
                             <div className="min-w-0">
                               <h2 className="font-bold text-slate-900 truncate">{period.name}</h2>
                               <div className="flex flex-wrap items-center gap-2 mt-0.5">
                                 <span className="text-xs text-slate-400">{fmtDate(period.startDate)} — {fmtDate(period.endDate)}</span>
-                                <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-600">{period.entries.length} créneaux</span>
+                                <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-600">{period.entries.length} créneaux</span>
                               </div>
                             </div>
                           </div>
@@ -610,7 +610,7 @@ export default function PlanningPage() {
                                 </button>
                               )
                             )}
-                            <div className={`rounded-lg p-1.5 transition-transform ${expandedIds.has(period.id) ? 'rotate-180 text-indigo-600' : 'text-slate-300'}`}>
+                            <div className={`rounded-lg p-1.5 transition-transform ${expandedIds.has(period.id) ? 'rotate-180 text-blue-600' : 'text-slate-300'}`}>
                               <ChevronDown size={18} />
                             </div>
                           </div>
@@ -687,35 +687,35 @@ export default function PlanningPage() {
               
               {/* Floating Period Form Overlay */}
               {showPeriodForm && (
-                <div className="rounded-2xl border-2 border-indigo-500 bg-indigo-50 p-6 shadow-xl animate-in fade-in slide-in-from-top-4">
+                <div className="rounded-2xl border-2 border-blue-500 bg-blue-50 p-6 shadow-xl animate-in fade-in slide-in-from-top-4">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-indigo-900">Nouvelle Période</h3>
-                    <button onClick={() => setShowPeriodForm(false)} className="text-indigo-400 hover:text-indigo-600"><X size={20}/></button>
+                    <h3 className="font-bold text-blue-900">Nouvelle Période</h3>
+                    <button onClick={() => setShowPeriodForm(false)} className="text-blue-400 hover:text-blue-600"><X size={20}/></button>
                   </div>
                   <form onSubmit={handleCreatePeriod} className="space-y-4">
                     <input
                       placeholder="Nom (ex: Juin Semaine 1)"
-                      className="w-full rounded-xl border-none bg-white px-4 py-3 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500"
+                      className="w-full rounded-xl border-none bg-white px-4 py-3 text-sm shadow-sm focus:ring-2 focus:ring-blue-500"
                       value={periodForm.name}
                       onChange={e => setPeriodForm({ ...periodForm, name: e.target.value })}
                       required
                     />
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-indigo-400 uppercase ml-1">Début</label>
+                        <label className="text-[10px] font-bold text-blue-400 uppercase ml-1">Début</label>
                         <input
                           type="date"
-                          className="w-full rounded-xl border-none bg-white px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500"
+                          className="w-full rounded-xl border-none bg-white px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-blue-500"
                           value={periodForm.startDate}
                           onChange={e => setPeriodForm({ ...periodForm, startDate: e.target.value })}
                           required
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-indigo-400 uppercase ml-1">Fin</label>
+                        <label className="text-[10px] font-bold text-blue-400 uppercase ml-1">Fin</label>
                         <input
                           type="date"
-                          className="w-full rounded-xl border-none bg-white px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500"
+                          className="w-full rounded-xl border-none bg-white px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-blue-500"
                           value={periodForm.endDate}
                           onChange={e => setPeriodForm({ ...periodForm, endDate: e.target.value })}
                           required
@@ -724,7 +724,7 @@ export default function PlanningPage() {
                     </div>
                     <button
                       disabled={savingPeriod}
-                      className="w-full rounded-xl bg-indigo-600 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-200 transition-all hover:bg-indigo-700 disabled:bg-slate-300"
+                      className="w-full rounded-xl bg-blue-600 py-3 text-sm font-bold text-white shadow-lg shadow-gray-200 transition-all hover:bg-blue-700 disabled:bg-slate-300"
                     >
                       {savingPeriod ? <Loader2 className="animate-spin mx-auto" size={20} /> : "Confirmer la création"}
                     </button>
@@ -735,7 +735,7 @@ export default function PlanningPage() {
               {/* Main Shift Form */}
               <div id="shift-form" className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sticky top-24">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className={`p-2 rounded-lg ${editId ? 'bg-amber-50 text-amber-600' : 'bg-indigo-50 text-indigo-600'}`}>
+                  <div className={`p-2 rounded-lg ${editId ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'}`}>
                     {editId ? <Pencil size={20} /> : <Plus size={20} />}
                   </div>
                   <h3 className="font-bold text-slate-900">{editId ? "Modifier le créneau" : "Ajouter un créneau"}</h3>
@@ -745,7 +745,7 @@ export default function PlanningPage() {
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold text-slate-400 uppercase ml-1">Période associée</label>
                     <select
-                      className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
+                      className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:bg-white focus:ring-2 focus:ring-blue-500/20"
                       value={form.planningId}
                       onChange={e => setForm({ ...form, planningId: e.target.value })}
                     >
@@ -759,7 +759,7 @@ export default function PlanningPage() {
                       <label className="text-[11px] font-bold text-slate-400 uppercase ml-1">Date</label>
                       <input
                         type="date"
-                        className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
+                        className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:bg-white focus:ring-2 focus:ring-blue-500/20"
                         value={form.date}
                         onChange={e => setForm({ ...form, date: e.target.value })}
                         required
@@ -769,7 +769,7 @@ export default function PlanningPage() {
                       <label className="text-[11px] font-bold text-slate-400 uppercase ml-1">Shift</label>
                       <input
                         placeholder="08h - 16h"
-                        className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
+                        className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:bg-white focus:ring-2 focus:ring-blue-500/20"
                         value={form.shift}
                         onChange={e => setForm({ ...form, shift: e.target.value })}
                         required
@@ -780,7 +780,7 @@ export default function PlanningPage() {
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold text-slate-400 uppercase ml-1">Assignation</label>
                     <select
-                      className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
+                      className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:bg-white focus:ring-2 focus:ring-blue-500/20"
                       value={form.employeeId}
                       onChange={e => setForm({ ...form, employeeId: e.target.value })}
                     >
@@ -794,7 +794,7 @@ export default function PlanningPage() {
                     <textarea
                       rows={2}
                       placeholder="Informations complémentaires..."
-                      className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:bg-white focus:ring-2 focus:ring-indigo-500/20 resize-none"
+                      className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-all focus:bg-white focus:ring-2 focus:ring-blue-500/20 resize-none"
                       value={form.note}
                       onChange={e => setForm({ ...form, note: e.target.value })}
                     />
@@ -826,13 +826,13 @@ export default function PlanningPage() {
                    <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <h4 className="text-[11px] font-bold text-slate-400 uppercase">Exporter</h4>
-                        <Download size={14} className="text-indigo-400" />
+                        <Download size={14} className="text-blue-400" />
                       </div>
                       <button
                         onClick={handleExportExcel}
-                        className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 transition-all hover:bg-indigo-50 hover:border-indigo-200 group"
+                        className="flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 transition-all hover:bg-blue-50 hover:border-blue-200 group"
                       >
-                        <div className="p-2 rounded-lg bg-white shadow-sm group-hover:text-indigo-600">
+                        <div className="p-2 rounded-lg bg-white shadow-sm group-hover:text-blue-600">
                           <Download size={16} />
                         </div>
                         <span className="text-xs font-semibold text-slate-600">Télécharger Excel</span>
@@ -864,13 +864,13 @@ export default function PlanningPage() {
                    <div className="space-y-3">
                       <h4 className="text-[11px] font-bold text-slate-400 uppercase">Planning visuel</h4>
                       <div className="grid grid-cols-2 gap-2">
-                         <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-slate-200 bg-slate-50 py-3 transition-all hover:bg-indigo-50 hover:border-indigo-200">
-                            {uploading1 ? <Loader2 className="animate-spin text-indigo-500" size={14}/> : <ImageIcon className="text-slate-400" size={14}/>}
+                         <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-slate-200 bg-slate-50 py-3 transition-all hover:bg-blue-50 hover:border-blue-200">
+                            {uploading1 ? <Loader2 className="animate-spin text-blue-500" size={14}/> : <ImageIcon className="text-slate-400" size={14}/>}
                             <span className="text-[10px] font-bold text-slate-500 mt-1 uppercase">S1</span>
                             <input type="file" className="hidden" accept="image/*,.xlsx,.xls,.csv" onChange={e => handleSlotUpload(e, 1)} />
                          </label>
-                         <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-slate-200 bg-slate-50 py-3 transition-all hover:bg-indigo-50 hover:border-indigo-200">
-                            {uploading2 ? <Loader2 className="animate-spin text-indigo-500" size={14}/> : <ImageIcon className="text-slate-400" size={14}/>}
+                         <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-slate-200 bg-slate-50 py-3 transition-all hover:bg-blue-50 hover:border-blue-200">
+                            {uploading2 ? <Loader2 className="animate-spin text-blue-500" size={14}/> : <ImageIcon className="text-slate-400" size={14}/>}
                             <span className="text-[10px] font-bold text-slate-500 mt-1 uppercase">S2</span>
                             <input type="file" className="hidden" accept="image/*,.xlsx,.xls,.csv" onChange={e => handleSlotUpload(e, 2)} />
                          </label>
@@ -890,19 +890,19 @@ function EntryRow({ entry, employees, isAdmin, fmtShiftDate, onEdit, onDelete, c
   const employee = employees.find((e: any) => e.id === entry.employeeId);
   
   return (
-    <tr className="group/row hover:bg-indigo-50/30 transition-colors">
+    <tr className="group/row hover:bg-blue-50/30 transition-colors">
       <td className="px-4 py-4">
         <div className="flex flex-col">
           <span className="text-sm font-bold text-slate-900">{fmtShiftDate(entry.date)}</span>
           <div className="flex items-center gap-1.5 mt-1">
-             <Clock size={12} className="text-indigo-500" />
-             <span className="text-xs font-bold text-indigo-600 uppercase tracking-tighter">{entry.shift}</span>
+             <Clock size={12} className="text-blue-500" />
+             <span className="text-xs font-bold text-blue-600 uppercase tracking-tighter">{entry.shift}</span>
           </div>
         </div>
       </td>
       <td className="px-4 py-4">
         <div className="flex items-center gap-2.5">
-          <div className={`h-8 w-8 rounded-full flex items-center justify-center text-[10px] font-bold ${employee ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-500'}`}>
+          <div className={`h-8 w-8 rounded-full flex items-center justify-center text-[10px] font-bold ${employee ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'}`}>
             {employee ? employee.name.substring(0, 2).toUpperCase() : <Users size={14} />}
           </div>
           <span className={`text-sm font-medium ${employee ? 'text-slate-700' : 'text-slate-400 italic'}`}>

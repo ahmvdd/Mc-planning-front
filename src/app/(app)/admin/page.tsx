@@ -139,8 +139,8 @@ export default function AdminPage() {
   if (loading) return (
     <div className="flex min-h-[60vh] items-center justify-center">
       <div className="text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50">
-          <Loader2 className="animate-spin text-indigo-600" size={28} />
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50">
+          <Loader2 className="animate-spin text-blue-600" size={28} />
         </div>
         <p className="text-sm font-medium text-slate-500">Chargement de l&apos;espace admin...</p>
       </div>
@@ -149,21 +149,21 @@ export default function AdminPage() {
 
   const cardClass = "rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden";
   const cardHeaderClass = "border-b border-slate-100 px-6 py-4 flex items-center gap-2.5";
-  const cardHeaderIcon = "text-indigo-500";
+  const cardHeaderIcon = "text-blue-500";
   const cardHeaderTitle = "text-sm font-bold text-slate-700";
-  const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:bg-white focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/15 transition-all";
+  const inputClass = "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none focus:bg-white focus:border-blue-300 focus:ring-2 focus:ring-blue-500/15 transition-all";
 
   return (
     <div className="space-y-8">
       {/* Page title */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900">Espace Admin</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Espace Admin</h1>
           <p className="text-sm text-slate-500">Gérez l&apos;organisation, les accès et les plannings</p>
         </div>
-        <div className="flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-2">
-          <Settings size={13} className="text-indigo-500" />
-          <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider">Administration</span>
+        <div className="flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2">
+          <Settings size={13} className="text-blue-500" />
+          <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">Administration</span>
         </div>
       </div>
 
@@ -193,7 +193,7 @@ export default function AdminPage() {
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Logo</label>
                   <div
-                    className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 py-8 transition hover:border-indigo-300 hover:bg-indigo-50/30"
+                    className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 py-8 transition hover:border-blue-300 hover:bg-blue-50/30"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     {logoPreview ? (
@@ -214,7 +214,7 @@ export default function AdminPage() {
                 <button
                   type="submit"
                   disabled={updating}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 text-sm font-bold text-white shadow-md shadow-indigo-200 hover:bg-indigo-700 disabled:opacity-60 transition-all"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-bold text-white shadow-md shadow-gray-200 hover:bg-blue-700 disabled:opacity-60 transition-all"
                 >
                   {updating ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}
                   {updating ? "Enregistrement..." : "Enregistrer"}
@@ -250,7 +250,7 @@ export default function AdminPage() {
                   )}
                   <button
                     type="submit" disabled={inviteStatus === "loading"}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-2.5 text-sm font-bold text-white hover:bg-indigo-700 transition disabled:opacity-60"
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 text-sm font-bold text-white hover:bg-blue-700 transition disabled:opacity-60"
                   >
                     <Send size={13} />
                     {inviteStatus === "loading" ? "Envoi..." : "Envoyer l'invitation"}
@@ -347,7 +347,7 @@ export default function AdminPage() {
                 <form className="space-y-3" onSubmit={e => e.preventDefault()}>
                   <input className={inputClass} placeholder="Email de l'employé" type="email" />
                   <input className={inputClass} placeholder="Nouveau mot de passe" type="password" />
-                  <button className="w-full rounded-xl bg-slate-900 py-2.5 text-sm font-bold text-white hover:bg-indigo-600 transition-colors">
+                  <button className="w-full rounded-xl bg-slate-900 py-2.5 text-sm font-bold text-white hover:bg-blue-600 transition-colors">
                     Mettre à jour
                   </button>
                 </form>
@@ -365,7 +365,7 @@ export default function AdminPage() {
                 <form className="space-y-3" onSubmit={e => e.preventDefault()}>
                   <input className={inputClass} type="date" />
                   <textarea className={`${inputClass} resize-none`} placeholder="Message aux équipes" rows={2} />
-                  <button className="w-full rounded-xl bg-slate-900 py-2.5 text-sm font-bold text-white hover:bg-indigo-600 transition-colors">
+                  <button className="w-full rounded-xl bg-slate-900 py-2.5 text-sm font-bold text-white hover:bg-blue-600 transition-colors">
                     Publier
                   </button>
                 </form>

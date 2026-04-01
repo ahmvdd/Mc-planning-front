@@ -56,7 +56,7 @@ export default function InvitationPage() {
 
   if (validating) return (
     <div className="min-h-[60vh] flex items-center justify-center">
-      <Loader2 className="animate-spin text-indigo-500" size={36} />
+      <Loader2 className="animate-spin text-blue-500" size={36} />
     </div>
   );
 
@@ -90,19 +90,19 @@ export default function InvitationPage() {
       <div className="w-full max-w-lg space-y-8">
 
         <div className="text-center space-y-2">
-          <div className="mx-auto w-16 h-16 bg-slate-900 rounded-3xl flex items-center justify-center shadow-xl shadow-slate-900/20">
+          <div className="mx-auto w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center shadow-xl shadow-gray-900/10">
             <User size={30} className="text-white" />
           </div>
           <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Créer votre compte</h1>
           <p className="text-slate-500 text-sm">
-            Invitation pour <span className="font-bold text-indigo-600">{info?.email}</span>
+            Invitation pour <span className="font-bold text-blue-600">{info?.email}</span>
             {" "}— {info?.organizationName}
           </p>
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="rounded-[2.5rem] border border-slate-200/60 bg-white p-8 shadow-2xl shadow-indigo-500/5 space-y-5"
+          className="rounded-[2.5rem] border border-slate-200/60 bg-white p-8 shadow-2xl shadow-gray-200 space-y-5"
         >
           <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-500">
             <span className="font-semibold text-slate-700">Email :</span> {info?.email}
@@ -111,7 +111,7 @@ export default function InvitationPage() {
           <div className="relative">
             <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 pl-11 pr-4 py-3.5 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/20 transition-all"
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 pl-11 pr-4 py-3.5 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all"
               placeholder="Votre nom complet"
               required
               value={name}
@@ -123,7 +123,7 @@ export default function InvitationPage() {
             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input
               type="password"
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 pl-11 pr-4 py-3.5 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/20 transition-all"
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 pl-11 pr-4 py-3.5 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all"
               placeholder="Choisir un mot de passe"
               required
               minLength={6}
@@ -141,7 +141,7 @@ export default function InvitationPage() {
           <button
             type="submit"
             disabled={status === "loading"}
-            className="w-full flex items-center justify-center gap-2 rounded-2xl bg-slate-900 py-4 text-sm font-bold text-white shadow-xl hover:bg-indigo-600 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:hover:translate-y-0"
+            className="w-full flex items-center justify-center gap-2 rounded-2xl bg-slate-900 py-4 text-sm font-bold text-white shadow-xl hover:bg-blue-600 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:hover:translate-y-0"
           >
             {status === "loading"
               ? <><Loader2 className="animate-spin" size={18} /> Création...</>

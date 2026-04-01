@@ -20,22 +20,22 @@ const fadeShow = (delay = 0) => ({
 const FEATURES = [
   {
     icon: Calendar,
-    color: "bg-indigo-500",
-    light: "bg-indigo-50 text-indigo-600",
+    color: "bg-blue-500",
+    light: "bg-blue-50 text-blue-600",
     title: "Planning intelligent",
     desc: "Construisez des plannings en quelques clics. Visualisez les disponibilités, gérez les conflits et exportez en Excel instantanément.",
   },
   {
     icon: ClipboardCheck,
-    color: "bg-violet-500",
-    light: "bg-violet-50 text-violet-600",
+    color: "bg-blue-600",
+    light: "bg-blue-50 text-blue-600",
     title: "Demandes & congés",
     desc: "Vos employés soumettent leurs demandes directement depuis l'app. Validez ou refusez en un clic, avec historique complet.",
   },
   {
     icon: Users,
-    color: "bg-sky-500",
-    light: "bg-sky-50 text-sky-600",
+    color: "bg-blue-500",
+    light: "bg-blue-50 text-blue-600",
     title: "Gestion d'équipe",
     desc: "Onboardez vos collaborateurs par invitation email. Gérez les rôles, profils et accès depuis un tableau de bord centralisé.",
   },
@@ -80,14 +80,14 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 overflow-x-hidden font-sans selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-white text-slate-900 overflow-x-hidden font-sans selection:bg-blue-500 selection:text-white">
 
       {/* ── NAV ── */}
       <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-100 bg-white/90 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-black text-white shadow-md shadow-indigo-200">S</div>
-            <span className="text-lg font-black tracking-tighter text-slate-900">Shiftly</span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white shadow-md shadow-gray-200">S</div>
+            <span className="text-lg font-bold tracking-tighter text-slate-900">Shiftly</span>
           </div>
 
           <nav className="hidden items-center gap-7 md:flex">
@@ -106,7 +106,7 @@ export default function Home() {
             )}
             <Link
               href={me ? "/dashboard" : "/signup"}
-              className="flex items-center gap-1.5 rounded-full bg-indigo-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-indigo-200 transition hover:bg-indigo-700 active:scale-95"
+              className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-5 py-2 text-sm font-bold text-white shadow-md shadow-gray-200 transition hover:bg-blue-700 active:scale-95"
             >
               {me ? "Dashboard" : "Essai gratuit"} <ChevronRight size={14} />
             </Link>
@@ -129,7 +129,7 @@ export default function Home() {
               <a href="#pricing" className="font-semibold text-slate-700" onClick={() => setMobileOpen(false)}>Tarifs</a>
               <div className="mt-2 flex flex-col gap-3 border-t border-slate-100 pt-4">
                 {!me && <Link href="/login" className="font-bold text-slate-800" onClick={() => setMobileOpen(false)}>Connexion</Link>}
-                <Link href={me ? "/dashboard" : "/signup"} className="rounded-xl bg-indigo-600 py-3 text-center font-bold text-white" onClick={() => setMobileOpen(false)}>
+                <Link href={me ? "/dashboard" : "/signup"} className="rounded-xl bg-blue-600 py-3 text-center font-bold text-white" onClick={() => setMobileOpen(false)}>
                   {me ? "Mon Dashboard" : "Commencer gratuitement"}
                 </Link>
               </div>
@@ -142,18 +142,18 @@ export default function Home() {
       <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-5 pb-20 pt-32 sm:px-8">
         {/* bg gradient blobs */}
         <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[600px] w-[900px] rounded-full bg-indigo-500/10 blur-[120px]" />
-          <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-violet-400/10 blur-[100px]" />
+          <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[600px] w-[900px] rounded-full bg-blue-500/10 blur-[120px]" />
+          <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-blue-400/10 blur-[100px]" />
         </div>
 
         <div className="mx-auto max-w-4xl text-center">
-          <motion.div initial={fadeHidden} animate={fadeShow(0)} className="mb-7 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-indigo-600">
-            <Star size={11} className="fill-indigo-500 text-indigo-500" /> Nouveau — Scheduling v2.0 disponible
+          <motion.div initial={fadeHidden} animate={fadeShow(0)} className="mb-7 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-blue-600">
+            <Star size={11} className="fill-blue-500 text-blue-500" /> Nouveau — Scheduling v2.0 disponible
           </motion.div>
 
-          <motion.h1 initial={fadeHidden} animate={fadeShow(0.08)} className="mb-6 text-5xl font-black leading-[1.05] tracking-tight text-slate-900 sm:text-6xl md:text-7xl lg:text-[80px]">
+          <motion.h1 initial={fadeHidden} animate={fadeShow(0.08)} className="mb-6 text-5xl font-bold leading-[1.05] tracking-tight text-slate-900 sm:text-6xl md:text-7xl lg:text-[80px]">
             Gérez vos équipes<br />
-            <span className="bg-gradient-to-r from-indigo-600 via-violet-500 to-sky-500 bg-clip-text text-transparent">
+            <span className="text-blue-600">
               sans friction.
             </span>
           </motion.h1>
@@ -165,7 +165,7 @@ export default function Home() {
           <motion.div initial={fadeHidden} animate={fadeShow(0.24)} className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
               href="/signup"
-              className="group flex items-center gap-2.5 rounded-2xl bg-indigo-600 px-8 py-4 text-base font-bold text-white shadow-xl shadow-indigo-200 transition hover:bg-indigo-700 active:scale-95"
+              className="group flex items-center gap-2.5 rounded-2xl bg-blue-600 px-8 py-4 text-base font-bold text-white shadow-xl shadow-gray-200 transition hover:bg-blue-700 active:scale-95"
             >
               Démarrer gratuitement
               <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
@@ -191,7 +191,7 @@ export default function Home() {
           transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
           className="relative mx-auto mt-20 w-full max-w-5xl"
         >
-          <div className="rounded-[28px] border border-slate-200 bg-white p-2 shadow-[0_30px_100px_-20px_rgba(79,70,229,0.25)]">
+          <div className="rounded-[28px] border border-slate-200 bg-white p-2 shadow-[0_30px_100px_-20px_rgba(0,0,0,0.1)]">
             {/* browser bar */}
             <div className="mb-2 flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-2.5">
               <div className="flex gap-1.5">
@@ -209,29 +209,29 @@ export default function Home() {
               {/* top bar */}
               <div className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-7 w-7 rounded-lg bg-indigo-600 text-white text-xs font-black flex items-center justify-center">S</div>
+                  <div className="h-7 w-7 rounded-lg bg-blue-600 text-white text-xs font-bold flex items-center justify-center">S</div>
                   <span className="text-sm font-bold text-slate-800">Shiftly</span>
                 </div>
                 <div className="hidden sm:flex items-center gap-6 text-xs font-semibold text-slate-400">
-                  <span className="text-indigo-600">Planning</span>
+                  <span className="text-blue-600">Planning</span>
                   <span>Demandes</span>
                   <span>Employés</span>
                   <span>Admin</span>
                 </div>
-                <div className="h-7 w-7 rounded-full bg-indigo-100 text-indigo-600 text-xs font-bold flex items-center justify-center">A</div>
+                <div className="h-7 w-7 rounded-full bg-blue-100 text-blue-600 text-xs font-bold flex items-center justify-center">A</div>
               </div>
 
               {/* content */}
               <div className="grid grid-cols-1 gap-4 p-6 sm:grid-cols-3">
                 {/* stat cards */}
                 {[
-                  { label: "Employés actifs", val: "24", color: "text-indigo-600", bg: "bg-indigo-50" },
+                  { label: "Employés actifs", val: "24", color: "text-blue-600", bg: "bg-blue-50" },
                   { label: "Demandes en attente", val: "3", color: "text-amber-600", bg: "bg-amber-50" },
                   { label: "Jours planifiés", val: "180", color: "text-emerald-600", bg: "bg-emerald-50" },
                 ].map((s) => (
                   <div key={s.label} className={`rounded-xl ${s.bg} px-5 py-4`}>
                     <p className="mb-1 text-xs font-semibold text-slate-500">{s.label}</p>
-                    <p className={`text-3xl font-black ${s.color}`}>{s.val}</p>
+                    <p className={`text-3xl font-bold ${s.color}`}>{s.val}</p>
                   </div>
                 ))}
 
@@ -239,7 +239,7 @@ export default function Home() {
                 <div className="sm:col-span-3 rounded-xl border border-slate-200 bg-white overflow-hidden">
                   <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
                     <span className="text-sm font-bold text-slate-800">Planning — Semaine 14</span>
-                    <span className="rounded-full bg-indigo-50 px-3 py-0.5 text-xs font-bold text-indigo-600">Mars 2026</span>
+                    <span className="rounded-full bg-blue-50 px-3 py-0.5 text-xs font-bold text-blue-600">Mars 2026</span>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs">
@@ -257,14 +257,14 @@ export default function Home() {
                           { name: "Bob D.", shifts: ["S", "—", "S", "M", "S"], me: true },
                           { name: "Clara P.", shifts: ["M", "S", "M", "—", "M"] },
                         ].map((row) => (
-                          <tr key={row.name} className={row.me ? "bg-indigo-50" : "border-t border-slate-50 hover:bg-slate-50"}>
+                          <tr key={row.name} className={row.me ? "bg-blue-50" : "border-t border-slate-50 hover:bg-slate-50"}>
                             <td className="py-2.5 pl-5 pr-4 font-semibold text-slate-700 whitespace-nowrap">
                               {row.name}
-                              {row.me && <span className="ml-2 rounded-full bg-indigo-200 px-2 py-0.5 text-[10px] font-bold text-indigo-700">Vous</span>}
+                              {row.me && <span className="ml-2 rounded-full bg-blue-200 px-2 py-0.5 text-[10px] font-bold text-blue-700">Vous</span>}
                             </td>
                             {row.shifts.map((s, i) => (
                               <td key={i} className="px-3 py-2.5 text-center">
-                                <span className={`inline-block rounded-md px-2 py-0.5 font-bold ${s === "M" ? "bg-sky-100 text-sky-700" : s === "S" ? "bg-violet-100 text-violet-700" : "text-slate-300"}`}>
+                                <span className={`inline-block rounded-md px-2 py-0.5 font-bold ${s === "M" ? "bg-blue-100 text-blue-700" : s === "S" ? "bg-blue-100 text-blue-700" : "text-slate-300"}`}>
                                   {s}
                                 </span>
                               </td>
@@ -293,7 +293,7 @@ export default function Home() {
             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
             className="absolute -left-4 bottom-1/4 hidden rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-xl sm:block"
           >
-            <p className="text-xs font-bold text-indigo-600">✓ Planning validé</p>
+            <p className="text-xs font-bold text-blue-600">✓ Planning validé</p>
             <p className="text-[11px] text-slate-500 font-medium">il y a 2 min</p>
           </motion.div>
         </motion.div>
@@ -305,7 +305,7 @@ export default function Home() {
           <p className="mb-8 text-center text-xs font-bold uppercase tracking-widest text-slate-400">Ils utilisent Shiftly au quotidien</p>
           <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6">
             {["Hôtel Riviera", "Clinic Pro", "RestauGroup", "LogiTeam", "SportZen"].map((name) => (
-              <span key={name} className="text-sm font-black text-slate-300 tracking-tight">{name.toUpperCase()}</span>
+              <span key={name} className="text-sm font-bold text-slate-300 tracking-tight">{name.toUpperCase()}</span>
             ))}
           </div>
         </div>
@@ -316,13 +316,13 @@ export default function Home() {
         <div className="mb-16 text-center">
           <motion.p
             initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-            className="mb-3 text-xs font-bold uppercase tracking-widest text-indigo-500"
+            className="mb-3 text-xs font-bold uppercase tracking-widest text-blue-500"
           >
             Fonctionnalités
           </motion.p>
           <motion.h2
             initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.05 }}
-            className="mb-5 text-4xl font-black tracking-tight text-slate-900 sm:text-5xl"
+            className="mb-5 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl"
           >
             Tout ce dont vous avez besoin.
           </motion.h2>
@@ -358,8 +358,8 @@ export default function Home() {
       <section id="how" className="bg-slate-950 py-24 sm:py-32">
         <div className="mx-auto max-w-5xl px-5 sm:px-8">
           <div className="mb-16 text-center">
-            <p className="mb-3 text-xs font-bold uppercase tracking-widest text-indigo-400">Comment ça marche</p>
-            <h2 className="text-4xl font-black tracking-tight text-white sm:text-5xl">Opérationnel en 3 étapes.</h2>
+            <p className="mb-3 text-xs font-bold uppercase tracking-widest text-blue-400">Comment ça marche</p>
+            <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">Opérationnel en 3 étapes.</h2>
           </div>
 
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
@@ -372,7 +372,7 @@ export default function Home() {
                 transition={{ delay: i * 0.1 }}
                 className="relative rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur"
               >
-                <span className="mb-6 block text-5xl font-black text-white/10">{s.n}</span>
+                <span className="mb-6 block text-5xl font-bold text-white/10">{s.n}</span>
                 <h3 className="mb-3 text-xl font-bold text-white">{s.title}</h3>
                 <p className="text-sm leading-relaxed text-slate-400">{s.desc}</p>
                 {i < STEPS.length - 1 && (
@@ -403,7 +403,7 @@ export default function Home() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.4 }}
               >
-                <p className="text-4xl font-black text-indigo-600 sm:text-5xl">{s.val}</p>
+                <p className="text-4xl font-bold text-blue-600 sm:text-5xl">{s.val}</p>
                 <p className="mt-1.5 text-sm font-medium text-slate-400">{s.label}</p>
               </motion.div>
             ))}
@@ -418,24 +418,24 @@ export default function Home() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="relative overflow-hidden rounded-[36px] bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-600 px-10 py-20 text-center shadow-2xl shadow-indigo-200 sm:px-16"
+          className="relative overflow-hidden rounded-2xl bg-blue-600 px-10 py-20 text-center shadow-2xl shadow-gray-200 sm:px-16"
         >
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute right-0 top-0 h-80 w-80 -translate-y-1/2 translate-x-1/2 rounded-full bg-white/10 blur-[80px]" />
-            <div className="absolute bottom-0 left-0 h-80 w-80 -translate-x-1/2 translate-y-1/2 rounded-full bg-violet-400/20 blur-[80px]" />
+            <div className="absolute bottom-0 left-0 h-80 w-80 -translate-x-1/2 translate-y-1/2 rounded-full bg-blue-400/20 blur-[80px]" />
           </div>
 
           <div className="relative z-10 mx-auto max-w-2xl">
-            <h2 className="mb-5 text-4xl font-black leading-tight tracking-tight text-white sm:text-5xl">
+            <h2 className="mb-5 text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl">
               Prêt à simplifier la gestion de votre équipe ?
             </h2>
-            <p className="mb-10 text-lg text-indigo-100">
+            <p className="mb-10 text-lg text-blue-100">
               Rejoignez Shiftly dès aujourd'hui. Gratuit, sans carte bancaire, opérationnel en moins de 2 minutes.
             </p>
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
               <Link
                 href="/signup"
-                className="group flex items-center gap-2.5 rounded-2xl bg-white px-9 py-4 text-base font-bold text-indigo-600 shadow-lg transition hover:bg-indigo-50 active:scale-95"
+                className="group flex items-center gap-2.5 rounded-2xl bg-white px-9 py-4 text-base font-bold text-blue-600 shadow-lg transition hover:bg-blue-50 active:scale-95"
               >
                 Commencer gratuitement
                 <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
@@ -454,8 +454,8 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
             <div className="col-span-2 md:col-span-2">
               <div className="mb-4 flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-black text-white">S</div>
-                <span className="text-lg font-black tracking-tighter text-slate-900">Shiftly</span>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white">S</div>
+                <span className="text-lg font-bold tracking-tighter text-slate-900">Shiftly</span>
               </div>
               <p className="max-w-xs text-sm leading-relaxed text-slate-400">
                 La plateforme de gestion d'équipe nouvelle génération. Conçue pour les entreprises qui bougent vite.
