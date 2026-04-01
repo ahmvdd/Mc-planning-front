@@ -1,37 +1,34 @@
-# 🚀 Mon Projet Next.js
+# 🚀 Shiftly — Management de Planning d'Équipe
 
-Une application web moderne, performante et scalable construite avec le **App Router** de Next.js.
+**Shiftly** est une solution SaaS moderne de gestion de planning et de ressources humaines. Conçue pour simplifier la coordination des équipes, l'application permet aux administrateurs de gérer des organisations, d'inviter des collaborateurs et de piloter les plannings en temps réel.
+
+> 🛠️ **Statut du projet :** En cours de développement actif.  
+> 👤 **Auteur :** [Sayeh Ahmed](https://www.sayehahmed.com)  
+> 🌐 **Live Demo :** [shiftly.site](https://shiftly.site)
 
 ---
 
-## 📋 Présentation
-Ce projet est une application web optimisée utilisant les dernières fonctionnalités de React et Next.js. L'objectif est d'offrir une expérience utilisateur fluide tout en garantissant une maintenance aisée grâce à TypeScript.
+## 🛠️ Stack Technique
 
-### 🛠️ Stack Technique
-| Technologie | Usage |
+Shiftly repose sur une architecture découplée (Monorepo-style) pour une performance maximale.
+
+| Couche | Technologie |
 | :--- | :--- |
-| **Next.js 15** | Framework React (App Router) |
-| **TypeScript** | Typage statique sécurisé |
-| **Tailwind CSS** | Design responsive et moderne |
-| **Geist Font** | Optimisation de la typographie |
-| **Vercel** | Hébergement et CI/CD |
+| **Frontend** | Next.js 15 (App Router), Tailwind CSS v4, Framer Motion |
+| **Backend** | NestJS 11 (Node.js framework) |
+| **Base de données** | PostgreSQL via [Neon.tech](https://neon.tech) |
+| **ORM** | Prisma 6 |
+| **Authentification** | JWT (Access & Refresh Tokens) |
+| **Communications** | Resend SDK (Emails transactionnels) |
 
 ---
 
-## 📐 Architecture du Projet
+## 📐 Architecture du Système
 
-Le schéma ci-dessous illustre l'organisation des dossiers et le flux de données :
-
-```mermaid
-graph TD
-    A[Root: /app] --> B[Layouts & Pages]
-    A --> C[API Routes]
-    D[Components] --> B
-    E[Public Assets] --> B
-    F[Styles/Tailwind] --> A
-    
-    subgraph Structure
-    B
-    C
-    D
-    end
+### Structure des Dossiers
+```text
+mcplanning-manager/
+├── frontend/              # Next.js (Déployé sur Vercel)
+│   └── src/app/(app)      # Dashboard, Planning, Admin (Protected)
+└── backend/               # NestJS (Déployé sur Render)
+    └── src/auth           # Logique Refresh Token & Sécurité
