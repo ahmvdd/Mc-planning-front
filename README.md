@@ -1,36 +1,37 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 Mon Projet Next.js
 
-## Getting Started
+Une application web moderne, performante et scalable construite avec le **App Router** de Next.js.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 📋 Présentation
+Ce projet est une application web optimisée utilisant les dernières fonctionnalités de React et Next.js. L'objectif est d'offrir une expérience utilisateur fluide tout en garantissant une maintenance aisée grâce à TypeScript.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 🛠️ Stack Technique
+| Technologie | Usage |
+| :--- | :--- |
+| **Next.js 15** | Framework React (App Router) |
+| **TypeScript** | Typage statique sécurisé |
+| **Tailwind CSS** | Design responsive et moderne |
+| **Geist Font** | Optimisation de la typographie |
+| **Vercel** | Hébergement et CI/CD |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📐 Architecture du Projet
 
-## Learn More
+Le schéma ci-dessous illustre l'organisation des dossiers et le flux de données :
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```mermaid
+graph TD
+    A[Root: /app] --> B[Layouts & Pages]
+    A --> C[API Routes]
+    D[Components] --> B
+    E[Public Assets] --> B
+    F[Styles/Tailwind] --> A
+    
+    subgraph Structure
+    B
+    C
+    D
+    end
