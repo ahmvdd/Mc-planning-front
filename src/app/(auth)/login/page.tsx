@@ -63,7 +63,6 @@ export default function LoginPage() {
       {/* Left — Branding */}
       <div className="relative hidden w-[45%] flex-col justify-between bg-blue-600 p-10 md:flex overflow-hidden">
         <div className="relative z-10 flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 text-sm font-bold text-white">S</div>
           <span className="text-lg font-bold tracking-tighter text-white">Shiftly</span>
         </div>
 
@@ -104,9 +103,8 @@ export default function LoginPage() {
       {/* Right — Form */}
       <div className="flex flex-1 flex-col justify-center bg-white p-8 sm:p-12">
         <div className="mx-auto w-full max-w-sm">
-          {/* Mobile logo */}
-          <div className="mb-8 flex items-center gap-2 md:hidden">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white">S</div>
+          {/* Mobile title */}
+          <div className="mb-8 md:hidden">
             <span className="text-lg font-bold tracking-tighter text-slate-900">Shiftly</span>
           </div>
 
