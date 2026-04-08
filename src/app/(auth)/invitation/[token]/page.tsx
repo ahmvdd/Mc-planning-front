@@ -68,7 +68,7 @@ export default function InvitationPage() {
         </div>
         <h2 className="text-2xl font-bold text-slate-900">Lien invalide</h2>
         <p className="text-slate-500 text-sm">{invalidMsg}</p>
-        <p className="text-xs text-slate-400">Demandez un nouvel email d'invitation à votre responsable.</p>
+        <p className="text-xs text-slate-400">Demandez un nouvel email d&apos;invitation à votre responsable.</p>
       </div>
     </div>
   );

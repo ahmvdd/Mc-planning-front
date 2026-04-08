@@ -7,7 +7,7 @@ import { apiFetchClient, getToken } from "@/lib/clientApi";
 import {
   ArrowRight, Calendar, Users, ClipboardCheck,
   ShieldCheck, Zap, BarChart3, CheckCircle2,
-  ChevronRight, Star, X, Sparkles, Menu
+  Star, X, Sparkles, Menu
 } from "lucide-react";
 
 const fadeUp = (delay = 0) => ({
@@ -114,14 +114,14 @@ export default function Home() {
           className="max-w-5xl text-center text-6xl font-black leading-[0.9] tracking-tighter sm:text-8xl md:text-9xl"
         >
           MAÎTRISEZ <br />
-          <span className="bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">L'INSTANT.</span>
+          <span className="bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">L&apos;INSTANT.</span>
         </motion.h1>
 
         <motion.p
           {...fadeUp(0.2)}
           className="mt-10 max-w-2xl text-center text-lg leading-relaxed text-slate-400 sm:text-xl"
         >
-          Shiftly redéfinit la planification d'équipe. Une interface brutale, une vitesse insolente et une intelligence qui travaille pour vous.
+          Shiftly redéfinit la planification d&apos;équipe. Une interface brutale, une vitesse insolente et une intelligence qui travaille pour vous.
         </motion.p>
 
         <motion.div {...fadeUp(0.3)} className="mt-12 flex flex-col items-center gap-6 sm:flex-row">
@@ -263,7 +263,7 @@ export default function Home() {
         <div className="mb-16 text-center">
           <motion.p {...fadeUp(0)} className="mb-3 text-[10px] font-black uppercase tracking-widest text-blue-500">Fonctionnalités</motion.p>
           <motion.h2 {...fadeUp(0.05)} className="text-5xl font-black tracking-tighter sm:text-6xl">TOUT CE DONT<br />VOUS AVEZ BESOIN.</motion.h2>
-          <motion.p {...fadeUp(0.1)} className="mx-auto mt-6 max-w-xl text-slate-500">Une suite d'outils pensés pour les managers modernes qui veulent reprendre le contrôle de leur temps.</motion.p>
+          <motion.p {...fadeUp(0.1)} className="mx-auto mt-6 max-w-xl text-slate-500">Une suite d&apos;outils pensés pour les managers modernes qui veulent reprendre le contrôle de leur temps.</motion.p>
         </div>
 
         {/* Bento grid */}
@@ -276,7 +276,7 @@ export default function Home() {
               <Calendar size={120} className="text-blue-500/10 group-hover:text-blue-500/20 transition-colors" />
             </div>
             <h3 className="text-3xl font-bold tracking-tighter">Planning Intelligent</h3>
-            <p className="mt-4 max-w-xs text-slate-400">Algorithmes d'optimisation pour éviter les conflits et maximiser la présence. Export Excel en un clic.</p>
+            <p className="mt-4 max-w-xs text-slate-400">Algorithmes d&apos;optimisation pour éviter les conflits et maximiser la présence. Export Excel en un clic.</p>
             <div className="mt-8 flex gap-2">
               <div className="h-1 flex-1 rounded-full bg-blue-600" />
               <div className="h-1 flex-1 rounded-full bg-white/10" />
@@ -328,7 +328,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
             <motion.h2 {...fadeUp(0)} className="text-5xl font-black tracking-tighter sm:text-7xl">FLUX DE TRAVAIL.</motion.h2>
-            <motion.p {...fadeUp(0.1)} className="max-w-xs text-slate-500 text-sm italic">"La simplicité est la sophistication suprême."</motion.p>
+            <motion.p {...fadeUp(0.1)} className="max-w-xs text-slate-500 text-sm italic">&quot;La simplicité est la sophistication suprême.&quot;</motion.p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
             {[
@@ -385,7 +385,7 @@ export default function Home() {
               COMMENCER GRATUITEMENT <ArrowRight size={20} />
             </Link>
             <Link href="/login" className="h-14 px-12 border-2 border-black/10 rounded-2xl flex items-center justify-center font-bold text-sm text-black/60 hover:border-black/20 transition">
-              J'ai déjà un compte
+              J&apos;ai déjà un compte
             </Link>
           </div>
         </div>
@@ -398,7 +398,7 @@ export default function Home() {
             <div className="flex items-center gap-2 mb-6">
               <span className="font-black tracking-tighter">SHIFTLY</span>
             </div>
-            <p className="text-slate-500 text-sm max-w-[240px] leading-relaxed">L'excellence opérationnelle pour les managers qui ne s'arrêtent jamais.</p>
+            <p className="text-slate-500 text-sm max-w-[240px] leading-relaxed">L&apos;excellence opérationnelle pour les managers qui ne s&apos;arrêtent jamais.</p>
             <p className="mt-4 text-xs text-slate-600">
               Fait par{" "}
               <a href="https://www.sayehahmed.com" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-500 hover:text-blue-400 transition">

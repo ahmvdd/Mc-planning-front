@@ -103,7 +103,7 @@ export default function PlanningPage() {
   const toggleExpand = (id: number) => {
     setExpandedIds(prev => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) { next.delete(id); } else { next.add(id); }
       return next;
     });
   };
@@ -126,8 +126,8 @@ export default function PlanningPage() {
       setPeriodForm(EMPTY_PERIOD);
       setShowPeriodForm(false);
       setExpandedIds(prev => new Set([...prev, created.id]));
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Erreur");
     } finally {
       setSavingPeriod(false);
     }
@@ -137,8 +137,8 @@ export default function PlanningPage() {
     try {
       await apiFetchClient(`/planning/periods/${id}`, { method: "DELETE" });
       setPeriods(prev => prev.filter(p => p.id !== id));
-    } catch (err: any) {
-      alert("Erreur : " + err.message);
+    } catch (err: unknown) {
+      alert("Erreur : " + (err instanceof Error ? err.message : "inconnue"));
     } finally {
       setConfirmDeletePeriodId(null);
     }
@@ -167,8 +167,8 @@ export default function PlanningPage() {
         prev.map(p => ({ ...p, entries: p.entries.filter(e => e.id !== id) }))
       );
       setOrphanEntries(prev => prev.filter(e => e.id !== id));
-    } catch (err: any) {
-      alert("Erreur : " + err.message);
+    } catch (err: unknown) {
+      alert("Erreur : " + (err instanceof Error ? err.message : "inconnue"));
     } finally {
       setConfirmDeleteEntryId(null);
     }
@@ -178,7 +178,7 @@ export default function PlanningPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      const payload: any = {
+      const payload: { date: string; shift: string; employeeId?: number; note?: string; planningId?: number } = {
         date: form.date ? `${form.date}T00:00:00.000Z` : "",
         shift: form.shift.trim(),
         employeeId: form.employeeId ? Number(form.employeeId) : undefined,
@@ -209,8 +209,8 @@ export default function PlanningPage() {
 
       setForm(EMPTY_FORM);
       setEditId(null);
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Erreur");
     } finally {
       setSaving(false);
     }
@@ -247,9 +247,9 @@ export default function PlanningPage() {
           const buffer = await file.arrayBuffer();
           const wb = XLSX.read(buffer, { type: 'array', cellDates: true });
           const ws = wb.Sheets[wb.SheetNames[0]];
-          const data = XLSX.utils.sheet_to_json<any[]>(ws, { header: 1, raw: false, dateNF: 'yyyy-mm-dd' });
-          rows = data.filter((r: any[]) => r.length > 0).map((r: any[]) =>
-            r.map((c: any) => (c instanceof Date ? c.toISOString().slice(0, 10) : (c ?? '').toString()))
+          const data = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, raw: false, dateNF: 'yyyy-mm-dd' });
+          rows = (data as unknown[][]).filter((r) => r.length > 0).map((r) =>
+            r.map((c) => (c instanceof Date ? c.toISOString().slice(0, 10) : (c != null ? String(c) : '')))
           );
         } else {
           const text = await file.text();
@@ -260,7 +260,7 @@ export default function PlanningPage() {
         const slotData: SlotData = { type: 'excel', rows, name: file.name };
         // Sauvegarder en DB via le même endpoint image (préfixe __EXCEL__)
         const endpoint = slot === 2 ? '/admin/planning-image2' : '/admin/planning-image';
-        await apiFetchClient<any>(endpoint, {
+        await apiFetchClient<{ planningImageUrl?: string; planningImageUrl2?: string }>(endpoint, {
           method: 'POST',
           body: JSON.stringify({ imageData: '__EXCEL__' + JSON.stringify(slotData) }),
         });
@@ -272,22 +272,22 @@ export default function PlanningPage() {
         reader.onload = async () => {
           try {
             const endpoint = slot === 2 ? '/admin/planning-image2' : '/admin/planning-image';
-            const response = await apiFetchClient<any>(endpoint, {
+            const response = await apiFetchClient<{ planningImageUrl?: string; planningImageUrl2?: string }>(endpoint, {
               method: 'POST',
               body: JSON.stringify({ imageData: reader.result }),
             });
             const url = slot === 2 ? response.planningImageUrl2 : response.planningImageUrl;
             setSlot({ type: 'image', url: url ?? String(reader.result) });
-          } catch (err: any) {
-            alert('Erreur upload image : ' + err.message);
+          } catch (err: unknown) {
+            alert('Erreur upload image : ' + (err instanceof Error ? err.message : 'inconnue'));
           } finally {
             setUploading(false);
           }
         };
         return;
       }
-    } catch (err: any) {
-      alert('Erreur upload : ' + err.message);
+    } catch (err: unknown) {
+      alert('Erreur upload : ' + (err instanceof Error ? err.message : 'inconnue'));
     } finally {
       setUploading(false);
       e.target.value = '';
@@ -316,13 +316,13 @@ export default function PlanningPage() {
             const buffer = await file.arrayBuffer();
             const workbook = XLSX.read(buffer, { type: "array", cellDates: true });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            const data = XLSX.utils.sheet_to_json<any[]>(sheet, { header: 1, raw: false, dateNF: "yyyy-mm-dd" });
-            const hasHeader = data[0]?.[0]?.toString().toLowerCase().includes("date");
-            rows = (hasHeader ? data.slice(1) : data)
+            const data = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, raw: false, dateNF: "yyyy-mm-dd" });
+            const hasHeader = (data[0] as unknown[])?.[0]?.toString().toLowerCase().includes("date");
+            rows = ((hasHeader ? data.slice(1) : data) as unknown[][])
                 .filter(r => r.length > 0)
-                .map(r => r.map((c: any) => {
+                .map(r => r.map((c) => {
                     if (c instanceof Date) return c.toISOString().slice(0, 10);
-                    return (c ?? "").toString().trim();
+                    return (c != null ? String(c) : "").trim();
                 }));
         } else {
             const text = await file.text();
@@ -361,8 +361,8 @@ export default function PlanningPage() {
                     }),
                 });
                 ok++;
-            } catch (err: any) {
-                errors.push(`Erreur ligne "${cols.join(",")}" : ${err.message}`);
+            } catch (err: unknown) {
+                errors.push(`Erreur ligne "${cols.join(",")}" : ${err instanceof Error ? err.message : 'inconnue'}`);
             }
         }
         setCsvResult({ ok, errors });
@@ -374,7 +374,7 @@ export default function PlanningPage() {
         setPeriods(updatedPds);
         const pIds = new Set(updatedPds.flatMap(p => p.entries.map(e => e.id)));
         setOrphanEntries(updatedEntries.filter(e => !pIds.has(e.id)));
-    } catch (err) {
+    } catch {
         alert("Erreur lors de l'import");
     } finally {
         setCsvImporting(false);
@@ -470,6 +470,7 @@ export default function PlanningPage() {
                       {slot ? (
                         slot.type === 'image' ? (
                           <div className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={slot.url}
                               alt={`Planning Semaine ${idx + 1}`}
@@ -784,7 +785,7 @@ export default function PlanningPage() {
                       value={form.employeeId}
                       onChange={e => setForm({ ...form, employeeId: e.target.value })}
                     >
-                      <option value="">Toute l'équipe</option>
+                      <option value="">Toute l&apos;équipe</option>
                       {employees.map(emp => <option key={emp.id} value={emp.id}>{emp.name}</option>)}
                     </select>
                   </div>
@@ -886,8 +887,17 @@ export default function PlanningPage() {
 }
 
 // ── Subcomponent: EntryRow ──────────────────────────────────────────────────
-function EntryRow({ entry, employees, isAdmin, fmtShiftDate, onEdit, onDelete, confirmDeleteId, setConfirmDeleteId }: any) {
-  const employee = employees.find((e: any) => e.id === entry.employeeId);
+function EntryRow({ entry, employees, isAdmin, fmtShiftDate, onEdit, onDelete, confirmDeleteId, setConfirmDeleteId }: {
+  entry: PlanningEntry;
+  employees: EmployeeOption[];
+  isAdmin: boolean;
+  fmtShiftDate: (date: string) => string;
+  onEdit: (entry: PlanningEntry) => void;
+  onDelete: (id: number) => void;
+  confirmDeleteId: number | null;
+  setConfirmDeleteId: (id: number | null) => void;
+}) {
+  const employee = employees.find((e) => e.id === entry.employeeId);
   
   return (
     <tr className="group/row hover:bg-blue-50/30 transition-colors">

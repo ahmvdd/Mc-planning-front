@@ -16,6 +16,8 @@ import {
   Menu,
   X,
   UserCircle,
+  QrCode,
+  ScanLine,
 } from "lucide-react";
 
 export default function Navbar() {
@@ -72,11 +74,14 @@ export default function Navbar() {
       <Link className={linkClass} href="/dashboard"><LayoutDashboard size={14} /> Dashboard</Link>
       <Link className={linkClass} href="/planning"><CalendarDays size={14} /> Planning</Link>
       <Link className={linkClass} href="/requests"><ClipboardList size={14} /> Demandes</Link>
-      {role === "admin" && (
+      {role === "admin" ? (
         <>
+          <Link className={linkClass} href="/pointage"><QrCode size={14} /> Pointages</Link>
           <Link className={linkClass} href="/employees"><Users size={14} /> Employés</Link>
           <Link className={linkClass} href="/admin"><ShieldCheck size={14} /> Admin</Link>
         </>
+      ) : (
+        <Link className={linkClass} href="/scan"><ScanLine size={14} /> Scanner</Link>
       )}
       <Link className={linkClass} href="/profile"><UserCircle size={14} /> Profil</Link>
       <button
@@ -105,11 +110,14 @@ export default function Navbar() {
       <Link className={mobileLinkClass} href="/dashboard" onClick={close}><LayoutDashboard size={18} /> Dashboard</Link>
       <Link className={mobileLinkClass} href="/planning" onClick={close}><CalendarDays size={18} /> Planning</Link>
       <Link className={mobileLinkClass} href="/requests" onClick={close}><ClipboardList size={18} /> Demandes</Link>
-      {role === "admin" && (
+      {role === "admin" ? (
         <>
+          <Link className={mobileLinkClass} href="/pointage" onClick={close}><QrCode size={18} /> Pointages</Link>
           <Link className={mobileLinkClass} href="/employees" onClick={close}><Users size={18} /> Employés</Link>
           <Link className={mobileLinkClass} href="/admin" onClick={close}><ShieldCheck size={18} /> Admin</Link>
         </>
+      ) : (
+        <Link className={mobileLinkClass} href="/scan" onClick={close}><ScanLine size={18} /> Scanner</Link>
       )}
       <Link className={mobileLinkClass} href="/profile" onClick={close}><UserCircle size={18} /> Profil</Link>
       <button
