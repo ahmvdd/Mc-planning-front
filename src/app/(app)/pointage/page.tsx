@@ -31,7 +31,7 @@ export default function PointagePage() {
   const router = useRouter();
   const [entries, setEntries] = useState<PointageEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [qrData, setQrData] = useState<{ img: string; entryId: number } | null>(null);
+  const [qrData, setQrData] = useState<{ img: string; entryId: number | null; label: string } | null>(null);
   const [manualModal, setManualModal] = useState<PointageEntry | null>(null);
   const [manualStatus, setManualStatus] = useState("present");
   const [manualNote, setManualNote] = useState("");
@@ -55,7 +55,16 @@ export default function PointagePage() {
   const openQR = async (entryId: number) => {
     try {
       const res = await apiFetchClient<string>(`/pointage/qr/${entryId}`, { method: "POST" });
-      setQrData({ img: res, entryId });
+      setQrData({ img: res, entryId, label: "QR code de créneau" });
+    } catch (e: unknown) {
+      alert((e instanceof Error ? e.message : null) || "Erreur génération QR");
+    }
+  };
+
+  const openWorkplaceQR = async () => {
+    try {
+      const res = await apiFetchClient<string>("/pointage/workplace-qr");
+      setQrData({ img: res, entryId: null, label: "QR code d'entrée" });
     } catch (e: unknown) {
       alert((e instanceof Error ? e.message : null) || "Erreur génération QR");
     }
@@ -101,12 +110,20 @@ export default function PointagePage() {
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Pointages du jour</h1>
           <p className="mt-1 text-sm text-slate-500 capitalize">{today}</p>
         </div>
-        <button
-          onClick={fetchToday}
-          className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
-        >
-          <RefreshCw size={14} /> Actualiser
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={openWorkplaceQR}
+            className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-blue-700"
+          >
+            <QrCode size={14} /> QR d&apos;entrée
+          </button>
+          <button
+            onClick={fetchToday}
+            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+          >
+            <RefreshCw size={14} /> Actualiser
+          </button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -200,10 +217,14 @@ export default function PointagePage() {
       {qrData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setQrData(null)}>
           <div className="rounded-2xl bg-white p-8 shadow-2xl text-center" onClick={e => e.stopPropagation()}>
-            <h3 className="mb-4 text-base font-bold text-slate-900">QR code de pointage</h3>
+            <h3 className="mb-4 text-base font-bold text-slate-900">{qrData?.label ?? "QR code de pointage"}</h3>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={qrData.img} alt="QR Code" className="mx-auto h-56 w-56" />
-            <p className="mt-4 text-xs text-slate-400">Valable 8h — Les employés scannent avec leur téléphone</p>
+            <p className="mt-4 text-xs text-slate-400">
+              {qrData?.entryId === null
+                ? "QR permanent — Imprimez-le et affichez-le à l'entrée"
+                : "Valable 8h — Les employés scannent avec leur téléphone"}
+            </p>
             <button onClick={() => setQrData(null)} className="mt-5 w-full rounded-xl bg-slate-900 py-2.5 text-sm font-bold text-white transition hover:bg-slate-800">
               Fermer
             </button>

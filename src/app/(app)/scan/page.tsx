@@ -16,7 +16,34 @@ function ScanContent() {
   const [message, setMessage] = useState("");
   const [cameraActive, setCameraActive] = useState(false);
 
-  const handleToken = async (token: string) => {
+  // Pointage via QR d'entrée (workplace token) — identifie le shift automatiquement
+  const handleWorkplaceToken = async (workplaceToken: string) => {
+    if (!getToken()) { router.push("/login"); return; }
+    setStatus("loading");
+    try {
+      await apiFetchClient("/pointage/checkin", {
+        method: "POST",
+        body: JSON.stringify({ workplaceToken }),
+      });
+      setStatus("success");
+      setMessage("Pointage enregistré avec succès !");
+    } catch (err: unknown) {
+      const msg = (err instanceof Error ? err.message : null) || "Erreur lors du pointage";
+      if (msg.includes("déjà pointé")) {
+        setStatus("already");
+        setMessage("Vous avez déjà pointé pour ce créneau.");
+      } else if (msg.includes("Aucun créneau")) {
+        setStatus("error");
+        setMessage("Aucun créneau prévu pour vous aujourd'hui.");
+      } else {
+        setStatus("error");
+        setMessage(msg);
+      }
+    }
+  };
+
+  // Pointage via QR de créneau spécifique (token JWT entry)
+  const handleEntryToken = async (token: string) => {
     if (!getToken()) { router.push("/login"); return; }
     setStatus("loading");
     try {
@@ -38,10 +65,12 @@ function ScanContent() {
     }
   };
 
-  // Si token dans l'URL (scan direct via QR)
+  // Si token ou workplace dans l'URL (scan direct via QR)
   useEffect(() => {
+    const workplace = searchParams.get("workplace");
+    if (workplace) { handleWorkplaceToken(workplace); return; }
     const token = searchParams.get("token");
-    if (token) handleToken(token);
+    if (token) handleEntryToken(token);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -60,9 +89,14 @@ function ScanContent() {
           setCameraActive(false);
           try {
             const url = new URL(decodedText);
+            const workplace = url.searchParams.get("workplace");
+            if (workplace) {
+              await handleWorkplaceToken(workplace);
+              return;
+            }
             const token = url.searchParams.get("token");
             if (token) {
-              await handleToken(token);
+              await handleEntryToken(token);
             } else {
               setStatus("error");
               setMessage("QR code invalide");
