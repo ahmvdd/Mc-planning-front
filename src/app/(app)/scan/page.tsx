@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
 import { QrCode, CheckCircle2, XCircle, Loader2, Camera } from "lucide-react";
@@ -8,20 +8,13 @@ import { Html5Qrcode } from "html5-qrcode";
 
 type ScanStatus = "idle" | "scanning" | "loading" | "success" | "error" | "already";
 
-export default function ScanPage() {
+function ScanContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const [status, setStatus] = useState<ScanStatus>("idle");
   const [message, setMessage] = useState("");
   const [cameraActive, setCameraActive] = useState(false);
-
-  // Si token dans l'URL (scan direct via QR)
-  useEffect(() => {
-    const token = searchParams.get("token");
-    if (token) handleToken(token);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleToken = async (token: string) => {
     if (!getToken()) { router.push("/login"); return; }
@@ -45,6 +38,13 @@ export default function ScanPage() {
     }
   };
 
+  // Si token dans l'URL (scan direct via QR)
+  useEffect(() => {
+    const token = searchParams.get("token");
+    if (token) handleToken(token);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const startCamera = async () => {
     setCameraActive(true);
     setStatus("scanning");
@@ -58,7 +58,6 @@ export default function ScanPage() {
         async (decodedText) => {
           await scanner.stop();
           setCameraActive(false);
-          // Extraire le token de l'URL scannée
           try {
             const url = new URL(decodedText);
             const token = url.searchParams.get("token");
@@ -77,7 +76,7 @@ export default function ScanPage() {
       );
     } catch {
       setStatus("error");
-      setMessage("Impossible d'accéder à la caméra");
+      setMessage("Impossible d&apos;accéder à la caméra");
       setCameraActive(false);
     }
   };
@@ -98,7 +97,6 @@ export default function ScanPage() {
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        {/* Scanner */}
         <div className="relative flex min-h-[300px] items-center justify-center bg-slate-950">
           <div id="qr-reader" className="w-full" />
 
@@ -131,7 +129,6 @@ export default function ScanPage() {
           )}
         </div>
 
-        {/* Actions */}
         <div className="p-5 space-y-3">
           {!cameraActive && status !== "success" && (
             <button
@@ -175,5 +172,17 @@ export default function ScanPage() {
         En cas d&apos;oubli, contactez votre responsable pour un pointage manuel.
       </p>
     </div>
+  );
+}
+
+export default function ScanPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="animate-spin text-blue-600" size={32} />
+      </div>
+    }>
+      <ScanContent />
+    </Suspense>
   );
 }
