@@ -54,8 +54,8 @@ export default function PointagePage() {
 
   const openQR = async (entryId: number) => {
     try {
-      const res = await apiFetchClient<string>(`/pointage/qr/${entryId}`, { method: "POST" });
-      setQrData({ img: res, entryId, label: "QR code de créneau" });
+      const res = await apiFetchClient<{ img: string }>(`/pointage/qr/${entryId}`, { method: "POST" });
+      setQrData({ img: res.img, entryId, label: "QR code de créneau" });
     } catch (e: unknown) {
       alert((e instanceof Error ? e.message : null) || "Erreur génération QR");
     }
@@ -63,8 +63,8 @@ export default function PointagePage() {
 
   const openWorkplaceQR = async () => {
     try {
-      const res = await apiFetchClient<string>("/pointage/workplace-qr");
-      setQrData({ img: res, entryId: null, label: "QR code d'entrée" });
+      const res = await apiFetchClient<{ img: string }>("/pointage/workplace-qr");
+      setQrData({ img: res.img, entryId: null, label: "QR code d'entrée" });
     } catch (e: unknown) {
       alert((e instanceof Error ? e.message : null) || "Erreur génération QR");
     }
