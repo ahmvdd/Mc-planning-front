@@ -94,7 +94,7 @@ export default function ScanPage() {
     <div className="mx-auto max-w-md space-y-6 pb-12">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">Pointer mon arrivée</h1>
-        <p className="mt-1 text-sm text-slate-500">Scannez le QR code affiché à l'entrée de votre lieu de travail.</p>
+        <p className="mt-1 text-sm text-slate-500">Scannez le QR code affiché à l&apos;entrée de votre lieu de travail.</p>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -172,7 +172,7 @@ export default function ScanPage() {
       </div>
 
       <p className="text-center text-xs text-slate-400">
-        En cas d'oubli, contactez votre responsable pour un pointage manuel.
+        En cas d&apos;oubli, contactez votre responsable pour un pointage manuel.
       </p>
     </div>
   );

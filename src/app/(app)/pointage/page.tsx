@@ -56,8 +56,8 @@ export default function PointagePage() {
     try {
       const res = await apiFetchClient<string>(`/pointage/qr/${entryId}`, { method: "POST" });
       setQrData({ img: res, entryId });
-    } catch (e: any) {
-      alert(e?.message || "Erreur génération QR");
+    } catch (e: unknown) {
+      alert((e instanceof Error ? e.message : null) || "Erreur génération QR");
     }
   };
 
@@ -77,8 +77,8 @@ export default function PointagePage() {
       setManualModal(null);
       setManualNote("");
       await fetchToday();
-    } catch (e: any) {
-      alert(e?.message || "Erreur");
+    } catch (e: unknown) {
+      alert((e instanceof Error ? e.message : null) || "Erreur");
     } finally {
       setSaving(false);
     }
@@ -133,7 +133,7 @@ export default function PointagePage() {
         ) : entries.length === 0 ? (
           <div className="flex flex-col items-center py-16 text-center">
             <Clock size={40} className="text-slate-200 mb-3" />
-            <p className="font-bold text-slate-600">Aucun créneau aujourd'hui</p>
+            <p className="font-bold text-slate-600">Aucun créneau aujourd&apos;hui</p>
             <p className="text-xs text-slate-400 mt-1">Les créneaux du planning apparaîtront ici.</p>
           </div>
         ) : (

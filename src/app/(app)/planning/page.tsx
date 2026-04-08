@@ -260,7 +260,7 @@ export default function PlanningPage() {
         const slotData: SlotData = { type: 'excel', rows, name: file.name };
         // Sauvegarder en DB via le même endpoint image (préfixe __EXCEL__)
         const endpoint = slot === 2 ? '/admin/planning-image2' : '/admin/planning-image';
-        await apiFetchClient<any>(endpoint, {
+        await apiFetchClient<{ planningImageUrl?: string; planningImageUrl2?: string }>(endpoint, {
           method: 'POST',
           body: JSON.stringify({ imageData: '__EXCEL__' + JSON.stringify(slotData) }),
         });
@@ -785,7 +785,7 @@ export default function PlanningPage() {
                       value={form.employeeId}
                       onChange={e => setForm({ ...form, employeeId: e.target.value })}
                     >
-                      <option value="">Toute l'équipe</option>
+                      <option value="">Toute l&apos;équipe</option>
                       {employees.map(emp => <option key={emp.id} value={emp.id}>{emp.name}</option>)}
                     </select>
                   </div>
@@ -887,8 +887,17 @@ export default function PlanningPage() {
 }
 
 // ── Subcomponent: EntryRow ──────────────────────────────────────────────────
-function EntryRow({ entry, employees, isAdmin, fmtShiftDate, onEdit, onDelete, confirmDeleteId, setConfirmDeleteId }: any) {
-  const employee = employees.find((e: any) => e.id === entry.employeeId);
+function EntryRow({ entry, employees, isAdmin, fmtShiftDate, onEdit, onDelete, confirmDeleteId, setConfirmDeleteId }: {
+  entry: PlanningEntry;
+  employees: EmployeeOption[];
+  isAdmin: boolean;
+  fmtShiftDate: (date: string) => string;
+  onEdit: (entry: PlanningEntry) => void;
+  onDelete: (id: number) => void;
+  confirmDeleteId: number | null;
+  setConfirmDeleteId: (id: number | null) => void;
+}) {
+  const employee = employees.find((e) => e.id === entry.employeeId);
   
   return (
     <tr className="group/row hover:bg-blue-50/30 transition-colors">

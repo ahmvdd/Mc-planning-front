@@ -18,20 +18,13 @@ function decodeOrgName(token: string | null) {
 }
 
 export default function OrgTitle() {
-  const [orgName, setOrgName] = useState<string | null>(null);
+  const token = getToken();
+  const decoded = decodeOrgName(token);
+  const [orgName, setOrgName] = useState<string | null>(decoded);
 
   useEffect(() => {
-    const token = getToken();
-    if (!token) {
-      setOrgName(null);
-      return;
-    }
-
-    const decodedName = decodeOrgName(token);
-    if (decodedName) {
-      setOrgName(decodedName);
-      return;
-    }
+    if (decoded) return;
+    if (!token) return;
 
     apiFetchClient<{ orgName?: string | null; organizationName?: string | null }>(
       "/auth/me",
@@ -40,6 +33,7 @@ export default function OrgTitle() {
         setOrgName(data.orgName ?? data.organizationName ?? null);
       })
       .catch(() => setOrgName(null));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
