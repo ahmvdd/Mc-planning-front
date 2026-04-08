@@ -20,6 +20,7 @@ export default function ScanPage() {
   useEffect(() => {
     const token = searchParams.get("token");
     if (token) handleToken(token);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleToken = async (token: string) => {
@@ -32,8 +33,8 @@ export default function ScanPage() {
       });
       setStatus("success");
       setMessage("Pointage enregistré avec succès !");
-    } catch (err: any) {
-      const msg = err?.message || "Erreur lors du pointage";
+    } catch (err: unknown) {
+      const msg = (err instanceof Error ? err.message : null) || "Erreur lors du pointage";
       if (msg.includes("déjà pointé")) {
         setStatus("already");
         setMessage("Vous avez déjà pointé pour ce créneau.");

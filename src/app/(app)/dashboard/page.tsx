@@ -48,7 +48,7 @@ const STATUS_CONFIG: Record<Status, { label: string; color: string; bar: string;
 
 // --- Sous-Composants ---
 
-const StatCard = ({ label, value, icon: Icon, href }: any) => (
+const StatCard = ({ label, value, icon: Icon, href }: { label: string; value: number; icon: React.ElementType; href: string }) => (
   <Link href={href} className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 transition-all hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/5">
     <div className="flex items-center justify-between">
       <div>
@@ -65,7 +65,7 @@ const StatCard = ({ label, value, icon: Icon, href }: any) => (
   </Link>
 );
 
-const EmptyState = ({ icon: Icon, title, desc }: any) => (
+const EmptyState = ({ icon: Icon, title, desc }: { icon: React.ElementType; title: string; desc: string }) => (
   <div className="flex flex-col items-center justify-center py-12 text-center">
     <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 text-slate-300">
       <Icon size={32} />

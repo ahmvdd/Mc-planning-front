@@ -50,7 +50,7 @@ export default function PointagePage() {
     }
   };
 
-  useEffect(() => { fetchToday(); }, []);
+  useEffect(() => { fetchToday(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const openQR = async (entryId: number) => {
     try {
@@ -201,6 +201,7 @@ export default function PointagePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setQrData(null)}>
           <div className="rounded-2xl bg-white p-8 shadow-2xl text-center" onClick={e => e.stopPropagation()}>
             <h3 className="mb-4 text-base font-bold text-slate-900">QR code de pointage</h3>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={qrData.img} alt="QR Code" className="mx-auto h-56 w-56" />
             <p className="mt-4 text-xs text-slate-400">Valable 8h — Les employés scannent avec leur téléphone</p>
             <button onClick={() => setQrData(null)} className="mt-5 w-full rounded-xl bg-slate-900 py-2.5 text-sm font-bold text-white transition hover:bg-slate-800">

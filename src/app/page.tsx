@@ -7,7 +7,7 @@ import { apiFetchClient, getToken } from "@/lib/clientApi";
 import {
   ArrowRight, Calendar, Users, ClipboardCheck,
   ShieldCheck, Zap, BarChart3, CheckCircle2,
-  ChevronRight, Star, X, Sparkles, Menu
+  Star, X, Sparkles, Menu
 } from "lucide-react";
 
 const fadeUp = (delay = 0) => ({

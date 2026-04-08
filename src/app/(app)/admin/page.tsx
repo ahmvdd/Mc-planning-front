@@ -198,6 +198,7 @@ export default function AdminPage() {
                   >
                     {logoPreview ? (
                       <div className="flex flex-col items-center gap-2">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={logoPreview} alt="Logo" className="h-14 w-14 rounded-xl object-cover" />
                         <p className="text-xs text-slate-400">Cliquer pour changer</p>
                       </div>
