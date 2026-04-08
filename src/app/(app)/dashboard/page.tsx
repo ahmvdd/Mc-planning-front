@@ -157,6 +157,11 @@ export default function DashboardPage() {
   const { data, loading, error, stats } = useDashboard();
   const isAdmin = data.me?.role === "admin";
 
+  // Nom de l'utilisateur connecté — depuis me.name ou depuis la liste employees
+  const userName = data.me?.name
+    || data.employees.find(e => e.id === data.me?.sub)?.name
+    || "utilisateur";
+
   if (loading) return (
     <div className="flex min-h-[80vh] flex-col items-center justify-center space-y-4">
       <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
@@ -186,7 +191,7 @@ export default function DashboardPage() {
       <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-            Bonjour, {data.me?.name || "utilisateur"} 👋
+            Bonjour, {userName} 👋
           </h1>
           <p className="mt-1 text-slate-500 text-sm">
             Voici ce qu&apos;il se passe dans votre organisation aujourd&apos;hui.
@@ -225,34 +230,38 @@ export default function DashboardPage() {
         {/* --- MAIN COLUMN --- */}
         <div className="lg:col-span-8 space-y-8">
           
-          {/* User's Planning */}
+          {/* Planning — Mon planning (employé) / Planning équipe (admin) */}
           <div className="rounded-3xl border border-slate-200 bg-white p-2 shadow-sm">
             <div className="flex items-center justify-between p-4">
-              <h3 className="text-sm font-bold text-slate-900">Mon planning à venir</h3>
+              <h3 className="text-sm font-bold text-slate-900">
+                {isAdmin ? "Planning de l'équipe à venir" : "Mon planning à venir"}
+              </h3>
               <Link href="/planning" className="text-xs font-bold text-blue-600 hover:underline">Voir le calendrier complet</Link>
             </div>
-            
+
             {stats.upcoming.length === 0 ? (
-              <EmptyState icon={CalendarDays} title="Aucun créneau" desc="Vous n'avez pas de sessions prévues cette semaine." />
+              <EmptyState icon={CalendarDays} title="Aucun créneau" desc={isAdmin ? "Aucun créneau planifié dans les prochains jours." : "Vous n'avez pas de sessions prévues cette semaine."} />
             ) : (
               <div className="space-y-1">
-                {stats.upcoming.map((slot) => (
-                  <div key={slot.id} className="group flex items-center gap-4 rounded-2xl p-4 transition-colors hover:bg-slate-50">
-                    <div className="flex h-12 w-12 flex-col items-center justify-center rounded-xl bg-slate-900 text-white transition-transform group-hover:scale-105">
-                      <span className="text-sm font-bold">{new Date(slot.date).getDate()}</span>
-                      <span className="text-[10px] font-medium uppercase opacity-70">
-                        {new Date(slot.date).toLocaleDateString("fr-FR", { month: "short" })}
-                      </span>
+                {stats.upcoming
+                  .filter(slot => isAdmin || slot.employeeId === data.me?.sub)
+                  .map((slot) => (
+                    <div key={slot.id} className="group flex items-center gap-4 rounded-2xl p-4 transition-colors hover:bg-slate-50">
+                      <div className="flex h-12 w-12 flex-col items-center justify-center rounded-xl bg-slate-900 text-white transition-transform group-hover:scale-105">
+                        <span className="text-sm font-bold">{new Date(slot.date).getDate()}</span>
+                        <span className="text-[10px] font-medium uppercase opacity-70">
+                          {new Date(slot.date).toLocaleDateString("fr-FR", { month: "short" })}
+                        </span>
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-sm font-bold text-slate-900">{slot.shift}</h4>
+                        <p className="text-xs text-slate-500 capitalize">{formatDate(slot.date)}</p>
+                      </div>
+                      {slot.note && (
+                        <span className="rounded-lg bg-blue-50 px-3 py-1 text-[11px] font-bold text-blue-600">{slot.note}</span>
+                      )}
                     </div>
-                    <div className="flex-1">
-                      <h4 className="text-sm font-bold text-slate-900">{slot.shift}</h4>
-                      <p className="text-xs text-slate-500 capitalize">{formatDate(slot.date)}</p>
-                    </div>
-                    {slot.note && (
-                      <span className="rounded-lg bg-blue-50 px-3 py-1 text-[11px] font-bold text-blue-600">{slot.note}</span>
-                    )}
-                  </div>
-                ))}
+                  ))}
               </div>
             )}
           </div>
