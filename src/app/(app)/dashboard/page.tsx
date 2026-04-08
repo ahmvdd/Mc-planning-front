@@ -131,14 +131,23 @@ function useDashboard() {
     const counts = data.requests.reduce((acc, req) => {
       acc[req.status] = (acc[req.status] || 0) + 1;
       return acc;
-    }, {} as Record<string, number>);
+    }, {} as Record<Status, number>);
+
+    const today = new Date(new Date().setHours(0, 0, 0, 0));
+    const twoWeeksFromNow = new Date(today.getTime() + 14 * 86400000);
 
     const upcoming = data.planning
-      .filter(s => new Date(s.date) >= new Date(new Date().setHours(0, 0, 0, 0)))
+      .filter(s => new Date(s.date) >= today)
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .slice(0, 5);
 
-    return { ...counts, totalRequests: data.requests.length, upcoming, totalEmployees: data.employees.length };
+    // Rappel admin : aucune entrée planning dans les 2 prochaines semaines
+    const hasUpcomingInTwoWeeks = data.planning.some(
+      s => new Date(s.date) >= today && new Date(s.date) <= twoWeeksFromNow
+    );
+    const planningWarning = data.planning.length > 0 && !hasUpcomingInTwoWeeks;
+
+    return { ...counts, totalRequests: data.requests.length, upcoming, totalEmployees: data.employees.length, planningWarning };
   }, [data]);
 
   return { data, loading, error, stats };
@@ -189,6 +198,20 @@ export default function DashboardPage() {
           </Link>
         </div>
       </header>
+
+      {/* --- RAPPEL PLANNING ADMIN --- */}
+      {isAdmin && stats.planningWarning && (
+        <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
+          <AlertCircle size={18} className="mt-0.5 shrink-0 text-amber-500" />
+          <div className="flex-1">
+            <p className="text-sm font-bold text-amber-800">Planning à mettre à jour</p>
+            <p className="text-xs text-amber-700 mt-0.5">Aucun créneau planifié dans les 2 prochaines semaines. Pensez à mettre à jour le planning de votre équipe.</p>
+          </div>
+          <Link href="/planning" className="shrink-0 rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-amber-600">
+            Mettre à jour
+          </Link>
+        </div>
+      )}
 
       {/* --- STATS GRID --- */}
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
