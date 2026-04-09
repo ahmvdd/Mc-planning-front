@@ -309,76 +309,131 @@ export default function PlanningPage() {
     setCsvResult(null);
 
     try {
-        let rows: string[][];
-        const isExcel = file.name.endsWith(".xlsx") || file.name.endsWith(".xls");
+      // ── Lecture du fichier → tableau de lignes ──────────────────────
+      let allRows: string[][];
+      const isExcel = file.name.endsWith(".xlsx") || file.name.endsWith(".xls");
 
-        if (isExcel) {
-            const buffer = await file.arrayBuffer();
-            const workbook = XLSX.read(buffer, { type: "array", cellDates: true });
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            const data = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, raw: false, dateNF: "yyyy-mm-dd" });
-            const hasHeader = (data[0] as unknown[])?.[0]?.toString().toLowerCase().includes("date");
-            rows = ((hasHeader ? data.slice(1) : data) as unknown[][])
-                .filter(r => r.length > 0)
-                .map(r => r.map((c) => {
-                    if (c instanceof Date) return c.toISOString().slice(0, 10);
-                    return (c != null ? String(c) : "").trim();
-                }));
-        } else {
-            const text = await file.text();
-            const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
-            const hasHeader = lines[0]?.toLowerCase().includes("date");
-            rows = (hasHeader ? lines.slice(1) : lines).map(line =>
-                line.split(",").map(c => c.trim().replace(/^"|"$/g, ""))
-            );
-        }
+      if (isExcel) {
+        const buffer = await file.arrayBuffer();
+        const workbook = XLSX.read(buffer, { type: "array", cellDates: true });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const data = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, raw: false });
+        allRows = (data as unknown[][]).map(r =>
+          (r as unknown[]).map(c => (c != null ? String(c) : "").trim())
+        );
+      } else {
+        const text = await file.text();
+        const sep = text.includes("\t") ? "\t" : text.includes(";") ? ";" : ",";
+        allRows = text.split("\n").filter(l => l.trim()).map(line =>
+          line.split(sep).map(c => c.trim().replace(/^"|"$/g, ""))
+        );
+      }
 
-        let ok = 0;
-        const errors: string[] = [];
-        for (const cols of rows) {
-            const [dateRaw, shift, employeeName, note, planningName] = cols;
-            if (!dateRaw || !shift) continue;
+      const ok_errors: { ok: number; errors: string[] } = { ok: 0, errors: [] };
+
+      // ── Détection du format ─────────────────────────────────────────
+      // Format horizontal : les colonnes sont des jours ("Lun 16/06", "Mar 17/06"…)
+      const DAY_PREFIXES = ["lun", "mar", "mer", "jeu", "ven", "sam", "dim"];
+      const headerRowIdx = allRows.findIndex(row =>
+        row.some(cell => DAY_PREFIXES.some(d => cell.toLowerCase().startsWith(d) && cell.match(/\d{1,2}\/\d{2}/)))
+      );
+
+      if (headerRowIdx !== -1) {
+        // ── FORMAT HORIZONTAL (planning semaine avec jours en colonnes) ──
+        const headers = allRows[headerRowIdx];
+        const currentYear = new Date().getFullYear();
+
+        // Trouver les colonnes "jour"
+        const dayCols: { idx: number; date: string }[] = [];
+        headers.forEach((cell, i) => {
+          const m = cell.match(/(\d{1,2})\/(\d{2})(?:\/(\d{4}))?/);
+          if (m) {
+            const day = m[1].padStart(2, "0");
+            const month = m[2].padStart(2, "0");
+            const year = m[3] ?? String(currentYear);
+            dayCols.push({ idx: i, date: `${year}-${month}-${day}` });
+          }
+        });
+
+        for (let i = headerRowIdx + 1; i < allRows.length; i++) {
+          const row = allRows[i];
+          const empName = row[0]?.trim();
+          if (!empName || empName.toLowerCase().startsWith("total")) continue;
+
+          const employee = employees.find(emp =>
+            emp.name.toLowerCase() === empName.toLowerCase() ||
+            emp.name.toLowerCase().includes(empName.toLowerCase()) ||
+            empName.toLowerCase().includes(emp.name.toLowerCase())
+          );
+          if (!employee) {
+            ok_errors.errors.push(`Employé "${empName}" introuvable — créneaux ignorés`);
+            continue;
+          }
+
+          for (const { idx, date } of dayCols) {
+            const cell = row[idx]?.trim() ?? "";
+            if (!cell || ["repos", "off", "-", ""].includes(cell.toLowerCase())) continue;
+
+            // Parse "09:30 – 18:30 (9h)" → "09:30 – 18:30"
+            const shiftMatch = cell.match(/(\d{1,2}:\d{2})\s*[–\-]\s*(\d{1,2}:\d{2})/);
+            const shift = shiftMatch ? `${shiftMatch[1]} – ${shiftMatch[2]}` : cell.split("(")[0].trim();
+
             try {
-                // Normalise la date : "2026-03-18", "18/03/2026", etc.
-                let dateStr = dateRaw.trim();
-                if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) {
-                    const [d, m, y] = dateStr.split("/");
-                    dateStr = `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
-                }
-                const parsedDate = new Date(dateStr);
-                if (isNaN(parsedDate.getTime())) { errors.push(`Date invalide : "${dateRaw}"`); continue; }
-
-                const employee = employeeName ? employees.find(emp => emp.name.toLowerCase() === employeeName.toLowerCase()) : undefined;
-                const period = planningName ? periods.find(p => p.name.toLowerCase() === planningName.toLowerCase()) : undefined;
-                await apiFetchClient("/planning", {
-                    method: "POST",
-                    body: JSON.stringify({
-                        date: `${dateStr}T00:00:00.000Z`,
-                        shift,
-                        employeeId: employee?.id ?? undefined,
-                        note: note || undefined,
-                        planningId: period?.id ?? undefined,
-                    }),
-                });
-                ok++;
+              await apiFetchClient("/planning", {
+                method: "POST",
+                body: JSON.stringify({ date: `${date}T00:00:00.000Z`, shift, employeeId: employee.id }),
+              });
+              ok_errors.ok++;
             } catch (err: unknown) {
-                errors.push(`Erreur ligne "${cols.join(",")}" : ${err instanceof Error ? err.message : 'inconnue'}`);
+              ok_errors.errors.push(`${empName} ${date}: ${err instanceof Error ? err.message : "erreur"}`);
             }
+          }
         }
-        setCsvResult({ ok, errors });
-        // Refresh data
-        const [updatedPds, updatedEntries] = await Promise.all([
-            apiFetchClient<PlanningPeriod[]>("/planning/periods"),
-            apiFetchClient<PlanningEntry[]>("/planning"),
-        ]);
-        setPeriods(updatedPds);
-        const pIds = new Set(updatedPds.flatMap(p => p.entries.map(e => e.id)));
-        setOrphanEntries(updatedEntries.filter(e => !pIds.has(e.id)));
+      } else {
+        // ── FORMAT VERTICAL (date, shift, employé, note, planning) ──────
+        const dataRows = allRows.filter(r => r.length >= 2 && r[0]);
+        for (const cols of dataRows) {
+          const [dateRaw, shift, employeeName, note, planningName] = cols;
+          if (!dateRaw || !shift) continue;
+          let dateStr = dateRaw.trim();
+          if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) {
+            const [d, m, y] = dateStr.split("/");
+            dateStr = `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+          }
+          if (isNaN(new Date(dateStr).getTime())) { ok_errors.errors.push(`Date invalide : "${dateRaw}"`); continue; }
+
+          const employee = employeeName ? employees.find(emp => emp.name.toLowerCase() === employeeName.toLowerCase()) : undefined;
+          const period = planningName ? periods.find(p => p.name.toLowerCase() === planningName.toLowerCase()) : undefined;
+          try {
+            await apiFetchClient("/planning", {
+              method: "POST",
+              body: JSON.stringify({
+                date: `${dateStr}T00:00:00.000Z`, shift,
+                employeeId: employee?.id,
+                note: note || undefined,
+                planningId: period?.id,
+              }),
+            });
+            ok_errors.ok++;
+          } catch (err: unknown) {
+            ok_errors.errors.push(`Ligne "${cols.join(",")}" : ${err instanceof Error ? err.message : "erreur"}`);
+          }
+        }
+      }
+
+      setCsvResult(ok_errors);
+      const [updatedPds, updatedEntries] = await Promise.all([
+        apiFetchClient<PlanningPeriod[]>("/planning/periods"),
+        apiFetchClient<PlanningEntry[]>("/planning"),
+      ]);
+      setPeriods(updatedPds);
+      const pIds = new Set(updatedPds.flatMap(p => p.entries.map(e => e.id)));
+      setOrphanEntries(updatedEntries.filter(e => !pIds.has(e.id)));
     } catch {
-        alert("Erreur lors de l'import");
+      alert("Erreur lors de l'import");
     } finally {
-        setCsvImporting(false);
-        e.target.value = "";
+      setCsvImporting(false);
+      e.target.value = "";
     }
   };
 
