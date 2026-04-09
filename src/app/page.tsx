@@ -18,12 +18,12 @@ const fadeUp = (delay = 0) => ({
 });
 
 const FEATURES = [
-  { icon: Calendar, color: "text-blue-400", bg: "bg-blue-500/10", title: "Planning intelligent", desc: "Construisez des plannings en quelques clics. Visualisez les disponibilités, gérez les conflits et exportez en Excel instantanément." },
-  { icon: ClipboardCheck, color: "text-cyan-400", bg: "bg-cyan-500/10", title: "Demandes & congés", desc: "Vos employés soumettent leurs demandes directement depuis l'app. Validez ou refusez en un clic, avec historique complet." },
-  { icon: Users, color: "text-indigo-400", bg: "bg-indigo-500/10", title: "Gestion d'équipe", desc: "Onboardez vos collaborateurs par invitation email. Gérez les rôles, profils et accès depuis un tableau de bord centralisé." },
-  { icon: ShieldCheck, color: "text-emerald-400", bg: "bg-emerald-500/10", title: "Sécurité & conformité", desc: "Données chiffrées, hébergement cloud RGPD, tokens JWT rotatifs. Votre sécurité est notre priorité numéro un." },
-  { icon: Zap, color: "text-amber-400", bg: "bg-amber-500/10", title: "Rapide & responsive", desc: "Interface optimisée mobile et bureau. Accès instantané au planning depuis n'importe quel appareil, n'importe où." },
-  { icon: BarChart3, color: "text-rose-400", bg: "bg-rose-500/10", title: "Statistiques en temps réel", desc: "Suivez le taux de présence, les heures travaillées et les tendances de demandes. Prenez de meilleures décisions." },
+  { icon: Calendar, color: "text-blue-400", bg: "bg-blue-500/10", title: "Shifts sans conflits", desc: "Glissez-déposez les shifts, les chevauchements se détectent tout seuls. Vos plannings sont prêts en minutes, pas en heures." },
+  { icon: ClipboardCheck, color: "text-cyan-400", bg: "bg-cyan-500/10", title: "Congés en 10 secondes", desc: "Un employé pose une demande, vous recevez une alerte. Validez ou refusez d'un tap — l'historique se met à jour seul." },
+  { icon: Users, color: "text-indigo-400", bg: "bg-indigo-500/10", title: "Onboarding en 2 minutes", desc: "Envoyez un lien d'invitation. Votre collaborateur rejoint l'équipe et voit son planning immédiatement. Zéro formation." },
+  { icon: ShieldCheck, color: "text-emerald-400", bg: "bg-emerald-500/10", title: "Vos données restent les vôtres", desc: "Hébergement européen, chiffrement AES-256, conformité RGPD totale. Vous gardez le contrôle, on assure la protection." },
+  { icon: Zap, color: "text-amber-400", bg: "bg-amber-500/10", title: "Conçu pour le terrain", desc: "Utilisable d'une main dans un couloir. L'interface s'adapte à votre téléphone, votre tablette et votre bureau." },
+  { icon: BarChart3, color: "text-rose-400", bg: "bg-rose-500/10", title: "Décisions basées sur des faits", desc: "Taux de présence, heures effectuées, pics d'activité. Vos données RH en un coup d'œil, sans ouvrir un tableur." },
 ];
 
 export default function Home() {
@@ -106,7 +106,7 @@ export default function Home() {
       <section className="relative flex flex-col items-center justify-center px-6 pt-48 pb-32">
         <motion.div {...fadeUp(0)} className="mb-6 flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 backdrop-blur-sm">
           <Sparkles size={12} className="text-blue-400" />
-          <span className="text-[10px] font-bold uppercase tracking-widest text-blue-200">Next Gen Management</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-blue-200">Gestion d&apos;équipe simplifiée</span>
         </motion.div>
 
         <motion.h1
@@ -121,7 +121,7 @@ export default function Home() {
           {...fadeUp(0.2)}
           className="mt-10 max-w-2xl text-center text-lg leading-relaxed text-slate-400 sm:text-xl"
         >
-          Shiftly redéfinit la planification d&apos;équipe. Une interface brutale, une vitesse insolente et une intelligence qui travaille pour vous.
+          Plannings construits en minutes. Absences gérées en un clic. Équipe notifiée instantanément. Shiftly remplace vos fichiers Excel — pour toujours.
         </motion.p>
 
         <motion.div {...fadeUp(0.3)} className="mt-12 flex flex-col items-center gap-6 sm:flex-row">
@@ -249,7 +249,7 @@ export default function Home() {
       {/* ── SOCIAL PROOF ── */}
       <section className="border-y border-white/5 bg-white/[0.01] py-10">
         <div className="mx-auto max-w-5xl px-6">
-          <p className="mb-8 text-center text-[10px] font-black uppercase tracking-widest text-slate-600">Ils font confiance à Shiftly</p>
+          <p className="mb-8 text-center text-[10px] font-black uppercase tracking-widest text-slate-600">Des équipes qui travaillent mieux</p>
           <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6">
             {["Hôtel Riviera", "Clinic Pro", "RestauGroup", "LogiTeam", "SportZen"].map((name) => (
               <span key={name} className="text-sm font-black tracking-tight text-white/10">{name.toUpperCase()}</span>
@@ -262,8 +262,8 @@ export default function Home() {
       <section id="features" className="mx-auto max-w-7xl px-6 py-24">
         <div className="mb-16 text-center">
           <motion.p {...fadeUp(0)} className="mb-3 text-[10px] font-black uppercase tracking-widest text-blue-500">Fonctionnalités</motion.p>
-          <motion.h2 {...fadeUp(0.05)} className="text-5xl font-black tracking-tighter sm:text-6xl">TOUT CE DONT<br />VOUS AVEZ BESOIN.</motion.h2>
-          <motion.p {...fadeUp(0.1)} className="mx-auto mt-6 max-w-xl text-slate-500">Une suite d&apos;outils pensés pour les managers modernes qui veulent reprendre le contrôle de leur temps.</motion.p>
+          <motion.h2 {...fadeUp(0.05)} className="text-5xl font-black tracking-tighter sm:text-6xl">UN SEUL OUTIL.<br />TOUT LE CONTRÔLE.</motion.h2>
+          <motion.p {...fadeUp(0.1)} className="mx-auto mt-6 max-w-xl text-slate-500">Fini les fichiers partagés, les messages WhatsApp et les doublons. Tout au même endroit, accessible depuis n&apos;importe où.</motion.p>
         </div>
 
         {/* Bento grid */}
@@ -275,8 +275,8 @@ export default function Home() {
             <div className="absolute top-0 right-0 p-8">
               <Calendar size={120} className="text-blue-500/10 group-hover:text-blue-500/20 transition-colors" />
             </div>
-            <h3 className="text-3xl font-bold tracking-tighter">Planning Intelligent</h3>
-            <p className="mt-4 max-w-xs text-slate-400">Algorithmes d&apos;optimisation pour éviter les conflits et maximiser la présence. Export Excel en un clic.</p>
+            <h3 className="text-3xl font-bold tracking-tighter">Planning Visuel</h3>
+            <p className="mt-4 max-w-xs text-slate-400">Visualisez 4 semaines d&apos;un seul coup d&apos;œil. Détectez les conflits avant qu&apos;ils arrivent. Exportez en Excel en un clic.</p>
             <div className="mt-8 flex gap-2">
               <div className="h-1 flex-1 rounded-full bg-blue-600" />
               <div className="h-1 flex-1 rounded-full bg-white/10" />
@@ -285,8 +285,8 @@ export default function Home() {
           </motion.div>
           <motion.div {...fadeUp(0.2)} className="col-span-1 rounded-[2.5rem] border border-white/5 bg-[#0A0A0A] p-8 md:col-span-3">
             <ShieldCheck className="mb-4 text-emerald-400" size={32} />
-            <h3 className="text-xl font-bold tracking-tight">Sécurité Militaire</h3>
-            <p className="mt-2 text-sm text-slate-500">Chiffrement end-to-end, tokens JWT rotatifs et isolation des données pour une tranquillité totale.</p>
+            <h3 className="text-xl font-bold tracking-tight">Confiance totale</h3>
+            <p className="mt-2 text-sm text-slate-500">Hébergement européen, chiffrement de bout en bout. Vos données n&apos;appartiennent qu&apos;à vous.</p>
           </motion.div>
           <motion.div {...fadeUp(0.3)} className="col-span-1 rounded-[2.5rem] border border-white/5 bg-white/[0.02] p-8 md:col-span-1">
             <Users className="text-blue-400" size={24} />
@@ -327,14 +327,14 @@ export default function Home() {
       <section id="how" className="py-32 px-6 border-t border-white/5 bg-[#030303]">
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
-            <motion.h2 {...fadeUp(0)} className="text-5xl font-black tracking-tighter sm:text-7xl">FLUX DE TRAVAIL.</motion.h2>
-            <motion.p {...fadeUp(0.1)} className="max-w-xs text-slate-500 text-sm italic">&quot;La simplicité est la sophistication suprême.&quot;</motion.p>
+            <motion.h2 {...fadeUp(0)} className="text-5xl font-black tracking-tighter sm:text-7xl">3 ÉTAPES.<br />C&apos;EST TOUT.</motion.h2>
+            <motion.p {...fadeUp(0.1)} className="max-w-xs text-slate-500 text-sm italic">&quot;La meilleure interface est celle qu&apos;on n&apos;a pas besoin d&apos;expliquer.&quot;</motion.p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
             {[
-              { t: "CONNECTEZ", d: "Créez votre organisation et obtenez votre code unique en 30 secondes. Invitez votre équipe par email." },
-              { t: "ORGANISEZ", d: "Construisez vos plannings, gérez les demandes de congés et suivez les présences en temps réel." },
-              { t: "DÉPLOYEZ", d: "Un clic pour notifier toute votre équipe. Planning accessible sur mobile et desktop, partout." }
+              { t: "CRÉEZ", d: "Ouvrez votre espace en 30 secondes. Générez votre code d'équipe, invitez par email — vos collaborateurs sont opérationnels avant la fin de la journée." },
+              { t: "PLANIFIEZ", d: "Construisez vos plannings par glisser-déposer. Gérez les congés, les remplacements et les absences depuis un seul écran." },
+              { t: "PARTAGEZ", d: "Un clic pour notifier toute votre équipe. Chacun consulte son planning en temps réel sur son téléphone, sans compte supplémentaire." }
             ].map((step, i) => (
               <motion.div key={step.t} {...fadeUp(i * 0.1)} className="group cursor-default">
                 <div className="text-xs font-black text-blue-600 mb-4 italic">0{i + 1} —</div>
@@ -352,9 +352,9 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-8 text-center md:grid-cols-4">
             {[
               { val: "10h", label: "économisées / semaine" },
-              { val: "100%", label: "cloud & sécurisé" },
+              { val: "0€", label: "pour commencer" },
               { val: "< 2min", label: "pour démarrer" },
-              { val: "7j/7", label: "support disponible" },
+              { val: "100%", label: "données en Europe" },
             ].map((s) => (
               <motion.div key={s.label} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.4 }}>
                 <p className="text-4xl font-black text-blue-400 sm:text-5xl">{s.val}</p>
@@ -365,15 +365,74 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── ATELIER BANNER ── */}
+      <section className="py-16 px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          className="mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] border border-white/5 bg-[#0A0A0A] relative min-h-[480px] flex"
+        >
+          {/* Background image */}
+          <div
+            className="absolute inset-0 bg-cover bg-center opacity-25"
+            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=1400&q=80')" }}
+          />
+          {/* Gradient overlay gauche→droite */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0A] via-[#0A0A0A]/80 to-transparent" />
+          {/* Gradient overlay haut→bas subtil */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/60 via-transparent to-transparent" />
+
+          {/* Content */}
+          <div className="relative z-10 flex flex-col justify-center p-10 md:p-16 max-w-2xl">
+            <h2 className="text-4xl font-black leading-[1.05] tracking-tighter sm:text-5xl md:text-6xl">
+              AMÉLIOREZ VOTRE<br />
+              <span className="bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">
+                QUALITÉ DE TRAVAIL
+              </span>
+            </h2>
+
+            <p className="mt-6 max-w-md text-base leading-relaxed text-slate-400">
+              Chaque shift au bon endroit. Chaque employé au bon moment. Shiftly transforme la complexité de vos plannings en quelques clics — sans formation, sans migration, sans friction.
+            </p>
+
+            <div className="mt-10 flex flex-wrap items-center gap-4">
+              <Link
+                href="/signup"
+                className="group inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-white px-8 text-sm font-black text-black transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.15)] active:scale-95"
+              >
+                Essayer gratuitement <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+              </Link>
+              <a
+                href="#how"
+                className="text-sm font-bold text-slate-400 underline decoration-blue-500 underline-offset-8 hover:text-white transition"
+              >
+                Comment ça marche
+              </a>
+            </div>
+          </div>
+
+          {/* Image visible côté droit sur grand écran */}
+          <div className="hidden md:block absolute right-0 top-0 bottom-0 w-[45%]">
+            <div
+              className="h-full w-full bg-cover bg-center"
+              style={{ backgroundImage: "url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=1400&q=80')" }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0A] to-transparent" />
+          </div>
+        </motion.div>
+      </section>
+
       {/* ── CTA ── */}
       <section id="pricing" className="py-32 px-6">
         <div className="mx-auto max-w-7xl bg-white rounded-[3rem] p-12 md:p-24 text-black flex flex-col md:flex-row items-center justify-between gap-12 overflow-hidden relative">
           <div className="absolute top-0 right-0 w-64 h-64 bg-blue-100 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
           <div className="max-w-xl relative">
-            <h2 className="text-5xl md:text-7xl font-black tracking-tighter leading-none">REJOIGNEZ LE FUTUR.</h2>
-            <p className="mt-8 text-xl font-medium opacity-60">Prêt à transformer la gestion de vos ressources humaines ?</p>
+            <h2 className="text-5xl md:text-7xl font-black tracking-tighter leading-none">FINI LES<br />TABLEURS.</h2>
+            <p className="mt-8 text-xl font-medium opacity-60">Rejoignez les managers qui ont repris le contrôle de leur temps. Gratuit pour commencer, payant quand ça vous convient.</p>
             <div className="mt-8 flex flex-wrap gap-4 text-sm font-semibold text-black/50">
-              {["Aucune CB requise", "Déploiement en 2 min", "RGPD Friendly"].map((t) => (
+              {["Annulation à tout moment", "Migration assistée", "Support réactif"].map((t) => (
                 <span key={t} className="flex items-center gap-1.5">
                   <CheckCircle2 size={14} className="text-emerald-500" /> {t}
                 </span>
@@ -398,7 +457,7 @@ export default function Home() {
             <div className="flex items-center gap-2 mb-6">
               <span className="font-black tracking-tighter">SHIFTLY</span>
             </div>
-            <p className="text-slate-500 text-sm max-w-[240px] leading-relaxed">L&apos;excellence opérationnelle pour les managers qui ne s&apos;arrêtent jamais.</p>
+            <p className="text-slate-500 text-sm max-w-[240px] leading-relaxed">Le planning de vos équipes, simplement.</p>
             <p className="mt-4 text-xs text-slate-600">
               Fait par{" "}
               <a href="https://www.sayehahmed.com" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-500 hover:text-blue-400 transition">
