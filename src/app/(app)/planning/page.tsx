@@ -366,8 +366,7 @@ export default function PlanningPage() {
             empName.toLowerCase().includes(emp.name.toLowerCase())
           );
           if (!employee) {
-            ok_errors.errors.push(`Employé "${empName}" introuvable — créneaux ignorés`);
-            continue;
+            ok_errors.errors.push(`Employé "${empName}" introuvable en base — créneaux importés sans assignation`);
           }
 
           for (const { idx, date } of dayCols) {
@@ -381,7 +380,7 @@ export default function PlanningPage() {
             try {
               await apiFetchClient("/planning", {
                 method: "POST",
-                body: JSON.stringify({ date: `${date}T00:00:00.000Z`, shift, employeeId: employee.id }),
+                body: JSON.stringify({ date: `${date}T00:00:00.000Z`, shift, employeeId: employee?.id }),
               });
               ok_errors.ok++;
             } catch (err: unknown) {
