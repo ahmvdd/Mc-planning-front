@@ -41,7 +41,9 @@ export default function PlanningPage() {
   const [employees, setEmployees] = useState<EmployeeOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [me, setMe] = useState<{ role?: string; sub?: number } | null>(null);
-  type SlotData = { type: 'image'; url: string } | { type: 'excel'; rows: string[][]; name: string };
+  type SlotData =
+    | { type: 'image'; url: string }
+    | { type: 'excel'; rows: string[][]; name: string; importedIds?: number[] };
   const [slot1, setSlot1] = useState<SlotData | null>(null);
   const [slot2, setSlot2] = useState<SlotData | null>(null);
   const [uploading1, setUploading1] = useState(false);
@@ -230,6 +232,16 @@ export default function PlanningPage() {
     }
   };
 
+  const refreshPlanningData = async () => {
+    const [updatedPds, updatedEntries] = await Promise.all([
+      apiFetchClient<PlanningPeriod[]>('/planning/periods'),
+      apiFetchClient<PlanningEntry[]>('/planning'),
+    ]);
+    setPeriods(updatedPds);
+    const pIds = new Set(updatedPds.flatMap(p => p.entries.map(e => e.id)));
+    setOrphanEntries(updatedEntries.filter(e => !pIds.has(e.id)));
+  };
+
   const handleSlotUpload = async (e: React.ChangeEvent<HTMLInputElement>, slot: 1 | 2) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -242,29 +254,47 @@ export default function PlanningPage() {
 
     try {
       if (isExcel || isCsv) {
-        let rows: string[][];
+        // Import CSV/XLSX directement en DB
+        const token = getToken();
+        const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:3000/api';
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const res = await fetch(`${API_BASE}/planning/import`, {
+          method: 'POST',
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          body: formData,
+        });
+
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({})) as { message?: string };
+          throw new Error(body.message || `Import failed ${res.status}`);
+        }
+
+        const result = await res.json() as { created: number; errors: string[]; ids?: number[] };
+        await refreshPlanningData();
+        alert(`Planning importé (${result.created} créneaux).`);
+
+        if (result.errors?.length) {
+          setCsvResult({ ok: result.created, errors: result.errors });
+        }
+
         if (isExcel) {
           const buffer = await file.arrayBuffer();
           const wb = XLSX.read(buffer, { type: 'array', cellDates: true });
           const ws = wb.Sheets[wb.SheetNames[0]];
           const data = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, raw: false, dateNF: 'yyyy-mm-dd' });
-          rows = (data as unknown[][]).filter((r) => r.length > 0).map((r) =>
+          const rows = (data as unknown[][]).filter((r) => r.length > 0).map((r) =>
             r.map((c) => (c instanceof Date ? c.toISOString().slice(0, 10) : (c != null ? String(c) : '')))
           );
+          setSlot({ type: 'excel', rows, name: file.name, importedIds: result.ids });
         } else {
           const text = await file.text();
-          rows = text.split('\n').filter(Boolean).map(l =>
+          const rows = text.split('\n').filter(Boolean).map(l =>
             l.split(',').map(c => c.trim().replace(/^"|"$/g, ''))
           );
+          setSlot({ type: 'excel', rows, name: file.name, importedIds: result.ids });
         }
-        const slotData: SlotData = { type: 'excel', rows, name: file.name };
-        // Sauvegarder en DB via le même endpoint image (préfixe __EXCEL__)
-        const endpoint = slot === 2 ? '/admin/planning-image2' : '/admin/planning-image';
-        await apiFetchClient<{ planningImageUrl?: string; planningImageUrl2?: string }>(endpoint, {
-          method: 'POST',
-          body: JSON.stringify({ imageData: '__EXCEL__' + JSON.stringify(slotData) }),
-        });
-        setSlot(slotData);
       } else {
         // Image upload
         const reader = new FileReader();
@@ -296,6 +326,20 @@ export default function PlanningPage() {
 
   const handleDeleteSlot = async (slot: 1 | 2) => {
     const setSlot = slot === 1 ? setSlot1 : setSlot2;
+    const currentSlot = slot === 1 ? slot1 : slot2;
+
+    if (currentSlot?.type === 'excel' && currentSlot.importedIds?.length) {
+      try {
+        await apiFetchClient('/planning/import', {
+          method: 'DELETE',
+          body: JSON.stringify({ ids: currentSlot.importedIds }),
+        });
+        await refreshPlanningData();
+      } catch {}
+      setSlot(null);
+      return;
+    }
+
     try {
       await apiFetchClient(`/admin/planning-image${slot === 2 ? '2' : ''}`, { method: 'DELETE' });
     } catch {}
