@@ -478,9 +478,9 @@ export default function Home() {
 
           <div className="grid grid-cols-2 gap-12 sm:grid-cols-3">
             {[
-              { title: "Produit", links: [["Fonctionnalités", "#features"], ["Comment ça marche", "#how"], ["Sécurité", "#"]] },
-              { title: "Compte", links: [["Connexion", "/login"], ["Inscription", "/signup"], ["Support", "#"]] },
-              { title: "Légal", links: [["Confidentialité", "#"], ["CGU", "#"], ["RGPD", "#"]] },
+              { title: "Produit", links: [["Fonctionnalités", "#fonctionnalites"], ["Comment ça marche", "#comment"], ["Sécurité", "#securite"]] },
+              { title: "Compte", links: [["Connexion", "/login"], ["Inscription", "/signup"], ["Support", "/support"]] },
+              { title: "Légal", links: [["Confidentialité", "/confidentialite"], ["CGU", "/cgu"], ["RGPD", "/rgpd"]] },
             ].map((col) => (
               <div key={col.title}>
                 <p className="mb-4 text-[9px] font-black uppercase tracking-[0.4em] text-white/40">{col.title}</p>
