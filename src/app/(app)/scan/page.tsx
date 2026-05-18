@@ -16,7 +16,6 @@ function ScanContent() {
   const [message, setMessage] = useState("");
   const [cameraActive, setCameraActive] = useState(false);
 
-  // Pointage via QR d'entrée (workplace token) — identifie le shift automatiquement
   const handleWorkplaceToken = async (workplaceToken: string) => {
     if (!getToken()) { router.push("/login"); return; }
     setStatus("loading");
@@ -42,7 +41,6 @@ function ScanContent() {
     }
   };
 
-  // Pointage via QR de créneau spécifique (token JWT entry)
   const handleEntryToken = async (token: string) => {
     if (!getToken()) { router.push("/login"); return; }
     setStatus("loading");
@@ -65,7 +63,6 @@ function ScanContent() {
     }
   };
 
-  // Si token ou workplace dans l'URL (scan direct via QR)
   useEffect(() => {
     const workplace = searchParams.get("workplace");
     if (workplace) { handleWorkplaceToken(workplace); return; }
@@ -110,7 +107,7 @@ function ScanContent() {
       );
     } catch {
       setStatus("error");
-      setMessage("Impossible d&apos;accéder à la caméra");
+      setMessage("Impossible d'accéder à la caméra");
       setCameraActive(false);
     }
   };
@@ -125,49 +122,49 @@ function ScanContent() {
 
   return (
     <div className="mx-auto max-w-md space-y-6 pb-12">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Pointer mon arrivée</h1>
-        <p className="mt-1 text-sm text-slate-500">Scannez le QR code affiché à l&apos;entrée de votre lieu de travail.</p>
+      <div className="border-b border-zinc-800 pb-6">
+        <h1 className="text-2xl font-bold tracking-tight text-white">Pointer mon arrivée</h1>
+        <p className="mt-1 text-sm text-zinc-500">Scannez le QR code affiché à l&apos;entrée de votre lieu de travail.</p>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="relative flex min-h-[300px] items-center justify-center bg-slate-950">
+      <div className="overflow-hidden rounded-xl border border-zinc-800">
+        <div className="relative flex min-h-[300px] items-center justify-center bg-zinc-950">
           <div id="qr-reader" className="w-full" />
 
           {!cameraActive && status === "idle" && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white">
-              <QrCode size={64} className="text-white/20" />
-              <p className="text-sm text-white/50">Caméra inactive</p>
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+              <QrCode size={64} className="text-zinc-800" />
+              <p className="text-sm text-zinc-600">Caméra inactive</p>
             </div>
           )}
 
           {status === "loading" && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-950/90">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-zinc-950/90">
               <Loader2 size={40} className="animate-spin text-blue-400" />
               <p className="text-sm font-medium text-white">Enregistrement...</p>
             </div>
           )}
 
           {status === "success" && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-950/90">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-zinc-950/90">
               <CheckCircle2 size={56} className="text-emerald-400" />
               <p className="text-base font-bold text-white">{message}</p>
             </div>
           )}
 
           {(status === "error" || status === "already") && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-950/90">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-zinc-950/90">
               <XCircle size={56} className={status === "already" ? "text-amber-400" : "text-rose-400"} />
               <p className="text-base font-bold text-white text-center px-6">{message}</p>
             </div>
           )}
         </div>
 
-        <div className="p-5 space-y-3">
+        <div className="p-5 space-y-3 border-t border-zinc-800">
           {!cameraActive && status !== "success" && (
             <button
               onClick={startCamera}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-bold text-white transition hover:bg-blue-700 active:scale-95"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-bold text-white transition hover:bg-blue-500 active:scale-95"
             >
               <Camera size={18} /> Ouvrir la caméra
             </button>
@@ -176,7 +173,7 @@ function ScanContent() {
           {cameraActive && (
             <button
               onClick={stopCamera}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-700 bg-zinc-800 py-3 text-sm font-bold text-zinc-300 transition hover:bg-zinc-700"
             >
               Annuler
             </button>
@@ -185,7 +182,7 @@ function ScanContent() {
           {(status === "error" || status === "already") && (
             <button
               onClick={() => setStatus("idle")}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-700 bg-zinc-800 py-3 text-sm font-bold text-zinc-300 transition hover:bg-zinc-700"
             >
               Réessayer
             </button>
@@ -194,7 +191,7 @@ function ScanContent() {
           {status === "success" && (
             <button
               onClick={() => router.push("/dashboard")}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-800 py-3 text-sm font-bold text-white transition hover:bg-zinc-700"
             >
               Retour au dashboard
             </button>
@@ -202,7 +199,7 @@ function ScanContent() {
         </div>
       </div>
 
-      <p className="text-center text-xs text-slate-400">
+      <p className="text-center text-xs text-zinc-600">
         En cas d&apos;oubli, contactez votre responsable pour un pointage manuel.
       </p>
     </div>
@@ -213,7 +210,7 @@ export default function ScanPage() {
   return (
     <Suspense fallback={
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="animate-spin text-blue-600" size={32} />
+        <Loader2 className="animate-spin text-zinc-500" size={28} />
       </div>
     }>
       <ScanContent />
