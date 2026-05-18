@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
 import {
-  Users, ClipboardList, CalendarDays, Bell, Send, Loader2, 
+  Users, ClipboardList, CalendarDays, Bell, Send, Loader2,
   TrendingUp, Clock, CheckCircle2, ArrowRight, XCircle, AlertCircle, Plus
 } from "lucide-react";
 
@@ -24,7 +24,6 @@ interface DashboardData {
   me: { role?: Role; sub?: number; name?: string } | null;
 }
 
-// --- Helpers & Constants ---
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
 
@@ -39,43 +38,13 @@ const timeAgo = (iso: string) => {
   return `Il y a ${d}j`;
 };
 
-const STATUS_CONFIG: Record<Status, { label: string; color: string; bar: string; icon: React.ReactNode }> = {
-  pending: { label: "En attente", color: "text-amber-600 bg-amber-50 border-amber-100", bar: "bg-amber-400", icon: <Clock size={12} /> },
-  approved: { label: "Validé", color: "text-emerald-600 bg-emerald-50 border-emerald-100", bar: "bg-emerald-500", icon: <CheckCircle2 size={12} /> },
-  rejected: { label: "Refusé", color: "text-rose-600 bg-rose-50 border-rose-100", bar: "bg-rose-500", icon: <XCircle size={12} /> },
-  office: { label: "Bureau", color: "text-blue-600 bg-blue-50 border-blue-100", bar: "bg-blue-500", icon: <AlertCircle size={12} /> },
+const STATUS_CONFIG: Record<Status, { label: string; color: string; bar: string; dot: string; icon: React.ReactNode }> = {
+  pending:  { label: "En attente", color: "text-amber-400 bg-amber-400/10 border-amber-400/20",   bar: "bg-amber-400",   dot: "bg-amber-400",   icon: <Clock size={12} /> },
+  approved: { label: "Validé",     color: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20", bar: "bg-emerald-400", dot: "bg-emerald-400", icon: <CheckCircle2 size={12} /> },
+  rejected: { label: "Refusé",     color: "text-rose-400 bg-rose-400/10 border-rose-400/20",       bar: "bg-rose-400",    dot: "bg-rose-400",    icon: <XCircle size={12} /> },
+  office:   { label: "Bureau",     color: "text-blue-400 bg-blue-400/10 border-blue-400/20",       bar: "bg-blue-400",    dot: "bg-blue-400",    icon: <AlertCircle size={12} /> },
 };
 
-// --- Sous-Composants ---
-
-const StatCard = ({ label, value, icon: Icon, href }: { label: string; value: number; icon: React.ElementType; href: string }) => (
-  <Link href={href} className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 transition-all hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/5">
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-sm font-medium text-slate-500">{label}</p>
-        <p className="mt-1 text-3xl font-bold text-slate-900">{value}</p>
-      </div>
-      <div className="rounded-xl bg-slate-50 p-3 text-slate-600 transition-colors group-hover:bg-blue-50 group-hover:text-blue-600">
-        <Icon size={24} />
-      </div>
-    </div>
-    <div className="mt-4 flex items-center text-xs font-bold text-blue-600 opacity-0 transition-all group-hover:opacity-100">
-      Gérer <ArrowRight size={12} className="ml-1" />
-    </div>
-  </Link>
-);
-
-const EmptyState = ({ icon: Icon, title, desc }: { icon: React.ElementType; title: string; desc: string }) => (
-  <div className="flex flex-col items-center justify-center py-12 text-center">
-    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 text-slate-300">
-      <Icon size={32} />
-    </div>
-    <h4 className="text-sm font-bold text-slate-900">{title}</h4>
-    <p className="mt-1 text-xs text-slate-500">{desc}</p>
-  </div>
-);
-
-// --- Mock data (DEV only — NEXT_PUBLIC_DEV_BYPASS=true) ---
 const DEV_BYPASS = process.env.NEXT_PUBLIC_DEV_BYPASS === "true";
 const MOCK_DATA: DashboardData = {
   me: { role: "admin", sub: 1, name: "Dev User" },
@@ -97,7 +66,6 @@ const MOCK_DATA: DashboardData = {
   ],
 };
 
-// --- Hook de données ---
 function useDashboard() {
   const [data, setData] = useState<DashboardData>({ planning: [], requests: [], employees: [], me: null });
   const [loading, setLoading] = useState(!DEV_BYPASS);
@@ -141,7 +109,6 @@ function useDashboard() {
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .slice(0, 5);
 
-    // Rappel admin : aucune entrée planning dans les 2 prochaines semaines
     const hasUpcomingInTwoWeeks = data.planning.some(
       s => new Date(s.date) >= today && new Date(s.date) <= twoWeeksFromNow
     );
@@ -157,27 +124,26 @@ export default function DashboardPage() {
   const { data, loading, error, stats } = useDashboard();
   const isAdmin = data.me?.role === "admin";
 
-  // Nom de l'utilisateur connecté — depuis me.name ou depuis la liste employees
   const userName = data.me?.name
     || data.employees.find(e => e.id === data.me?.sub)?.name
     || "utilisateur";
 
   if (loading) return (
     <div className="flex min-h-[80vh] flex-col items-center justify-center space-y-4">
-      <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
-      <p className="text-sm font-medium text-slate-500">Préparation de votre espace...</p>
+      <Loader2 className="h-8 w-8 animate-spin text-zinc-500" />
+      <p className="text-sm text-zinc-500">Préparation de votre espace...</p>
     </div>
   );
 
   if (error) return (
     <div className="flex min-h-[60vh] items-center justify-center p-4">
-      <div className="w-full max-w-md rounded-3xl border border-rose-100 bg-white p-8 text-center shadow-xl">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-rose-50 text-rose-500">
+      <div className="w-full max-w-md text-center">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-rose-500/10 text-rose-400">
           <AlertCircle size={24} />
         </div>
-        <h2 className="text-lg font-bold text-slate-900">Accès restreint</h2>
-        <p className="mt-2 text-sm text-slate-500">{error}</p>
-        <button onClick={() => window.location.reload()} className="mt-6 w-full rounded-xl bg-slate-900 py-3 text-sm font-bold text-white transition hover:bg-slate-800">
+        <h2 className="text-lg font-bold text-white">Accès restreint</h2>
+        <p className="mt-2 text-sm text-zinc-400">{error}</p>
+        <button onClick={() => window.location.reload()} className="mt-6 w-full rounded-xl bg-zinc-800 py-3 text-sm font-bold text-white transition hover:bg-zinc-700">
           Réessayer
         </button>
       </div>
@@ -186,105 +152,121 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-10 pb-12">
-      
-      {/* --- HEADER SECTION --- */}
-      <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+
+      {/* Header */}
+      <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between border-b border-zinc-800 pb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-            Bonjour, {userName} 👋
+          <h1 className="text-3xl font-bold tracking-tight text-white">
+            Bonjour, {userName}
           </h1>
-          <p className="mt-1 text-slate-500 text-sm">
+          <p className="mt-1 text-zinc-500 text-sm">
             Voici ce qu&apos;il se passe dans votre organisation aujourd&apos;hui.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Link href="/requests" className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700 hover:shadow-blue-300">
-            <Plus size={18} /> Nouvelle demande
-          </Link>
-        </div>
+        <Link href="/requests" className="flex w-fit items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-blue-500">
+          <Plus size={16} /> Nouvelle demande
+        </Link>
       </header>
 
-      {/* --- RAPPEL PLANNING ADMIN --- */}
+      {/* Planning warning */}
       {isAdmin && stats.planningWarning && (
-        <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
-          <AlertCircle size={18} className="mt-0.5 shrink-0 text-amber-500" />
+        <div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/10 px-5 py-4">
+          <AlertCircle size={16} className="mt-0.5 shrink-0 text-amber-400" />
           <div className="flex-1">
-            <p className="text-sm font-bold text-amber-800">Planning à mettre à jour</p>
-            <p className="text-xs text-amber-700 mt-0.5">Aucun créneau planifié dans les 2 prochaines semaines. Pensez à mettre à jour le planning de votre équipe.</p>
+            <p className="text-sm font-bold text-amber-300">Planning à mettre à jour</p>
+            <p className="text-xs text-amber-400/80 mt-0.5">Aucun créneau planifié dans les 2 prochaines semaines.</p>
           </div>
-          <Link href="/planning" className="shrink-0 rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-amber-600">
+          <Link href="/planning" className="shrink-0 rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-amber-400">
             Mettre à jour
           </Link>
         </div>
       )}
 
-      {/* --- STATS GRID --- */}
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Effectif" value={stats.totalEmployees} icon={Users} href="/employees" />
-        <StatCard label="En attente" value={stats.pending || 0} icon={Clock} href="/requests" />
-        <StatCard label="Planning" value={data.planning.length} icon={CalendarDays} href="/planning" />
-        <StatCard label="Total Demandes" value={stats.totalRequests} icon={ClipboardList} href="/requests" />
+      {/* Stats row — flat, no cards */}
+      <section className="flex flex-wrap gap-10 border-b border-zinc-800 pb-8">
+        {[
+          { label: "Effectif", value: stats.totalEmployees, icon: Users, href: "/employees" },
+          { label: "En attente", value: stats.pending || 0, icon: Clock, href: "/requests" },
+          { label: "Créneaux", value: data.planning.length, icon: CalendarDays, href: "/planning" },
+          { label: "Total demandes", value: stats.totalRequests, icon: ClipboardList, href: "/requests" },
+        ].map(({ label, value, icon: Icon, href }) => (
+          <Link key={label} href={href} className="group flex flex-col gap-1.5 transition-opacity hover:opacity-80">
+            <div className="flex items-center gap-1.5 text-zinc-500">
+              <Icon size={14} />
+              <span className="text-xs font-medium uppercase tracking-wider">{label}</span>
+            </div>
+            <p className="text-3xl font-bold text-white">{value}</p>
+          </Link>
+        ))}
       </section>
 
-      <div className="grid gap-8 lg:grid-cols-12">
-        {/* --- MAIN COLUMN --- */}
-        <div className="lg:col-span-8 space-y-8">
-          
-          {/* Planning — Mon planning (employé) / Planning équipe (admin) */}
-          <div className="rounded-3xl border border-slate-200 bg-white p-2 shadow-sm">
-            <div className="flex items-center justify-between p-4">
-              <h3 className="text-sm font-bold text-slate-900">
-                {isAdmin ? "Planning de l'équipe à venir" : "Mon planning à venir"}
+      <div className="grid gap-10 lg:grid-cols-12">
+
+        {/* Main column */}
+        <div className="lg:col-span-8 space-y-10">
+
+          {/* Planning à venir */}
+          <section>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+                {isAdmin ? "Planning équipe à venir" : "Mon planning à venir"}
               </h3>
-              <Link href="/planning" className="text-xs font-bold text-blue-600 hover:underline">Voir le calendrier complet</Link>
+              <Link href="/planning" className="flex items-center gap-1 text-xs font-semibold text-blue-500 hover:text-blue-400 transition-colors">
+                Voir tout <ArrowRight size={12} />
+              </Link>
             </div>
 
             {stats.upcoming.length === 0 ? (
-              <EmptyState icon={CalendarDays} title="Aucun créneau" desc={isAdmin ? "Aucun créneau planifié dans les prochains jours." : "Vous n'avez pas de sessions prévues cette semaine."} />
+              <div className="py-10 text-center">
+                <CalendarDays size={28} className="mx-auto mb-3 text-zinc-700" />
+                <p className="text-sm font-medium text-zinc-500">Aucun créneau à venir</p>
+              </div>
             ) : (
-              <div className="space-y-1">
+              <div>
                 {stats.upcoming
                   .filter(slot => isAdmin || slot.employeeId === data.me?.sub)
-                  .map((slot) => (
-                    <div key={slot.id} className="group flex items-center gap-4 rounded-2xl p-4 transition-colors hover:bg-slate-50">
-                      <div className="flex h-12 w-12 flex-col items-center justify-center rounded-xl bg-slate-900 text-white transition-transform group-hover:scale-105">
+                  .map((slot, i, arr) => (
+                    <div key={slot.id} className={`flex items-center gap-4 py-4 ${i < arr.length - 1 ? "border-b border-zinc-800/60" : ""}`}>
+                      <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-lg bg-zinc-800 text-white">
                         <span className="text-sm font-bold">{new Date(slot.date).getDate()}</span>
-                        <span className="text-[10px] font-medium uppercase opacity-70">
+                        <span className="text-[10px] font-medium uppercase text-zinc-400">
                           {new Date(slot.date).toLocaleDateString("fr-FR", { month: "short" })}
                         </span>
                       </div>
-                      <div className="flex-1">
-                        <h4 className="text-sm font-bold text-slate-900">{slot.shift}</h4>
-                        <p className="text-xs text-slate-500 capitalize">{formatDate(slot.date)}</p>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-semibold text-white">{slot.shift}</h4>
+                        <p className="text-xs text-zinc-500 capitalize">{formatDate(slot.date)}</p>
                       </div>
                       {slot.note && (
-                        <span className="rounded-lg bg-blue-50 px-3 py-1 text-[11px] font-bold text-blue-600">{slot.note}</span>
+                        <span className="rounded-md bg-blue-500/10 px-2.5 py-1 text-[11px] font-semibold text-blue-400 border border-blue-500/20">
+                          {slot.note}
+                        </span>
                       )}
                     </div>
                   ))}
               </div>
             )}
-          </div>
+          </section>
 
-          {/* Admin Insights (Progress bars) */}
+          {/* Répartition des demandes (admin) */}
           {isAdmin && (
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="mb-6 flex items-center gap-2">
-                <TrendingUp size={18} className="text-blue-600" />
-                <h3 className="text-sm font-bold text-slate-900">Répartition des demandes</h3>
+            <section>
+              <div className="flex items-center gap-2 mb-5">
+                <TrendingUp size={14} className="text-zinc-500" />
+                <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Répartition des demandes</h3>
               </div>
-              <div className="grid gap-6 sm:grid-cols-2">
+              <div className="grid gap-5 sm:grid-cols-2">
                 {(["pending", "approved", "rejected", "office"] as Status[]).map((s) => {
                   const count = (stats[s] || 0) as number;
                   const percentage = stats.totalRequests ? (count / stats.totalRequests) * 100 : 0;
                   const config = STATUS_CONFIG[s];
                   return (
                     <div key={s} className="space-y-2">
-                      <div className="flex justify-between text-xs font-bold">
-                        <span className="text-slate-600">{config.label}</span>
-                        <span className="text-slate-900">{count}</span>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-zinc-400">{config.label}</span>
+                        <span className="font-bold text-white">{count}</span>
                       </div>
-                      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                      <div className="h-1 w-full overflow-hidden rounded-full bg-zinc-800">
                         <div
                           className={`h-full rounded-full transition-all duration-1000 ${config.bar}`}
                           style={{ width: `${percentage}%` }}
@@ -294,53 +276,53 @@ export default function DashboardPage() {
                   );
                 })}
               </div>
-            </div>
+            </section>
           )}
         </div>
 
-        {/* --- SIDEBAR --- */}
+        {/* Sidebar */}
         <aside className="lg:col-span-4 space-y-8">
-          
-          {/* Notifications / Recent Requests */}
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900">
-                <Bell size={16} className="text-rose-500" /> Flux d&apos;activité
-              </h3>
+
+          {/* Flux d'activité */}
+          <section>
+            <div className="flex items-center gap-2 mb-5">
+              <Bell size={14} className="text-zinc-500" />
+              <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Flux d&apos;activité</h3>
             </div>
-            <div className="space-y-4">
-              {data.requests.slice(0, 4).map((req) => (
-                <div key={req.id} className="relative flex gap-4 pb-4 last:pb-0 last:after:hidden after:absolute after:left-[11px] after:top-8 after:h-full after:w-[1px] after:bg-slate-100">
-                  <div className={`mt-1 h-[22px] w-[22px] shrink-0 rounded-full border-2 border-white ring-2 ring-transparent flex items-center justify-center ${STATUS_CONFIG[req.status].color}`}>
+            <div>
+              {data.requests.slice(0, 4).map((req, i, arr) => (
+                <div key={req.id} className={`flex gap-3 py-3 ${i < arr.length - 1 ? "border-b border-zinc-800/60" : ""}`}>
+                  <div className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] ${STATUS_CONFIG[req.status].color}`}>
                     {STATUS_CONFIG[req.status].icon}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-slate-900 truncate">{req.type}</p>
-                    <p className="text-[11px] text-slate-500 line-clamp-1">{req.message || "Aucun message attaché"}</p>
-                    <p className="mt-1 text-[10px] font-medium text-slate-400">{timeAgo(req.createdAt)}</p>
+                    <p className="text-xs font-semibold text-white truncate">{req.type}</p>
+                    <p className="text-[11px] text-zinc-500 line-clamp-1">{req.message || "Aucun message"}</p>
+                    <p className="mt-0.5 text-[10px] text-zinc-600">{timeAgo(req.createdAt)}</p>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          </section>
 
-          {/* Quick Contact Form */}
-          <div className="rounded-3xl bg-slate-900 p-6 text-white shadow-xl">
-            <h3 className="flex items-center gap-2 text-sm font-bold">
-              <Send size={16} className="text-blue-400" /> Support Rapide
-            </h3>
-            <p className="mt-2 text-xs text-slate-400">Besoin d&apos;aide ou d&apos;un changement urgent ?</p>
-            <div className="mt-4 space-y-3">
+          {/* Support rapide */}
+          <section>
+            <div className="flex items-center gap-2 mb-5">
+              <Send size={14} className="text-zinc-500" />
+              <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Support rapide</h3>
+            </div>
+            <p className="mb-3 text-xs text-zinc-500">Besoin d&apos;aide ou d&apos;un changement urgent ?</p>
+            <div className="space-y-3">
               <textarea
-                className="w-full rounded-xl border-none bg-white/10 p-3 text-xs text-white placeholder-slate-500 outline-none ring-1 ring-white/20 focus:ring-blue-500"
+                className="w-full rounded-xl border border-zinc-700 bg-zinc-800 p-3 text-xs text-white placeholder-zinc-600 outline-none ring-0 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all resize-none"
                 placeholder="Décrivez votre besoin..."
                 rows={3}
               />
-              <button className="w-full rounded-xl bg-blue-600 py-2.5 text-xs font-bold transition hover:bg-blue-500">
+              <button className="w-full rounded-xl bg-blue-600 py-2.5 text-xs font-bold text-white transition hover:bg-blue-500">
                 Envoyer le message
               </button>
             </div>
-          </div>
+          </section>
 
         </aside>
       </div>
