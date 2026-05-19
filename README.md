@@ -1,36 +1,130 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Shiftly — Frontend
 
-## Getting Started
+Interface web de l'application de gestion de planning d'équipe **Shiftly**.  
+Fait par [Sayeh Ahmed](https://www.sayehahmed.com)
 
-First, run the development server:
+---
+
+## Stack
+
+| | |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| Langage | TypeScript |
+| Styles | Tailwind CSS v4 — palette zinc dark |
+| Animations | Framer Motion + Lenis (scroll fluide) |
+| Icons | lucide-react |
+| QR scan | html5-qrcode |
+| Excel | xlsx |
+| Déploiement | Vercel → [shiftly.site](https://shiftly.site) |
+
+---
+
+## Démarrage local
+
+**Prérequis :** Node.js 20+, backend Shiftly en cours d'exécution sur le port 3001.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Le fichier `.env.local` est déjà configuré :
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+NEXT_PUBLIC_API_BASE=http://localhost:3001/api
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+> Sur Vercel : `NEXT_PUBLIC_API_BASE=https://mcplanning-back.onrender.com/api`
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Structure des pages
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/app/
+├── page.tsx                  # Landing page (publique)
+├── (auth)/
+│   ├── login/                # Connexion
+│   ├── signup/
+│   │   ├── admin/            # Création compte admin + organisation
+│   │   └── employee/         # Inscription employé (via invitation)
+│   └── invitation/[token]/   # Acceptation invitation
+└── (app)/                    # Pages protégées (JWT requis)
+    ├── layout.tsx             # Navbar + footer dark
+    ├── dashboard/             # Vue d'ensemble + planning du jour
+    ├── planning/              # Gestion créneaux, import Excel, planning visuel
+    ├── employees/             # Liste employés (admin), profil (employé)
+    ├── requests/              # Demandes RH (congés, documents)
+    ├── pointage/              # Suivi présences du jour (admin)
+    ├── scan/                  # Scanner QR code pour pointer
+    ├── profile/               # Profil + changement mot de passe
+    └── admin/                 # Paramètres organisation (admin)
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Composants partagés
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+src/components/
+├── navbar.tsx          # Barre de navigation responsive
+├── org-title.tsx       # Nom de l'organisation en header
+├── auth-quote.tsx      # Citation decorative (pages auth)
+├── smooth-scroll.tsx   # Provider Lenis
+└── split-text.tsx      # Animation texte lettre par lettre
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Client API
+
+`src/lib/clientApi.ts` — fetch avec refresh token automatique :
+- Si une réponse `401` est reçue, appelle `POST /auth/refresh` silencieusement
+- En cas d'échec du refresh, redirige vers `/login`
+- Clés localStorage : `shiftly_token`, `shiftly_refresh_token`
+
+---
+
+## Authentification
+
+| Étape | Détail |
+|-------|--------|
+| Admin signup | Crée un `Employee` (role=admin) + une `Organization` |
+| Login | Retourne `accessToken` (15 min) + `refreshToken` (7 j) |
+| Refresh | Automatique via `clientApi.ts` sur 401 |
+| Logout | Supprime les tokens + redirect `/` |
+
+---
+
+## Rôles et accès
+
+| Page | Admin | Employé |
+|------|:-----:|:-------:|
+| `/dashboard` | ✅ | ✅ |
+| `/planning` | ✅ | ✅ lecture |
+| `/requests` | ✅ valider | ✅ créer |
+| `/employees` | ✅ | ❌ |
+| `/pointage` | ✅ | ❌ |
+| `/admin` | ✅ | ❌ |
+| `/scan` | ✅ | ✅ |
+| `/profile` | ✅ | ✅ |
+
+---
+
+## Scripts
+
+```bash
+npm run dev      # Serveur de développement (Turbopack)
+npm run build    # Build de production
+npm run start    # Serveur de production
+npm run lint     # ESLint
+```
+
+---
+
+## Repo GitHub
+
+[github.com/ahmvdd/Mc-planning-front](https://github.com/ahmvdd/Mc-planning-front)
+
+Branches : `develop` (intégration) → `main` (production)
