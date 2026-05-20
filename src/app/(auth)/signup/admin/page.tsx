@@ -26,7 +26,10 @@ export default function AdminSignupPage() {
           body: JSON.stringify({ ...form, role: "admin", status: "active" }),
         }
       );
-      if (!response.ok) throw new Error("Erreur lors de la création du compte.");
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({})) as { message?: string };
+        throw new Error(body.message || "Erreur lors de la création du compte.");
+      }
       const data = await response.json();
       setOrgCode(data.organizationCode ?? null);
       if (typeof window !== "undefined") {
