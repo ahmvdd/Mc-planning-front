@@ -18,8 +18,8 @@ export default function SupportPage() {
               icon: Mail,
               title: "Email",
               desc: "Réponse sous 24h ouvrées.",
-              action: "contact@shiftly.io",
-              href: "mailto:contact@shiftly.io",
+              action: "ahmed.sayeh67@gmail.com",
+              href: "mailto:ahmed.sayeh67@gmail.com",
             },
             {
               icon: MessageCircle,

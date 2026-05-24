@@ -135,20 +135,25 @@ export default function DashboardPage() {
     </div>
   );
 
-  if (error) return (
-    <div className="flex min-h-[60vh] items-center justify-center p-4">
-      <div className="w-full max-w-md text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-rose-500/10 text-rose-400">
-          <AlertCircle size={24} />
+  if (error) {
+    const is5xx = error.includes("500") || error.toLowerCase().includes("internal") || error.toLowerCase().includes("server");
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center p-4">
+        <div className="w-full max-w-md text-center">
+          <div className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full ${is5xx ? "bg-amber-500/10 text-amber-400" : "bg-rose-500/10 text-rose-400"}`}>
+            <AlertCircle size={24} />
+          </div>
+          <h2 className="text-lg font-bold text-white">
+            {is5xx ? "Erreur serveur" : "Accès restreint"}
+          </h2>
+          <p className="mt-2 text-sm text-zinc-400">{error}</p>
+          <button onClick={() => window.location.reload()} className="mt-6 w-full rounded-xl bg-zinc-800 py-3 text-sm font-bold text-white transition hover:bg-zinc-700">
+            Réessayer
+          </button>
         </div>
-        <h2 className="text-lg font-bold text-white">Accès restreint</h2>
-        <p className="mt-2 text-sm text-zinc-400">{error}</p>
-        <button onClick={() => window.location.reload()} className="mt-6 w-full rounded-xl bg-zinc-800 py-3 text-sm font-bold text-white transition hover:bg-zinc-700">
-          Réessayer
-        </button>
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl space-y-10 pb-12">

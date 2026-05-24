@@ -48,7 +48,7 @@ export default function CguPage() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-white/5">
-          <p className="text-xs text-white/20">Pour toute question : <a href="mailto:contact@shiftly.io" className="text-blue-400 hover:text-blue-300 transition-colors">contact@shiftly.io</a></p>
+          <p className="text-xs text-white/20">Pour toute question : <a href="mailto:ahmed.sayeh67@gmail.com" className="text-blue-400 hover:text-blue-300 transition-colors">ahmed.sayeh67@gmail.com</a></p>
         </div>
       </div>
     </div>

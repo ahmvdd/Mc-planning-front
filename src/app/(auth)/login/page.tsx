@@ -9,7 +9,7 @@ import { Mail, Lock, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("admin123");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,7 +35,10 @@ export default function LoginPage() {
           body: JSON.stringify({ email, password }),
         });
 
-        if (!response.ok) throw new Error("Identifiants invalides");
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({})) as { message?: string };
+          throw new Error(body.message || "Identifiants invalides");
+        }
 
         const data = (await response.json()) as { accessToken: string; refreshToken?: string };
         localStorage.setItem("shiftly_token", data.accessToken);
@@ -68,8 +71,7 @@ export default function LoginPage() {
 
         {/* Header */}
         <div className="px-8 py-7 border-b border-white/5">
-          <span className="text-sm font-bold tracking-tight text-white">Shiftly</span>
-          <h2 className="mt-6 text-2xl font-bold tracking-tight text-white mb-1.5">Content de vous revoir</h2>
+          <h2 className="text-2xl font-bold tracking-tight text-white mb-1.5">Content de vous revoir</h2>
           <p className="text-sm text-white/30">Entrez vos identifiants pour continuer</p>
         </div>
 
