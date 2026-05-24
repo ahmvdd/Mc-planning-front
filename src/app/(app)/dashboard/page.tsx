@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
 import {
-  Users, ClipboardList, CalendarDays, Bell, Send, Loader2,
+  Users, ClipboardList, CalendarDays, Bell, Loader2,
   TrendingUp, Clock, CheckCircle2, ArrowRight, XCircle, AlertCircle, Plus
 } from "lucide-react";
 
@@ -310,24 +310,6 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          {/* Support rapide */}
-          <section>
-            <div className="flex items-center gap-2 mb-5">
-              <Send size={14} className="text-zinc-500" />
-              <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Support rapide</h3>
-            </div>
-            <p className="mb-3 text-xs text-zinc-500">Besoin d&apos;aide ou d&apos;un changement urgent ?</p>
-            <div className="space-y-3">
-              <textarea
-                className="w-full rounded-xl border border-zinc-700 bg-zinc-800 p-3 text-xs text-white placeholder-zinc-600 outline-none ring-0 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all resize-none"
-                placeholder="Décrivez votre besoin..."
-                rows={3}
-              />
-              <button className="w-full rounded-xl bg-blue-600 py-2.5 text-xs font-bold text-white transition hover:bg-blue-500">
-                Envoyer le message
-              </button>
-            </div>
-          </section>
 
         </aside>
       </div>
