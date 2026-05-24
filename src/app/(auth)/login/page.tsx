@@ -71,8 +71,7 @@ export default function LoginPage() {
 
         {/* Header */}
         <div className="px-8 py-7 border-b border-white/5">
-          <span className="text-sm font-bold tracking-tight text-white">Shiftly</span>
-          <h2 className="mt-6 text-2xl font-bold tracking-tight text-white mb-1.5">Content de vous revoir</h2>
+          <h2 className="text-2xl font-bold tracking-tight text-white mb-1.5">Content de vous revoir</h2>
           <p className="text-sm text-white/30">Entrez vos identifiants pour continuer</p>
         </div>
 

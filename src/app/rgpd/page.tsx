@@ -28,7 +28,7 @@ export default function RgpdPage() {
             },
             {
               title: "Vos droits",
-              content: "Conformément aux articles 15 à 22 du RGPD, vous disposez des droits suivants : accès, rectification, suppression, limitation, portabilité et opposition. Pour exercer ces droits, contactez-nous à contact@shiftly.io.",
+              content: "Conformément aux articles 15 à 22 du RGPD, vous disposez des droits suivants : accès, rectification, suppression, limitation, portabilité et opposition. Pour exercer ces droits, contactez-nous à ahmed.sayeh67@gmail.com.",
             },
             {
               title: "Sous-traitants",
@@ -40,7 +40,7 @@ export default function RgpdPage() {
             },
             {
               title: "Délégué à la protection des données",
-              content: "Pour toute question relative à la protection de vos données, contactez notre DPO à : dpo@shiftly.io",
+              content: "Pour toute question relative à la protection de vos données, contactez notre DPO à : ahmed.sayeh67@gmail.com",
             },
             {
               title: "Réclamation",
@@ -55,7 +55,7 @@ export default function RgpdPage() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-white/5">
-          <p className="text-xs text-white/20">Contact DPO : <a href="mailto:dpo@shiftly.io" className="text-blue-400 hover:text-blue-300 transition-colors">dpo@shiftly.io</a></p>
+          <p className="text-xs text-white/20">Contact DPO : <a href="mailto:ahmed.sayeh67@gmail.com" className="text-blue-400 hover:text-blue-300 transition-colors">ahmed.sayeh67@gmail.com</a></p>
         </div>
       </div>
     </div>

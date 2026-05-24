@@ -29,7 +29,7 @@ export default function ConfidentialitePage() {
             },
             {
               title: "4. Vos droits (RGPD)",
-              content: "Conformément au RGPD, vous disposez d'un droit d'accès, de rectification, de suppression et de portabilité de vos données. Pour exercer ces droits, contactez-nous à : contact@shiftly.io",
+              content: "Conformément au RGPD, vous disposez d'un droit d'accès, de rectification, de suppression et de portabilité de vos données. Pour exercer ces droits, contactez-nous à : ahmed.sayeh67@gmail.com",
             },
             {
               title: "5. Durée de conservation",
@@ -44,7 +44,7 @@ export default function ConfidentialitePage() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-white/5">
-          <p className="text-xs text-white/20">Pour toute question : <a href="mailto:contact@shiftly.io" className="text-blue-400 hover:text-blue-300 transition-colors">contact@shiftly.io</a></p>
+          <p className="text-xs text-white/20">Pour toute question : <a href="mailto:ahmed.sayeh67@gmail.com" className="text-blue-400 hover:text-blue-300 transition-colors">ahmed.sayeh67@gmail.com</a></p>
         </div>
       </div>
     </div>

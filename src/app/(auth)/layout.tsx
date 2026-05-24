@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, Calendar } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { AuthQuote } from "@/components/auth-quote";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
@@ -20,16 +20,6 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="absolute inset-y-0 right-0 w-40 bg-gradient-to-l from-black to-transparent" />
         {/* Subtle blue tint */}
         <div className="absolute inset-0 bg-[#5a9eff]/5" />
-
-        {/* Top — Logo */}
-        <div className="relative z-10">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[#5a9eff] flex items-center justify-center">
-              <Calendar size={15} className="text-black" />
-            </div>
-            <span className="text-white font-bold tracking-tight text-base">Shiftly</span>
-          </div>
-        </div>
 
         {/* Bottom — Rotating quotes */}
         <div className="relative z-10">
@@ -63,7 +53,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </div>
 
         {/* Form centered */}
-        <div className="relative z-10 flex flex-1 items-center justify-center p-6 sm:p-10">
+        <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-6 p-6 sm:p-10">
+          <span className="text-white font-bold tracking-tight text-xl">Shiftly</span>
           {children}
         </div>
 

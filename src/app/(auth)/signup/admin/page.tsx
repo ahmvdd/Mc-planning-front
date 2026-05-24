@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  ShieldCheck, Building2, Mail, Lock, User,
+  Building2, Mail, Lock, User,
   Loader2, CheckCircle2, ArrowRight, Copy, AlertCircle,
 } from "lucide-react";
 
@@ -68,12 +68,6 @@ export default function AdminSignupPage() {
 
         {/* Header */}
         <div className="px-8 py-7 border-b border-white/5">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600/20 border border-blue-500/20">
-              <ShieldCheck size={17} className="text-blue-400" />
-            </div>
-            <span className="text-sm font-bold tracking-tight text-white">Shiftly</span>
-          </div>
           <h1 className="text-2xl font-bold tracking-tight text-white mb-1.5">Créer un espace</h1>
           <p className="text-sm text-white/30">Configurez votre organisation en 30 secondes.</p>
         </div>
