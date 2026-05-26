@@ -24,7 +24,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-[data-theme="light"] {
+[data-theme="light"] #app-root {
   --background: #f2ede4;
   --foreground: #1c1a17;
   --card: #e8e3da;
@@ -41,12 +41,12 @@ body {
   --color-zinc-200: #1e1c19;
 }
 
-[data-theme="light"] .glass-morphism {
+[data-theme="light"] #app-root .glass-morphism {
   background: rgba(0, 0, 0, 0.03);
   border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-[data-theme="light"] .glass-morphism-strong {
+[data-theme="light"] #app-root .glass-morphism-strong {
   background: rgba(0, 0, 0, 0.05);
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
