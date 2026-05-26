@@ -168,9 +168,11 @@ export default function DashboardPage() {
             Voici ce qu&apos;il se passe dans votre organisation aujourd&apos;hui.
           </p>
         </div>
-        <Link href="/requests" className="flex w-fit items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-blue-500">
-          <Plus size={16} /> Nouvelle demande
-        </Link>
+        {!isAdmin && (
+          <Link href="/requests" className="flex w-fit items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-blue-500">
+            <Plus size={16} /> Nouvelle demande
+          </Link>
+        )}
       </header>
 
       {/* Planning warning */}

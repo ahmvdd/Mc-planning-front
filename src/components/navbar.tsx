@@ -18,6 +18,8 @@ import {
   UserCircle,
   QrCode,
   ScanLine,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 export default function Navbar() {
@@ -25,8 +27,12 @@ export default function Navbar() {
   const [role, setRole] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
 
   useEffect(() => {
+    const saved = localStorage.getItem("shiftly_theme") as "dark" | "light" | null;
+    if (saved === "light") setTheme("light");
+
     const checkAuth = () => {
       const token = localStorage.getItem("shiftly_token");
       setIsAuthed(Boolean(token));
@@ -51,6 +57,17 @@ export default function Navbar() {
       window.removeEventListener("shiftly:logout", checkAuth);
     };
   }, []);
+
+  const toggleTheme = () => {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    localStorage.setItem("shiftly_theme", next);
+    if (next === "light") {
+      document.documentElement.setAttribute("data-theme", "light");
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("shiftly_token");
@@ -84,6 +101,14 @@ export default function Navbar() {
         <Link className={linkClass} href="/scan"><ScanLine size={14} /> Scanner</Link>
       )}
       <Link className={linkClass} href="/profile"><UserCircle size={14} /> Profil</Link>
+      <button
+        type="button"
+        onClick={toggleTheme}
+        className="flex items-center justify-center rounded-lg px-2.5 py-1.5 text-zinc-400 transition hover:bg-zinc-800 hover:text-white"
+        aria-label="Changer de thème"
+      >
+        {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
+      </button>
       <button
         type="button"
         onClick={handleLogout}
@@ -120,6 +145,14 @@ export default function Navbar() {
         <Link className={mobileLinkClass} href="/scan" onClick={close}><ScanLine size={18} /> Scanner</Link>
       )}
       <Link className={mobileLinkClass} href="/profile" onClick={close}><UserCircle size={18} /> Profil</Link>
+      <button
+        type="button"
+        onClick={toggleTheme}
+        className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
+      >
+        {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+        {theme === "dark" ? "Mode clair" : "Mode sombre"}
+      </button>
       <button
         type="button"
         onClick={handleLogout}
