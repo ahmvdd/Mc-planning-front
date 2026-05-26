@@ -17,11 +17,38 @@
 }
 
 body {
-  background: #000000;
+  background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+[data-theme="light"] {
+  --background: #f2ede4;
+  --foreground: #1c1a17;
+  --card: #e8e3da;
+  --border: rgba(0, 0, 0, 0.1);
+  --color-white: #1c1a17;
+  --color-zinc-950: #f2ede4;
+  --color-zinc-900: #e8e3da;
+  --color-zinc-800: #d8d3cb;
+  --color-zinc-700: #bfbab3;
+  --color-zinc-600: #4c4843;
+  --color-zinc-500: #5e5a55;
+  --color-zinc-400: #706c67;
+  --color-zinc-300: #2a2724;
+  --color-zinc-200: #1e1c19;
+}
+
+[data-theme="light"] .glass-morphism {
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .glass-morphism-strong {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .glass-morphism {
