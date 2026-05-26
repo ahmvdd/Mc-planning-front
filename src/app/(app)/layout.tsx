@@ -1,5 +1,10 @@
+import type { Metadata } from "next";
 import Navbar from "@/components/navbar";
 import OrgTitle from "@/components/org-title";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default function AppLayout({
   children,
@@ -7,7 +12,7 @@ export default function AppLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div id="app-root" className="min-h-screen bg-zinc-950">
       <div className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur-xl" style={{ paddingTop: "env(safe-area-inset-top)" }}>
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-3 sm:px-6 py-4">
           <div className="flex items-center gap-3">
