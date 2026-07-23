@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
+import { SmoothScroll } from "@/components/smooth-scroll";
 import {
   ArrowRight, Calendar, ClipboardCheck,
   ShieldCheck, BarChart3,
@@ -69,6 +70,7 @@ export default function Home() {
   }, []);
 
   return (
+    <SmoothScroll>
     <div className="min-h-screen bg-black text-white antialiased overflow-x-hidden selection:bg-[#5a9eff]/20 selection:text-[#5a9eff]">
 
       {/* NAV */}
@@ -462,5 +464,6 @@ export default function Home() {
         </div>
       </footer>
     </div>
+    </SmoothScroll>
   );
 }
