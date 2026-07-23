@@ -6,6 +6,8 @@ Backend : [Mc-planning-back](https://github.com/ahmvdd/Mc-planning-back)
 Production : [shiftly.site](https://shiftly.site)
 
 ---
+<img width="1463" height="948" alt="image" src="https://github.com/user-attachments/assets/9213dd49-974f-4f32-a8e4-6756854245f4" />
+
 
 ## Stack
 
