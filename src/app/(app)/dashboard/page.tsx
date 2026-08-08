@@ -6,16 +6,38 @@ import { useRouter } from "next/navigation";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
 import {
   Users, ClipboardList, CalendarDays, Bell, Loader2,
-  TrendingUp, Clock, CheckCircle2, ArrowRight, XCircle, AlertCircle, Plus
+  TrendingUp, Clock, CheckCircle2, ArrowRight, XCircle, AlertCircle, Plus,
+  Sparkles, Calendar, ChevronRight, RefreshCw, Layers
 } from "lucide-react";
 
 // --- Types ---
 type Role = "admin" | "employee";
 type Status = "pending" | "approved" | "rejected" | "office";
 
-interface Employee { id: number; name: string; email: string; role: Role; status: string }
-interface PlanningEntry { id: number; date: string; shift: string; note?: string | null; employeeId?: number | null }
-interface RequestItem { id: number; employeeId: number; type: string; status: Status; message?: string | null; createdAt: string }
+interface Employee {
+  id: number;
+  name: string;
+  email: string;
+  role: Role;
+  status: string;
+}
+
+interface PlanningEntry {
+  id: number;
+  date: string;
+  shift: string;
+  note?: string | null;
+  employeeId?: number | null;
+}
+
+interface RequestItem {
+  id: number;
+  employeeId: number;
+  type: string;
+  status: Status;
+  message?: string | null;
+  createdAt: string;
+}
 
 interface DashboardData {
   planning: PlanningEntry[];
@@ -38,14 +60,35 @@ const timeAgo = (iso: string) => {
   return `Il y a ${d}j`;
 };
 
-const STATUS_CONFIG: Record<Status, { label: string; color: string; bar: string; dot: string; icon: React.ReactNode }> = {
-  pending:  { label: "En attente", color: "text-amber-400 bg-amber-400/10 border-amber-400/20",   bar: "bg-amber-400",   dot: "bg-amber-400",   icon: <Clock size={12} /> },
-  approved: { label: "Validé",     color: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20", bar: "bg-emerald-400", dot: "bg-emerald-400", icon: <CheckCircle2 size={12} /> },
-  rejected: { label: "Refusé",     color: "text-rose-400 bg-rose-400/10 border-rose-400/20",       bar: "bg-rose-400",    dot: "bg-rose-400",    icon: <XCircle size={12} /> },
-  office:   { label: "Bureau",     color: "text-blue-400 bg-blue-400/10 border-blue-400/20",       bar: "bg-blue-400",    dot: "bg-blue-400",    icon: <AlertCircle size={12} /> },
+const STATUS_CONFIG: Record<Status, { label: string; badge: string; bar: string; icon: React.ReactNode }> = {
+  pending: {
+    label: "En attente",
+    badge: "text-amber-300 bg-amber-500/10 border-amber-500/30",
+    bar: "bg-amber-400",
+    icon: <Clock size={12} className="text-amber-400" />
+  },
+  approved: {
+    label: "Validé",
+    badge: "text-emerald-300 bg-emerald-500/10 border-emerald-500/30",
+    bar: "bg-emerald-400",
+    icon: <CheckCircle2 size={12} className="text-emerald-400" />
+  },
+  rejected: {
+    label: "Refusé",
+    badge: "text-rose-300 bg-rose-500/10 border-rose-500/30",
+    bar: "bg-rose-400",
+    icon: <XCircle size={12} className="text-rose-400" />
+  },
+  office: {
+    label: "Bureau",
+    badge: "text-blue-300 bg-blue-500/10 border-blue-500/30",
+    bar: "bg-blue-400",
+    icon: <AlertCircle size={12} className="text-blue-400" />
+  },
 };
 
 const DEV_BYPASS = process.env.NEXT_PUBLIC_DEV_BYPASS === "true";
+
 const MOCK_DATA: DashboardData = {
   me: { role: "admin", sub: 1, name: "Dev User" },
   employees: [
@@ -54,15 +97,15 @@ const MOCK_DATA: DashboardData = {
     { id: 3, name: "Claire Leroy", email: "claire@test.com", role: "admin", status: "active" },
   ],
   planning: [
-    { id: 1, date: new Date(Date.now() + 86400000).toISOString(), shift: "Matin 8h-16h", note: "Site A" },
-    { id: 2, date: new Date(Date.now() + 2 * 86400000).toISOString(), shift: "Après-midi 14h-22h", note: null },
-    { id: 3, date: new Date(Date.now() + 4 * 86400000).toISOString(), shift: "Nuit 22h-6h", note: "Urgence" },
+    { id: 1, date: new Date(Date.now() + 86400000).toISOString(), shift: "Matin 08h - 16h", note: "Site Principal", employeeId: 1 },
+    { id: 2, date: new Date(Date.now() + 2 * 86400000).toISOString(), shift: "Après-midi 14h - 22h", note: null, employeeId: 2 },
+    { id: 3, date: new Date(Date.now() + 4 * 86400000).toISOString(), shift: "Nuit 22h - 06h", note: "Intervention Urgente", employeeId: 1 },
   ],
   requests: [
-    { id: 1, employeeId: 1, type: "Congé annuel", status: "pending", message: "Vacances été", createdAt: new Date(Date.now() - 3600000).toISOString() },
-    { id: 2, employeeId: 2, type: "Arrêt maladie", status: "approved", message: "Certificat joint", createdAt: new Date(Date.now() - 86400000).toISOString() },
-    { id: 3, employeeId: 1, type: "Convocation bureau", status: "office", message: "Réunion RH", createdAt: new Date(Date.now() - 2 * 86400000).toISOString() },
-    { id: 4, employeeId: 3, type: "Congé sans solde", status: "rejected", message: "Demande refusée", createdAt: new Date(Date.now() - 5 * 86400000).toISOString() },
+    { id: 1, employeeId: 1, type: "Congé annuel", status: "pending", message: "Vacances d'été", createdAt: new Date(Date.now() - 3600000).toISOString() },
+    { id: 2, employeeId: 2, type: "Arrêt maladie", status: "approved", message: "Certificat transmis à la RH", createdAt: new Date(Date.now() - 86400000).toISOString() },
+    { id: 3, employeeId: 1, type: "Convocation bureau", status: "office", message: "Point trimestriel d'équipe", createdAt: new Date(Date.now() - 2 * 86400000).toISOString() },
+    { id: 4, employeeId: 3, type: "Congé sans solde", status: "rejected", message: "Période de haute activité", createdAt: new Date(Date.now() - 5 * 86400000).toISOString() },
   ],
 };
 
@@ -73,8 +116,15 @@ function useDashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    if (DEV_BYPASS) { setData(MOCK_DATA); return; }
-    if (!getToken()) { router.push("/login"); return; }
+    if (DEV_BYPASS) {
+      setData(MOCK_DATA);
+      return;
+    }
+
+    if (!getToken()) {
+      router.push("/login");
+      return;
+    }
 
     const fetchData = async () => {
       try {
@@ -129,26 +179,32 @@ export default function DashboardPage() {
     || "utilisateur";
 
   if (loading) return (
-    <div className="flex min-h-[80vh] flex-col items-center justify-center space-y-4">
-      <Loader2 className="h-8 w-8 animate-spin text-zinc-500" />
-      <p className="text-sm text-zinc-500">Préparation de votre espace...</p>
+    <div className="flex min-h-[85vh] flex-col items-center justify-center space-y-4">
+      <div className="relative flex items-center justify-center">
+        <div className="h-12 w-12 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin" />
+        <Sparkles size={16} className="absolute text-blue-400" />
+      </div>
+      <p className="text-xs font-medium tracking-wide text-zinc-400 uppercase">Chargement de votre espace...</p>
     </div>
   );
 
   if (error) {
     const is5xx = error.includes("500") || error.toLowerCase().includes("internal") || error.toLowerCase().includes("server");
     return (
-      <div className="flex min-h-[60vh] items-center justify-center p-4">
-        <div className="w-full max-w-md text-center">
-          <div className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full ${is5xx ? "bg-amber-500/10 text-amber-400" : "bg-rose-500/10 text-rose-400"}`}>
-            <AlertCircle size={24} />
+      <div className="flex min-h-[70vh] items-center justify-center p-4">
+        <div className="glass-panel w-full max-w-md rounded-2xl p-8 text-center shadow-2xl">
+          <div className={`mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl ${is5xx ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" : "bg-rose-500/10 text-rose-400 border border-rose-500/20"}`}>
+            <AlertCircle size={28} />
           </div>
-          <h2 className="text-lg font-bold text-white">
-            {is5xx ? "Erreur serveur" : "Accès restreint"}
+          <h2 className="text-xl font-bold tracking-tight text-white">
+            {is5xx ? "Problème serveur" : "Accès non autorisé"}
           </h2>
-          <p className="mt-2 text-sm text-zinc-400">{error}</p>
-          <button onClick={() => window.location.reload()} className="mt-6 w-full rounded-xl bg-zinc-800 py-3 text-sm font-bold text-white transition hover:bg-zinc-700">
-            Réessayer
+          <p className="mt-2 text-sm text-zinc-400 leading-relaxed">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 py-3 text-sm font-semibold text-white transition-all active:scale-[0.98]"
+          >
+            <RefreshCw size={15} /> Réessayer
           </button>
         </div>
       </div>
@@ -156,98 +212,150 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-10 pb-12">
+    <div className="mx-auto max-w-7xl space-y-8 pb-16 px-4 sm:px-6">
 
-      {/* Header */}
-      <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between border-b border-zinc-800 pb-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">
-            Bonjour, {userName}
-          </h1>
-          <p className="mt-1 text-zinc-500 text-sm">
-            Voici ce qu&apos;il se passe dans votre organisation aujourd&apos;hui.
-          </p>
+      {/* Header Banner */}
+      <header className="glass-panel relative overflow-hidden rounded-3xl p-6 sm:p-8">
+        <div className="absolute -right-10 -top-10 h-60 w-60 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
+        <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/10 border border-blue-500/20 px-3 py-1 text-xs font-semibold text-blue-400 mb-3">
+              <span className="h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
+              Espace {isAdmin ? "Administration" : "Collaborateur"}
+            </div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+              Ravi de vous revoir, <span className="bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">{userName}</span>
+            </h1>
+            <p className="mt-2 text-sm text-zinc-400">
+              Aperçu en temps réel de votre activité et des créneaux d&apos;équipe.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {!isAdmin && (
+              <Link 
+                href="/requests" 
+                className="glow-pill inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-5 py-3 text-sm font-bold text-white transition-all hover:opacity-95 active:scale-95"
+              >
+                <Plus size={18} /> Nouvelle demande
+              </Link>
+            )}
+            {isAdmin && (
+              <Link 
+                href="/planning" 
+                className="inline-flex items-center gap-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 px-5 py-3 text-sm font-semibold text-white transition-all active:scale-95"
+              >
+                <Calendar size={16} /> Gérer le planning
+              </Link>
+            )}
+          </div>
         </div>
-        {!isAdmin && (
-          <Link href="/requests" className="flex w-fit items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-blue-500">
-            <Plus size={16} /> Nouvelle demande
-          </Link>
-        )}
       </header>
 
       {/* Planning warning */}
       {isAdmin && stats.planningWarning && (
-        <div className="flex items-start gap-3 rounded-xl border border-amber-500/20 bg-amber-500/10 px-5 py-4">
-          <AlertCircle size={16} className="mt-0.5 shrink-0 text-amber-400" />
-          <div className="flex-1">
-            <p className="text-sm font-bold text-amber-300">Planning à mettre à jour</p>
-            <p className="text-xs text-amber-400/80 mt-0.5">Aucun créneau planifié dans les 2 prochaines semaines.</p>
+        <div className="glass-panel flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border-l-4 border-l-amber-500 p-5">
+          <div className="flex items-start gap-3">
+            <div className="rounded-xl bg-amber-500/10 p-2 text-amber-400 border border-amber-500/20 shrink-0">
+              <AlertCircle size={20} />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-amber-200">Mise à jour requise</h3>
+              <p className="text-xs text-amber-300/70 mt-0.5">Aucun créneau planifié sur les 14 prochains jours pour votre équipe.</p>
+            </div>
           </div>
-          <Link href="/planning" className="shrink-0 rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-bold text-white transition hover:bg-amber-400">
-            Mettre à jour
+          <Link href="/planning" className="shrink-0 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 px-4 py-2 text-xs font-bold text-amber-200 transition-colors text-center">
+            Planifier des shifts
           </Link>
         </div>
       )}
 
-      {/* Stats row — flat, no cards */}
-      <section className="flex flex-wrap gap-10 border-b border-zinc-800 pb-8">
+      {/* Modern Metric Cards Grid */}
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { label: "Effectif", value: stats.totalEmployees, icon: Users, href: "/employees" },
-          { label: "En attente", value: stats.pending || 0, icon: Clock, href: "/requests" },
-          { label: "Créneaux", value: data.planning.length, icon: CalendarDays, href: "/planning" },
-          { label: "Total demandes", value: stats.totalRequests, icon: ClipboardList, href: "/requests" },
-        ].map(({ label, value, icon: Icon, href }) => (
-          <Link key={label} href={href} className="group flex flex-col gap-1.5 transition-opacity hover:opacity-80">
-            <div className="flex items-center gap-1.5 text-zinc-500">
-              <Icon size={14} />
-              <span className="text-xs font-medium uppercase tracking-wider">{label}</span>
+          { label: "Membres d'équipe", value: stats.totalEmployees, icon: Users, color: "from-blue-500/20 to-indigo-500/20", iconColor: "text-blue-400", href: "/employees" },
+          { label: "En attente de validation", value: stats.pending || 0, icon: Clock, color: "from-amber-500/20 to-orange-500/20", iconColor: "text-amber-400", href: "/requests" },
+          { label: "Créneaux planifiés", value: data.planning.length, icon: CalendarDays, color: "from-emerald-500/20 to-teal-500/20", iconColor: "text-emerald-400", href: "/planning" },
+          { label: "Total demandes", value: stats.totalRequests, icon: ClipboardList, color: "from-purple-500/20 to-pink-500/20", iconColor: "text-purple-400", href: "/requests" },
+        ].map(({ label, value, icon: Icon, color, iconColor, href }) => (
+          <Link key={label} href={href} className="glass-panel glass-panel-hover group relative overflow-hidden rounded-2xl p-5">
+            <div className={`absolute -right-6 -top-6 h-24 w-24 rounded-full bg-gradient-to-br ${color} blur-2xl transition-all group-hover:scale-150`} />
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">{label}</span>
+              <div className={`rounded-xl bg-white/5 p-2.5 ${iconColor} border border-white/5`}>
+                <Icon size={18} />
+              </div>
             </div>
-            <p className="text-3xl font-bold text-white">{value}</p>
+            <div className="mt-4 flex items-baseline justify-between">
+              <span className="text-3xl font-black tracking-tight text-white">{value}</span>
+              <span className="text-xs font-medium text-zinc-500 group-hover:text-zinc-300 flex items-center gap-1 transition-colors">
+                Consulter <ChevronRight size={12} />
+              </span>
+            </div>
           </Link>
         ))}
       </section>
 
-      <div className="grid gap-10 lg:grid-cols-12">
+      {/* Main Content Layout */}
+      <div className="grid gap-8 lg:grid-cols-12">
 
-        {/* Main column */}
-        <div className="lg:col-span-8 space-y-10">
+        {/* Column Left (8 Cols) */}
+        <div className="lg:col-span-8 space-y-8">
 
-          {/* Planning à venir */}
-          <section>
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-500">
-                {isAdmin ? "Planning équipe à venir" : "Mon planning à venir"}
-              </h3>
-              <Link href="/planning" className="flex items-center gap-1 text-xs font-semibold text-blue-500 hover:text-blue-400 transition-colors">
-                Voir tout <ArrowRight size={12} />
+          {/* Planning Section */}
+          <section className="glass-panel rounded-3xl p-6 sm:p-7">
+            <div className="flex items-center justify-between border-b border-white/5 pb-5 mb-6">
+              <div className="flex items-center gap-3">
+                <div className="rounded-xl bg-blue-500/10 p-2.5 text-blue-400 border border-blue-500/20">
+                  <CalendarDays size={20} />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-white">
+                    {isAdmin ? "Planning Général de l'Équipe" : "Mon Planning Prochain"}
+                  </h2>
+                  <p className="text-xs text-zinc-400">Prochains créneaux attribués</p>
+                </div>
+              </div>
+              <Link href="/planning" className="flex items-center gap-1.5 text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors">
+                Voir tout <ArrowRight size={14} />
               </Link>
             </div>
 
             {stats.upcoming.length === 0 ? (
-              <div className="py-10 text-center">
-                <CalendarDays size={28} className="mx-auto mb-3 text-zinc-700" />
-                <p className="text-sm font-medium text-zinc-500">Aucun créneau à venir</p>
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="rounded-2xl bg-zinc-900/80 p-4 text-zinc-600 mb-3 border border-white/5">
+                  <CalendarDays size={32} />
+                </div>
+                <p className="text-sm font-semibold text-zinc-300">Aucun créneau programmée</p>
+                <p className="text-xs text-zinc-500 mt-1">Les créneaux futurs apparaîtront ici.</p>
               </div>
             ) : (
-              <div>
+              <div className="space-y-3">
                 {stats.upcoming
-                  .filter(slot => isAdmin || slot.employeeId === data.me?.sub)
-                  .map((slot, i, arr) => (
-                    <div key={slot.id} className={`flex items-center gap-4 py-4 ${i < arr.length - 1 ? "border-b border-zinc-800/60" : ""}`}>
-                      <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-lg bg-zinc-800 text-white">
-                        <span className="text-sm font-bold">{new Date(slot.date).getDate()}</span>
-                        <span className="text-[10px] font-medium uppercase text-zinc-400">
-                          {new Date(slot.date).toLocaleDateString("fr-FR", { month: "short" })}
-                        </span>
+                  .filter(slot => isAdmin || !slot.employeeId || slot.employeeId === data.me?.sub)
+                  .map((slot) => (
+                    <div 
+                      key={slot.id} 
+                      className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 p-4 transition-all"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10 text-white shadow-inner">
+                          <span className="text-base font-bold leading-none">{new Date(slot.date).getDate()}</span>
+                          <span className="text-[10px] font-medium uppercase text-zinc-400 mt-0.5">
+                            {new Date(slot.date).toLocaleDateString("fr-FR", { month: "short" })}
+                          </span>
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-bold text-white group-hover:text-blue-300 transition-colors">{slot.shift}</h4>
+                          <p className="text-xs text-zinc-400 capitalize mt-0.5">{formatDate(slot.date)}</p>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-semibold text-white">{slot.shift}</h4>
-                        <p className="text-xs text-zinc-500 capitalize">{formatDate(slot.date)}</p>
-                      </div>
+
                       {slot.note && (
-                        <span className="rounded-md bg-blue-500/10 px-2.5 py-1 text-[11px] font-semibold text-blue-400 border border-blue-500/20">
+                        <div className="inline-flex items-center gap-1.5 self-start sm:self-center rounded-xl bg-blue-500/10 px-3 py-1.5 text-xs font-semibold text-blue-300 border border-blue-500/20">
+                          <Layers size={12} />
                           {slot.note}
-                        </span>
+                        </div>
                       )}
                     </div>
                   ))}
@@ -255,25 +363,34 @@ export default function DashboardPage() {
             )}
           </section>
 
-          {/* Répartition des demandes (admin) */}
+          {/* Admin Distribution Metrics */}
           {isAdmin && (
-            <section>
-              <div className="flex items-center gap-2 mb-5">
-                <TrendingUp size={14} className="text-zinc-500" />
-                <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Répartition des demandes</h3>
+            <section className="glass-panel rounded-3xl p-6 sm:p-7">
+              <div className="flex items-center gap-3 border-b border-white/5 pb-5 mb-6">
+                <div className="rounded-xl bg-purple-500/10 p-2.5 text-purple-400 border border-purple-500/20">
+                  <TrendingUp size={20} />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-white">Statistiques des demandes</h2>
+                  <p className="text-xs text-zinc-400">Répartition globale des états de demandes</p>
+                </div>
               </div>
-              <div className="grid gap-5 sm:grid-cols-2">
+
+              <div className="grid gap-4 sm:grid-cols-2">
                 {(["pending", "approved", "rejected", "office"] as Status[]).map((s) => {
                   const count = (stats[s] || 0) as number;
-                  const percentage = stats.totalRequests ? (count / stats.totalRequests) * 100 : 0;
+                  const percentage = stats.totalRequests ? Math.round((count / stats.totalRequests) * 100) : 0;
                   const config = STATUS_CONFIG[s];
                   return (
-                    <div key={s} className="space-y-2">
-                      <div className="flex justify-between text-xs">
-                        <span className="text-zinc-400">{config.label}</span>
-                        <span className="font-bold text-white">{count}</span>
+                    <div key={s} className="rounded-2xl bg-white/[0.02] border border-white/5 p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="p-1 rounded-md bg-white/5">{config.icon}</span>
+                          <span className="text-xs font-semibold text-zinc-300">{config.label}</span>
+                        </div>
+                        <span className="text-sm font-bold text-white">{count} <span className="text-xs font-normal text-zinc-500">({percentage}%)</span></span>
                       </div>
-                      <div className="h-1 w-full overflow-hidden rounded-full bg-zinc-800">
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-800/80">
                         <div
                           className={`h-full rounded-full transition-all duration-1000 ${config.bar}`}
                           style={{ width: `${percentage}%` }}
@@ -285,35 +402,46 @@ export default function DashboardPage() {
               </div>
             </section>
           )}
+
         </div>
 
-        {/* Sidebar */}
+        {/* Sidebar Right (4 Cols) */}
         <aside className="lg:col-span-4 space-y-8">
 
-          {/* Flux d'activité */}
-          <section>
-            <div className="flex items-center gap-2 mb-5">
-              <Bell size={14} className="text-zinc-500" />
-              <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-500">Flux d&apos;activité</h3>
+          {/* Activity Feed */}
+          <section className="glass-panel rounded-3xl p-6 sm:p-7">
+            <div className="flex items-center gap-3 border-b border-white/5 pb-5 mb-6">
+              <div className="rounded-xl bg-indigo-500/10 p-2.5 text-indigo-400 border border-indigo-500/20">
+                <Bell size={20} />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-white">Activité récente</h2>
+                <p className="text-xs text-zinc-400">Dernières requêtes de l&apos;équipe</p>
+              </div>
             </div>
-            <div>
-              {data.requests.slice(0, 4).map((req, i, arr) => (
-                <div key={req.id} className={`flex gap-3 py-3 ${i < arr.length - 1 ? "border-b border-zinc-800/60" : ""}`}>
-                  <div className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] ${STATUS_CONFIG[req.status].color}`}>
-                    {STATUS_CONFIG[req.status].icon}
+
+            <div className="space-y-4">
+              {data.requests.slice(0, 5).map((req) => (
+                <div key={req.id} className="relative flex gap-3.5 rounded-2xl bg-white/[0.02] border border-white/5 p-3.5 transition-all hover:bg-white/[0.04]">
+                  <div className="mt-0.5 shrink-0">
+                    <div className={`flex h-7 w-7 items-center justify-center rounded-xl border ${STATUS_CONFIG[req.status].badge}`}>
+                      {STATUS_CONFIG[req.status].icon}
+                    </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-white truncate">{req.type}</p>
-                    <p className="text-[11px] text-zinc-500 line-clamp-1">{req.message || "Aucun message"}</p>
-                    <p className="mt-0.5 text-[10px] text-zinc-600">{timeAgo(req.createdAt)}</p>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs font-bold text-white truncate">{req.type}</p>
+                      <span className="text-[10px] text-zinc-500 shrink-0">{timeAgo(req.createdAt)}</span>
+                    </div>
+                    <p className="text-xs text-zinc-400 mt-1 line-clamp-2">{req.message || "Aucune précision apportée."}</p>
                   </div>
                 </div>
               ))}
             </div>
           </section>
 
-
         </aside>
+
       </div>
     </div>
   );
