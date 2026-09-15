@@ -80,6 +80,27 @@ body {
   box-shadow: 0 0 15px -3px rgba(59, 130, 246, 0.3);
 }
 
+.dot-grid-dark {
+  background-color: #000;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.dot-grid-light {
+  background-color: #f2f2f0;
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.14) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-ticker {
+  animation: ticker 28s linear infinite;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
