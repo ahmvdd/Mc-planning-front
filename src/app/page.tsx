@@ -8,8 +8,15 @@ import { SmoothScroll } from "@/components/smooth-scroll";
 import {
   ArrowRight, Calendar, ClipboardCheck,
   ShieldCheck, BarChart3,
-  Menu, X, ChevronRight,
+  Menu, X, Lock,
 } from "lucide-react";
+
+const NAV_LINKS: [string, string][] = [
+  ["Fonctionnalités", "#features"],
+  ["Comment ça marche", "#steps"],
+  ["Notre histoire", "#histoire"],
+  ["Sécurité", "#security"],
+];
 
 const fadeUp = {
   initial: { opacity: 0, y: 24 },
@@ -63,6 +70,11 @@ export default function Home() {
   const heroScale = useTransform(scrollYProgress, [0, 0.6], [1, 0.92]);
 
   useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileOpen]);
+
+  useEffect(() => {
     if (getToken()) {
       apiFetchClient<{ email?: string; role?: string }>("/auth/me")
         .then(setMe).catch(() => setMe(null));
@@ -71,129 +83,157 @@ export default function Home() {
 
   return (
     <SmoothScroll>
-    <div className="min-h-screen bg-black text-white antialiased overflow-x-hidden selection:bg-[#5a9eff]/20 selection:text-[#5a9eff]">
+    <div className="min-h-screen bg-black text-white antialiased overflow-x-hidden selection:bg-[#3b82f6]/20 selection:text-[#3b82f6]">
 
-      {/* NAV */}
-      <nav className="fixed top-4 inset-x-4 sm:top-6 sm:inset-x-6 z-[100] flex flex-col items-center gap-2">
-        <div className="w-full max-w-7xl h-14 rounded-full glass-morphism-strong px-5 sm:px-8 flex items-center justify-between">
-          <span className="text-sm font-bold tracking-tight text-white">Shiftly</span>
+      {/* HERO — nav + contenu ancrés dans une seule section plein écran */}
+      <section ref={heroRef} className="dot-grid-dark relative h-screen w-full overflow-hidden" style={{ fontFamily: "var(--font-instrument-sans)" }}>
 
-          <div className="hidden lg:flex items-center gap-8">
-            {[
-              ["Fonctionnalités", "#features"],
-              ["Comment ça marche", "#steps"],
-              ["Sécurité", "#security"],
-            ].map(([label, href]) => (
-              <a key={label} href={href} className="text-sm font-medium text-white/50 hover:text-white transition-colors">
-                {label}
-              </a>
-            ))}
-          </div>
+        {/* Décor — pas de vidéo tant que la licence n'est pas confirmée */}
+        <div className="pointer-events-none absolute -top-[20%] left-[20%] h-[600px] w-[600px] rounded-full bg-blue-900/25 blur-[120px] mix-blend-screen" />
+        <div className="pointer-events-none absolute -bottom-[10%] right-[20%] h-[500px] w-[500px] rounded-full bg-indigo-900/20 blur-[120px] mix-blend-screen" />
 
-          <div className="flex items-center gap-3">
-            {me ? (
-              <Link href="/dashboard" className="hidden sm:flex h-8 px-4 rounded-full bg-[#5a9eff] text-black text-sm font-bold items-center justify-center hover:bg-[#5a9eff]/90 transition-all glow-blue-sm">
-                Dashboard
-              </Link>
-            ) : (
-              <Link href="/login" className="hidden sm:flex h-8 px-4 rounded-full bg-white text-black text-sm font-bold items-center justify-center hover:bg-white/90 transition-all">
-                Connexion
-              </Link>
-            )}
-            <button
-              className="lg:hidden flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/60 hover:text-white transition-colors"
-              onClick={() => setMobileOpen(!mobileOpen)}
-            >
-              {mobileOpen ? <X size={15} /> : <Menu size={15} />}
-            </button>
-          </div>
-        </div>
+        <motion.div style={{ opacity: heroOpacity, scale: heroScale }} className="relative z-10 flex h-full flex-col">
 
-        {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}
-            className="w-full max-w-7xl rounded-2xl glass-morphism-strong px-5 py-5 flex flex-col gap-3 lg:hidden"
-          >
-            {[
-              ["Fonctionnalités", "#features"],
-              ["Comment ça marche", "#steps"],
-              ["Sécurité", "#security"],
-            ].map(([label, href]) => (
-              <a key={label} href={href} onClick={() => setMobileOpen(false)} className="text-sm font-medium text-white/60 hover:text-white py-1 transition-colors">
-                {label}
-              </a>
-            ))}
-            <div className="border-t border-white/8 pt-3 mt-1">
-              <Link href="/login" onClick={() => setMobileOpen(false)} className="text-sm font-medium text-white/60 hover:text-white transition-colors">
-                Connexion
+          {/* NAV */}
+          <nav className="flex items-center justify-between px-5 py-5 sm:px-8 sm:py-6 lg:px-12">
+            <span className="text-lg font-semibold tracking-tight text-white">Shiftly</span>
+
+            <div className="hidden md:flex items-center gap-3">
+              <div className="flex items-center gap-1 rounded-full bg-white/10 px-1.5 py-1.5 backdrop-blur-lg">
+                {NAV_LINKS.map(([label, href]) => (
+                  <a
+                    key={label}
+                    href={href}
+                    className="rounded-full px-4 py-1.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+                  >
+                    {label}
+                  </a>
+                ))}
+              </div>
+              <Link
+                href={me ? "/dashboard" : "/signup"}
+                className="self-stretch flex items-center rounded-full px-5 text-sm font-medium text-white hover:opacity-90 transition-opacity"
+                style={{ background: "linear-gradient(to bottom, #2B2B2B, #101010)" }}
+              >
+                {me ? "Dashboard" : "Démarrer"}
               </Link>
             </div>
-          </motion.div>
-        )}
-      </nav>
 
-      {/* HERO */}
-      <section ref={heroRef} className="relative pt-36 sm:pt-52 lg:pt-64 pb-16 sm:pb-24 px-4 sm:px-6 flex flex-col items-center overflow-hidden">
-
-        {/* Background gradient */}
-        <div className="absolute inset-0 z-0">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-[#5a9eff]/8 blur-[160px] rounded-full" />
-          <div className="absolute inset-x-0 bottom-0 h-[30%] bg-gradient-to-t from-black to-transparent" />
-        </div>
-
-        <motion.div style={{ opacity: heroOpacity, scale: heroScale }} className="text-center relative z-10">
-
-          {/* Headline */}
-          <motion.h1
-            {...fadeUp} transition={{ duration: 0.8, delay: 0.1 }}
-            className="text-[clamp(3rem,12vw,9rem)] font-bold tracking-tight leading-[0.88] mb-8"
-          >
-            <span className="text-white">
-              Gérez votre équipe
-            </span>
-            <br />
-            <motion.span
-              initial={{ opacity: 0, filter: "blur(24px)", y: 8 }}
-              animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-              transition={{ duration: 1.2, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="text-white italic inline-block"
-              style={{ fontFamily: "var(--font-instrument-serif)" }}
+            <button
+              className="md:hidden relative z-50 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-lg text-white"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label="Menu"
             >
-              sans le chaos.
-            </motion.span>
-          </motion.h1>
+              <Menu size={18} className={`absolute transition-all duration-300 ${mobileOpen ? "rotate-90 scale-0 opacity-0" : "opacity-100"}`} />
+              <X size={18} className={`absolute transition-all duration-300 ${mobileOpen ? "opacity-100" : "-rotate-90 scale-0 opacity-0"}`} />
+            </button>
+          </nav>
 
-          {/* Subtitle */}
-          <motion.p
-            {...fadeUp} transition={{ duration: 0.8, delay: 0.2 }}
-            className="max-w-xl mx-auto text-white/50 text-lg md:text-xl font-medium mb-10 leading-relaxed"
+          {/* Mobile overlay */}
+          <div
+            className={`fixed inset-0 z-40 bg-black/80 backdrop-blur-md transition-opacity duration-300 md:hidden ${mobileOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+            onClick={() => setMobileOpen(false)}
+          />
+
+          {/* Mobile drawer */}
+          <div
+            className={`fixed right-0 top-0 z-40 flex h-full w-72 flex-col bg-black/90 backdrop-blur-xl transition-transform md:hidden ${mobileOpen ? "translate-x-0" : "translate-x-full"}`}
+            style={{ transitionDuration: "500ms", transitionTimingFunction: "cubic-bezier(0.16,1,0.3,1)" }}
           >
-            La plateforme tout-en-un pour le planning, les congés et la communication interne.
-            Conçu pour les équipes qui exigent de la clarté.
-          </motion.p>
-
-          {/* CTAs */}
-          <motion.div {...fadeUp} transition={{ duration: 0.8, delay: 0.3 }} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex flex-col gap-2 px-6 pt-24">
+              {NAV_LINKS.map(([label, href], i) => (
+                <a
+                  key={label}
+                  href={href}
+                  onClick={() => setMobileOpen(false)}
+                  className="rounded-xl px-4 py-3.5 text-base font-medium text-white/80 hover:bg-white/10 hover:text-white transition-all"
+                  style={{
+                    transitionProperty: "opacity, transform, background-color, color",
+                    opacity: mobileOpen ? 1 : 0,
+                    transform: mobileOpen ? "translateX(0)" : "translateX(24px)",
+                    transitionDelay: mobileOpen ? `${(i + 1) * 60}ms` : "0ms",
+                    transitionDuration: "300ms",
+                  }}
+                >
+                  {label}
+                </a>
+              ))}
+            </div>
             <Link
-              href="/signup"
-              className="h-14 px-10 rounded-full bg-white text-black font-bold text-sm hover:scale-105 hover:shadow-[0_0_50px_-10px_rgba(255,255,255,0.4)] transition-all inline-flex items-center gap-2.5"
+              href={me ? "/dashboard" : "/signup"}
+              onClick={() => setMobileOpen(false)}
+              className="mt-auto mx-6 mb-10 rounded-full px-6 py-3.5 text-center text-sm font-medium text-white transition-all"
+              style={{
+                background: "linear-gradient(to bottom, #2B2B2B, #101010)",
+                opacity: mobileOpen ? 1 : 0,
+                transform: mobileOpen ? "translateY(0)" : "translateY(16px)",
+                transitionDelay: mobileOpen ? "300ms" : "0ms",
+                transitionDuration: "400ms",
+              }}
             >
-              Démarrer gratuitement <ArrowRight size={15} />
+              {me ? "Dashboard" : "Démarrer"}
             </Link>
-            <a
-              href="#features"
-              className="h-14 px-10 rounded-full glass-morphism font-bold text-sm text-white/80 hover:bg-white/10 hover:text-white transition-all inline-flex items-center gap-2.5"
+          </div>
+
+          {/* MAIN — ancré en bas */}
+          <main className="mt-auto flex flex-col gap-6 px-5 pb-8 sm:gap-8 sm:px-8 sm:pb-12 lg:flex-row lg:items-end lg:justify-between lg:px-12 lg:pb-16">
+
+            {/* Left — headline + CTA email */}
+            <div className="max-w-xl">
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
+                className="text-3xl sm:text-4xl lg:text-[3.5rem] font-semibold leading-[1.1] tracking-tight text-white"
+              >
+                Le planning qui tourne, même sans vous.
+              </motion.h1>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}
+                className="mt-6 flex flex-col gap-3 sm:mt-8 sm:inline-flex sm:flex-row sm:items-center sm:rounded-full sm:bg-white sm:p-1.5"
+              >
+                <input
+                  type="email"
+                  placeholder="Votre email pro"
+                  className="rounded-full bg-white px-5 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none sm:w-64 sm:rounded-none sm:bg-transparent sm:px-4 sm:py-2"
+                />
+                <Link
+                  href="/signup"
+                  className="rounded-full px-6 py-3 text-center text-sm font-medium text-white hover:opacity-90 transition-opacity sm:py-2.5"
+                  style={{ background: "linear-gradient(to bottom, #2B2B2B, #101010)" }}
+                >
+                  Commencer
+                </Link>
+              </motion.div>
+            </div>
+
+            {/* Right — glass cards */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.5 }}
+              className="flex flex-col gap-4 sm:flex-row lg:w-auto lg:gap-5"
             >
-              Voir comment ça marche <ChevronRight size={15} />
-            </a>
-          </motion.div>
+              <div className="flex flex-col justify-between rounded-2xl bg-white/10 p-5 backdrop-blur-lg sm:w-64 sm:p-6">
+                <p className="text-3xl sm:text-4xl font-normal tracking-tight text-white" style={{ fontFamily: "var(--font-silkscreen)" }}>
+                  3 clics
+                </p>
+                <p className="mt-3 text-sm leading-relaxed text-white/70 sm:mt-4">
+                  Pour publier un planning complet, sans tableur.
+                </p>
+              </div>
 
-          {/* Trust */}
-          <motion.p {...fadeUp} transition={{ duration: 0.8, delay: 0.45 }} className="mt-8 text-white/20 text-xs font-medium">
-            Aucune CB requise · Setup en 2 min · Conforme RGPD
-          </motion.p>
+              <div className="rounded-2xl bg-white/10 p-5 backdrop-blur-lg sm:w-64 sm:p-6">
+                <div className="mb-3 flex items-center gap-2 sm:mb-4">
+                  <span className="flex h-6 w-6 items-center justify-center rounded bg-black">
+                    <Lock size={12} className="text-white" />
+                  </span>
+                  <span className="text-sm font-semibold text-white">Sécurité</span>
+                </div>
+                <p className="text-sm leading-relaxed text-white/80">
+                  Hébergement en France, données chiffrées, conforme RGPD.
+                </p>
+              </div>
+            </motion.div>
+          </main>
         </motion.div>
-
       </section>
 
       {/* TICKER + SPOTLIGHT */}
@@ -220,7 +260,7 @@ export default function Home() {
               "Équipes connectées",
             ].map((item, i) => (
               <span key={i} className="text-[10px] font-bold uppercase tracking-[0.35em] text-white/25 shrink-0 px-8">
-                {item} <span className="text-[#5a9eff]">·</span>
+                {item} <span className="text-[#3b82f6]">·</span>
               </span>
             ))}
           </div>
@@ -236,7 +276,7 @@ export default function Home() {
             {/* Left — text */}
             <div className="p-10 sm:p-14 flex flex-col justify-between relative z-10">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#5a9eff] mb-8">GESTION D&apos;ÉQUIPE / 001</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#3b82f6] mb-8">GESTION D&apos;ÉQUIPE / 001</p>
                 <h2 className="text-5xl sm:text-6xl font-bold tracking-tight text-white leading-[0.9] mb-6">
                   Planifiez<br />sans effort.
                 </h2>
@@ -275,7 +315,7 @@ export default function Home() {
           initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }}
           className="mb-16 text-center"
         >
-          <p className="text-xs font-bold uppercase tracking-[0.4em] text-[#5a9eff] mb-4">Fonctionnalités</p>
+          <p className="text-xs font-bold uppercase tracking-[0.4em] text-[#3b82f6] mb-4">Fonctionnalités</p>
           <h2
             className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent"
           >
@@ -290,24 +330,24 @@ export default function Home() {
               initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: i * 0.1 }} viewport={{ once: true }}
               whileHover={{ y: -4 }}
-              className="group relative glass-morphism rounded-[28px] p-7 sm:p-8 flex flex-col justify-between overflow-hidden cursor-default"
+              className="group relative glass-panel rounded-[28px] p-7 sm:p-8 flex flex-col justify-between overflow-hidden cursor-default"
             >
               {/* Hover glow */}
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(90,158,255,0.08),transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-              <div className="absolute inset-0 rounded-[28px] border border-[#5a9eff]/0 group-hover:border-[#5a9eff]/20 transition-colors duration-500 pointer-events-none" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(59, 130, 246,0.08),transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+              <div className="absolute inset-0 rounded-[28px] border border-[#3b82f6]/0 group-hover:border-[#3b82f6]/20 transition-colors duration-500 pointer-events-none" />
 
               <div className="relative z-10">
-                <div className="w-11 h-11 rounded-2xl glass-morphism flex items-center justify-center text-white/30 group-hover:text-[#5a9eff] transition-colors mb-6">
+                <div className="w-11 h-11 rounded-2xl glass-panel flex items-center justify-center text-white/30 group-hover:text-[#3b82f6] transition-colors mb-6">
                   <f.icon size={20} />
                 </div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-white/30 group-hover:text-[#5a9eff]/70 transition-colors mb-3">{f.label}</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-white/30 group-hover:text-[#3b82f6]/70 transition-colors mb-3">{f.label}</p>
                 <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-3 leading-tight">{f.title}</h3>
                 <p className="text-white/40 text-sm font-medium leading-relaxed">{f.desc}</p>
               </div>
 
               <Link
                 href={f.href}
-                className="relative z-10 mt-8 inline-flex items-center gap-1.5 text-xs font-bold text-white/30 group-hover:text-[#5a9eff] transition-colors"
+                className="relative z-10 mt-8 inline-flex items-center gap-1.5 text-xs font-bold text-white/30 group-hover:text-[#3b82f6] transition-colors"
               >
                 {f.cta} <ArrowRight size={13} />
               </Link>
@@ -320,9 +360,9 @@ export default function Home() {
           initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} viewport={{ once: true }}
           className="relative rounded-[28px] bg-[#090909] border border-white/8 p-10 sm:p-16 overflow-hidden"
         >
-          <div className="absolute top-0 right-0 w-[500px] h-[300px] bg-[#5a9eff]/5 blur-[100px] rounded-full pointer-events-none" />
+          <div className="absolute top-0 right-0 w-[500px] h-[300px] bg-[#3b82f6]/5 blur-[100px] rounded-full pointer-events-none" />
           <div className="relative z-10 max-w-2xl">
-            <ShieldCheck size={32} className="text-[#5a9eff] mb-6" />
+            <ShieldCheck size={32} className="text-[#3b82f6] mb-6" />
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[0.9] mb-5">
               <span className="bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
                 Souveraineté totale<br />des données.
@@ -333,7 +373,7 @@ export default function Home() {
             </p>
             <div className="flex flex-wrap gap-3">
               {["AES-256", "TLS 1.3", "RGPD", "99.9% Uptime", "Hébergement France"].map((tag) => (
-                <span key={tag} className="glass-morphism px-4 py-1.5 rounded-full text-xs font-bold text-white/50">
+                <span key={tag} className="glass-panel px-4 py-1.5 rounded-full text-xs font-bold text-white/50">
                   {tag}
                 </span>
               ))}
@@ -349,7 +389,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }}
             className="mb-14"
           >
-            <p className="text-xs font-bold uppercase tracking-[0.4em] text-[#5a9eff] mb-4">Comment ça marche</p>
+            <p className="text-xs font-bold uppercase tracking-[0.4em] text-[#3b82f6] mb-4">Comment ça marche</p>
             <h2 className="text-4xl sm:text-5xl font-bold tracking-tight bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
               Simple. Rapide. Efficace.
             </h2>
@@ -361,9 +401,9 @@ export default function Home() {
                 key={step.n}
                 initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: i * 0.1 }} viewport={{ once: true }}
-                className="group glass-morphism rounded-2xl p-6 flex items-start gap-6 hover:border-[#5a9eff]/20 transition-colors"
+                className="group glass-panel rounded-2xl p-6 flex items-start gap-6 hover:border-[#3b82f6]/20 transition-colors"
               >
-                <span className="text-[#5a9eff] font-bold text-xs shrink-0 mt-0.5 tabular-nums">{step.n}</span>
+                <span className="text-[#3b82f6] font-bold text-xs shrink-0 mt-0.5 tabular-nums">{step.n}</span>
                 <div>
                   <h3 className="text-base font-bold text-white mb-1.5">{step.t}</h3>
                   <p className="text-sm text-white/40 leading-relaxed font-medium">{step.d}</p>
@@ -374,23 +414,71 @@ export default function Home() {
         </div>
       </section>
 
+      {/* NOTRE HISTOIRE */}
+      <section id="histoire" className="py-24 sm:py-36 px-4 sm:px-6 max-w-7xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }}
+          className="mb-16 text-center"
+        >
+          <p className="text-xs font-bold uppercase tracking-[0.4em] text-[#3b82f6] mb-4">Notre histoire</p>
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
+            Un planning Excel de trop.
+          </h2>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} viewport={{ once: true }}
+          className="glass-panel rounded-[28px] p-10 sm:p-14 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-10 md:gap-16 items-center"
+        >
+          <div>
+            <p className="text-white/50 text-base sm:text-lg font-medium leading-relaxed mb-5">
+              Shiftly est né d&apos;un constat simple : dans beaucoup de commerces et de restaurants, le planning se
+              fait encore sur un tableur envoyé par mail ou par groupe WhatsApp. Les conflits d&apos;horaires se
+              découvrent trop tard, personne ne sait vraiment qui travaille quand, et les managers passent plus de
+              temps à corriger des erreurs qu&apos;à gérer leur équipe.
+            </p>
+            <p className="text-white/50 text-base sm:text-lg font-medium leading-relaxed">
+              J&apos;ai voulu construire l&apos;outil que ces équipes méritent : simple, clair, et qui prévient les
+              problèmes avant qu&apos;ils n&apos;arrivent. Shiftly est développé en solo, avec l&apos;objectif de
+              rester au plus près des managers et des employés qui l&apos;utilisent au quotidien.
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center text-center md:w-56 shrink-0">
+            <div className="w-20 h-20 rounded-full bg-[#3b82f6]/15 border border-[#3b82f6]/30 flex items-center justify-center text-2xl font-bold text-[#3b82f6] mb-4">
+              SA
+            </div>
+            <p className="font-bold text-white text-sm">Sayeh Ahmed</p>
+            <p className="text-white/40 text-xs font-medium mb-3">Fondateur &amp; Développeur</p>
+            <a
+              href="https://www.sayehahmed.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-semibold text-[#3b82f6] hover:text-[#3b82f6]/80 transition-colors"
+            >
+              sayehahmed.com
+            </a>
+          </div>
+        </motion.div>
+      </section>
+
       {/* CTA FINAL */}
       <section id="security" className="py-24 sm:py-36 px-4 sm:px-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(90,158,255,0.08),transparent_65%)] pointer-events-none" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#5a9eff]/6 blur-[160px] rounded-full pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(59, 130, 246,0.08),transparent_65%)] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#3b82f6]/6 blur-[160px] rounded-full pointer-events-none" />
 
         <motion.div
           initial={{ opacity: 0, scale: 0.94 }} whileInView={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1, ease: [0.19, 1, 0.22, 1] }} viewport={{ once: true }}
           className="max-w-3xl mx-auto text-center relative z-10"
         >
-          <p className="text-xs font-bold uppercase tracking-[0.4em] text-[#5a9eff] mb-6">Commencer</p>
+          <p className="text-xs font-bold uppercase tracking-[0.4em] text-[#3b82f6] mb-6">Commencer</p>
           <h2 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight leading-[0.88] mb-6">
             <span className="bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
               Fini les tableurs.<br />
             </span>
             <span
-              className="italic bg-gradient-to-b from-[#5a9eff] to-[#5a9eff]/50 bg-clip-text text-transparent"
+              className="italic bg-gradient-to-b from-[#3b82f6] to-[#3b82f6]/50 bg-clip-text text-transparent"
               style={{ fontFamily: "var(--font-instrument-serif)" }}
             >
               Bienvenue sur Shiftly.
@@ -402,13 +490,13 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/signup"
-              className="h-14 px-10 rounded-full bg-[#5a9eff] text-black font-bold text-sm hover:scale-105 hover:shadow-[0_0_60px_-10px_rgba(90,158,255,0.7)] transition-all inline-flex items-center gap-3"
+              className="h-14 px-10 rounded-full bg-[#3b82f6] text-black font-bold text-sm hover:scale-105 hover:shadow-[0_0_60px_-10px_rgba(59, 130, 246,0.7)] transition-all inline-flex items-center gap-3"
             >
               Commencer gratuitement <ArrowRight size={15} />
             </Link>
             <Link
               href="/login"
-              className="h-14 px-10 rounded-full glass-morphism font-bold text-sm text-white/60 hover:bg-white/5 hover:text-white transition-all inline-flex items-center"
+              className="h-14 px-10 rounded-full glass-panel font-bold text-sm text-white/60 hover:bg-white/5 hover:text-white transition-all inline-flex items-center"
             >
               J&apos;ai déjà un compte
             </Link>
@@ -422,7 +510,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start justify-between gap-12">
           <div>
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-7 h-7 rounded-lg bg-[#5a9eff] flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-[#3b82f6] flex items-center justify-center">
                 <Calendar size={14} className="text-black" />
               </div>
               <span className="font-bold tracking-tight text-white text-sm">SHIFTLY</span>
@@ -432,7 +520,7 @@ export default function Home() {
             </p>
             <p className="text-white/20 text-xs">
               Fait par{" "}
-              <a href="https://www.sayehahmed.com" target="_blank" rel="noopener noreferrer" className="text-[#5a9eff] hover:text-[#5a9eff]/80 transition-colors font-semibold">
+              <a href="https://www.sayehahmed.com" target="_blank" rel="noopener noreferrer" className="text-[#3b82f6] hover:text-[#3b82f6]/80 transition-colors font-semibold">
                 Sayeh Ahmed
               </a>
             </p>
