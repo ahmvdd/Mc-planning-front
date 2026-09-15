@@ -88,9 +88,16 @@ export default function Home() {
       {/* HERO — nav + contenu ancrés dans une seule section plein écran */}
       <section ref={heroRef} className="dot-grid-dark relative h-screen w-full overflow-hidden" style={{ fontFamily: "var(--font-instrument-sans)" }}>
 
-        {/* Décor — pas de vidéo tant que la licence n'est pas confirmée */}
-        <div className="pointer-events-none absolute -top-[20%] left-[20%] h-[600px] w-[600px] rounded-full bg-blue-900/25 blur-[120px] mix-blend-screen" />
-        <div className="pointer-events-none absolute -bottom-[10%] right-[20%] h-[500px] w-[500px] rounded-full bg-indigo-900/20 blur-[120px] mix-blend-screen" />
+        {/* Background video (source: motionsites.ai) */}
+        <video
+          className="absolute inset-0 h-full w-full object-cover"
+          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260803_192301_9231ed6b-c55c-4a48-909c-4ebe11cf2e11.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+        />
+        <div className="pointer-events-none absolute inset-0 bg-black/40" />
 
         <motion.div style={{ opacity: heroOpacity, scale: heroScale }} className="relative z-10 flex h-full flex-col">
 
