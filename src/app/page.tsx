@@ -7,15 +7,49 @@ import { apiFetchClient, getToken } from "@/lib/clientApi";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import {
   ArrowRight, Calendar, ClipboardCheck,
-  ShieldCheck, BarChart3,
+  ShieldCheck, BarChart3, Check,
   Menu, X, Lock,
 } from "lucide-react";
 
 const NAV_LINKS: [string, string][] = [
   ["Fonctionnalités", "#features"],
   ["Comment ça marche", "#steps"],
+  ["Tarifs", "#tarifs"],
   ["Notre histoire", "#histoire"],
   ["Sécurité", "#security"],
+];
+
+const PLANS = [
+  {
+    name: "Gratuit",
+    price: "0€",
+    period: "",
+    desc: "Pour tester avec une petite équipe.",
+    features: [
+      "Jusqu'à 5 employés",
+      "Planning & créneaux",
+      "Congés et demandes",
+      "Gestion des employés",
+    ],
+    cta: "Démarrer gratuitement",
+    highlighted: false,
+  },
+  {
+    name: "Pro",
+    price: "2€",
+    period: "/mois",
+    desc: "Prix de lancement — augmente une fois l'app stabilisée.",
+    features: [
+      "Employés illimités",
+      "Tout le plan Gratuit",
+      "Pointage par QR code",
+      "Import / export Excel",
+      "Statistiques & analytics",
+      "Logo personnalisé",
+    ],
+    cta: "Essayer le plan Pro",
+    highlighted: true,
+  },
 ];
 
 const fadeUp = {
@@ -85,7 +119,91 @@ export default function Home() {
     <SmoothScroll>
     <div className="min-h-screen bg-black text-white antialiased overflow-x-hidden selection:bg-[#3b82f6]/20 selection:text-[#3b82f6]">
 
-      {/* HERO — nav + contenu ancrés dans une seule section plein écran */}
+      {/* NAV — fixe, persiste sur toute la page */}
+      <nav
+        className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-5 py-5 sm:px-8 sm:py-6 lg:px-12"
+        style={{ fontFamily: "var(--font-instrument-sans)" }}
+      >
+        <span className="text-lg font-semibold tracking-tight text-white">Shiftly</span>
+
+        <div className="hidden md:flex items-center gap-3">
+          <div className="flex items-center gap-1 rounded-full bg-white/10 px-1.5 py-1.5 backdrop-blur-lg">
+            {NAV_LINKS.map(([label, href]) => (
+              <a
+                key={label}
+                href={href}
+                className="rounded-full px-4 py-1.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+              >
+                {label}
+              </a>
+            ))}
+          </div>
+          <Link
+            href={me ? "/dashboard" : "/signup"}
+            className="self-stretch flex items-center rounded-full px-5 text-sm font-medium text-white hover:opacity-90 transition-opacity"
+            style={{ background: "linear-gradient(to bottom, #2B2B2B, #101010)" }}
+          >
+            {me ? "Dashboard" : "Démarrer"}
+          </Link>
+        </div>
+
+        <button
+          className="md:hidden relative z-50 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-lg text-white"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label="Menu"
+        >
+          <Menu size={18} className={`absolute transition-all duration-300 ${mobileOpen ? "rotate-90 scale-0 opacity-0" : "opacity-100"}`} />
+          <X size={18} className={`absolute transition-all duration-300 ${mobileOpen ? "opacity-100" : "-rotate-90 scale-0 opacity-0"}`} />
+        </button>
+      </nav>
+
+      {/* Mobile overlay */}
+      <div
+        className={`fixed inset-0 z-40 bg-black/80 backdrop-blur-md transition-opacity duration-300 md:hidden ${mobileOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        onClick={() => setMobileOpen(false)}
+      />
+
+      {/* Mobile drawer */}
+      <div
+        className={`fixed right-0 top-0 z-40 flex h-full w-72 flex-col bg-black/90 backdrop-blur-xl transition-transform md:hidden ${mobileOpen ? "translate-x-0" : "translate-x-full"}`}
+        style={{ transitionDuration: "500ms", transitionTimingFunction: "cubic-bezier(0.16,1,0.3,1)" }}
+      >
+        <div className="flex flex-col gap-2 px-6 pt-24">
+          {NAV_LINKS.map(([label, href], i) => (
+            <a
+              key={label}
+              href={href}
+              onClick={() => setMobileOpen(false)}
+              className="rounded-xl px-4 py-3.5 text-base font-medium text-white/80 hover:bg-white/10 hover:text-white transition-all"
+              style={{
+                transitionProperty: "opacity, transform, background-color, color",
+                opacity: mobileOpen ? 1 : 0,
+                transform: mobileOpen ? "translateX(0)" : "translateX(24px)",
+                transitionDelay: mobileOpen ? `${(i + 1) * 60}ms` : "0ms",
+                transitionDuration: "300ms",
+              }}
+            >
+              {label}
+            </a>
+          ))}
+        </div>
+        <Link
+          href={me ? "/dashboard" : "/signup"}
+          onClick={() => setMobileOpen(false)}
+          className="mt-auto mx-6 mb-10 rounded-full px-6 py-3.5 text-center text-sm font-medium text-white transition-all"
+          style={{
+            background: "linear-gradient(to bottom, #2B2B2B, #101010)",
+            opacity: mobileOpen ? 1 : 0,
+            transform: mobileOpen ? "translateY(0)" : "translateY(16px)",
+            transitionDelay: mobileOpen ? "300ms" : "0ms",
+            transitionDuration: "400ms",
+          }}
+        >
+          {me ? "Dashboard" : "Démarrer"}
+        </Link>
+      </div>
+
+      {/* HERO — contenu ancré en bas d'une section plein écran */}
       <section ref={heroRef} className="dot-grid-dark relative h-screen w-full overflow-hidden" style={{ fontFamily: "var(--font-instrument-sans)" }}>
 
         {/* Background video (source: motionsites.ai) */}
@@ -100,87 +218,6 @@ export default function Home() {
         <div className="pointer-events-none absolute inset-0 bg-black/40" />
 
         <motion.div style={{ opacity: heroOpacity, scale: heroScale }} className="relative z-10 flex h-full flex-col">
-
-          {/* NAV */}
-          <nav className="flex items-center justify-between px-5 py-5 sm:px-8 sm:py-6 lg:px-12">
-            <span className="text-lg font-semibold tracking-tight text-white">Shiftly</span>
-
-            <div className="hidden md:flex items-center gap-3">
-              <div className="flex items-center gap-1 rounded-full bg-white/10 px-1.5 py-1.5 backdrop-blur-lg">
-                {NAV_LINKS.map(([label, href]) => (
-                  <a
-                    key={label}
-                    href={href}
-                    className="rounded-full px-4 py-1.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors"
-                  >
-                    {label}
-                  </a>
-                ))}
-              </div>
-              <Link
-                href={me ? "/dashboard" : "/signup"}
-                className="self-stretch flex items-center rounded-full px-5 text-sm font-medium text-white hover:opacity-90 transition-opacity"
-                style={{ background: "linear-gradient(to bottom, #2B2B2B, #101010)" }}
-              >
-                {me ? "Dashboard" : "Démarrer"}
-              </Link>
-            </div>
-
-            <button
-              className="md:hidden relative z-50 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-lg text-white"
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label="Menu"
-            >
-              <Menu size={18} className={`absolute transition-all duration-300 ${mobileOpen ? "rotate-90 scale-0 opacity-0" : "opacity-100"}`} />
-              <X size={18} className={`absolute transition-all duration-300 ${mobileOpen ? "opacity-100" : "-rotate-90 scale-0 opacity-0"}`} />
-            </button>
-          </nav>
-
-          {/* Mobile overlay */}
-          <div
-            className={`fixed inset-0 z-40 bg-black/80 backdrop-blur-md transition-opacity duration-300 md:hidden ${mobileOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
-            onClick={() => setMobileOpen(false)}
-          />
-
-          {/* Mobile drawer */}
-          <div
-            className={`fixed right-0 top-0 z-40 flex h-full w-72 flex-col bg-black/90 backdrop-blur-xl transition-transform md:hidden ${mobileOpen ? "translate-x-0" : "translate-x-full"}`}
-            style={{ transitionDuration: "500ms", transitionTimingFunction: "cubic-bezier(0.16,1,0.3,1)" }}
-          >
-            <div className="flex flex-col gap-2 px-6 pt-24">
-              {NAV_LINKS.map(([label, href], i) => (
-                <a
-                  key={label}
-                  href={href}
-                  onClick={() => setMobileOpen(false)}
-                  className="rounded-xl px-4 py-3.5 text-base font-medium text-white/80 hover:bg-white/10 hover:text-white transition-all"
-                  style={{
-                    transitionProperty: "opacity, transform, background-color, color",
-                    opacity: mobileOpen ? 1 : 0,
-                    transform: mobileOpen ? "translateX(0)" : "translateX(24px)",
-                    transitionDelay: mobileOpen ? `${(i + 1) * 60}ms` : "0ms",
-                    transitionDuration: "300ms",
-                  }}
-                >
-                  {label}
-                </a>
-              ))}
-            </div>
-            <Link
-              href={me ? "/dashboard" : "/signup"}
-              onClick={() => setMobileOpen(false)}
-              className="mt-auto mx-6 mb-10 rounded-full px-6 py-3.5 text-center text-sm font-medium text-white transition-all"
-              style={{
-                background: "linear-gradient(to bottom, #2B2B2B, #101010)",
-                opacity: mobileOpen ? 1 : 0,
-                transform: mobileOpen ? "translateY(0)" : "translateY(16px)",
-                transitionDelay: mobileOpen ? "300ms" : "0ms",
-                transitionDuration: "400ms",
-              }}
-            >
-              {me ? "Dashboard" : "Démarrer"}
-            </Link>
-          </div>
 
           {/* MAIN — ancré en bas */}
           <main className="mt-auto flex flex-col gap-6 px-5 pb-8 sm:gap-8 sm:px-8 sm:pb-12 lg:flex-row lg:items-end lg:justify-between lg:px-12 lg:pb-16">
@@ -283,7 +320,7 @@ export default function Home() {
             {/* Left — text */}
             <div className="p-10 sm:p-14 flex flex-col justify-between relative z-10">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#3b82f6] mb-8">GESTION D&apos;ÉQUIPE / 001</p>
+                <p className="font-mono text-xs text-[#3b82f6] mb-8">[ gestion d&apos;équipe ]</p>
                 <h2 className="text-5xl sm:text-6xl font-bold tracking-tight text-white leading-[0.9] mb-6">
                   Planifiez<br />sans effort.
                 </h2>
@@ -299,14 +336,14 @@ export default function Home() {
               </Link>
             </div>
 
-            {/* Right — image */}
-            <div className="relative min-h-[300px] md:min-h-0">
+            {/* Right — vraie capture du dashboard */}
+            <div className="relative min-h-[300px] md:min-h-0 bg-[#0a0a0a]">
               <img
-                src="/spotlight-bg.jpg"
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover object-center"
+                src="/dashboard-preview.png"
+                alt="Dashboard Shiftly"
+                className="absolute inset-0 w-full h-full object-cover object-top"
               />
-              <div className="absolute inset-0 bg-black/40" />
+              <div className="absolute inset-0 bg-black/10" />
               {/* Gradient blending on left edge */}
               <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#090909] to-transparent" />
               {/* Gradient blending on bottom */}
@@ -322,7 +359,7 @@ export default function Home() {
           initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }}
           className="mb-16 text-center"
         >
-          <p className="text-xs font-bold uppercase tracking-[0.4em] text-[#3b82f6] mb-4">Fonctionnalités</p>
+          <p className="font-mono text-xs text-[#3b82f6] mb-4">[ fonctionnalités ]</p>
           <h2
             className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent"
           >
@@ -330,31 +367,33 @@ export default function Home() {
           </h2>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
+        <div className="border-t border-white/10 mb-5">
           {FEATURES.map((f, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: i * 0.1 }} viewport={{ once: true }}
-              whileHover={{ y: -4 }}
-              className="group relative glass-panel rounded-[28px] p-7 sm:p-8 flex flex-col justify-between overflow-hidden cursor-default"
+              initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: i * 0.08 }} viewport={{ once: true }}
+              className="group grid grid-cols-1 md:grid-cols-[80px_1fr_1.3fr_auto] items-center gap-4 md:gap-8 border-b border-white/10 py-8 md:py-10"
             >
-              {/* Hover glow */}
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(59, 130, 246,0.08),transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-              <div className="absolute inset-0 rounded-[28px] border border-[#3b82f6]/0 group-hover:border-[#3b82f6]/20 transition-colors duration-500 pointer-events-none" />
+              <span className="font-mono text-2xl text-white/20 group-hover:text-[#3b82f6] transition-colors">
+                {String(i + 1).padStart(2, "0")}
+              </span>
 
-              <div className="relative z-10">
-                <div className="w-11 h-11 rounded-2xl glass-panel flex items-center justify-center text-white/30 group-hover:text-[#3b82f6] transition-colors mb-6">
-                  <f.icon size={20} />
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 shrink-0 rounded-xl bg-white/10 flex items-center justify-center text-white/40 group-hover:text-[#3b82f6] transition-colors">
+                  <f.icon size={18} />
                 </div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-white/30 group-hover:text-[#3b82f6]/70 transition-colors mb-3">{f.label}</p>
-                <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-3 leading-tight">{f.title}</h3>
-                <p className="text-white/40 text-sm font-medium leading-relaxed">{f.desc}</p>
+                <div>
+                  <p className="font-mono text-[10px] text-white/30 mb-1">{f.label}</p>
+                  <h3 className="text-lg sm:text-xl font-bold tracking-tight text-white leading-tight">{f.title}</h3>
+                </div>
               </div>
+
+              <p className="text-white/40 text-sm leading-relaxed max-w-md">{f.desc}</p>
 
               <Link
                 href={f.href}
-                className="relative z-10 mt-8 inline-flex items-center gap-1.5 text-xs font-bold text-white/30 group-hover:text-[#3b82f6] transition-colors"
+                className="md:justify-self-end inline-flex items-center gap-1.5 text-xs font-bold text-white/30 group-hover:text-[#3b82f6] transition-colors shrink-0"
               >
                 {f.cta} <ArrowRight size={13} />
               </Link>
@@ -380,7 +419,7 @@ export default function Home() {
             </p>
             <div className="flex flex-wrap gap-3">
               {["AES-256", "TLS 1.3", "RGPD", "99.9% Uptime", "Hébergement France"].map((tag) => (
-                <span key={tag} className="glass-panel px-4 py-1.5 rounded-full text-xs font-bold text-white/50">
+                <span key={tag} className="bg-white/10 backdrop-blur-lg px-4 py-1.5 rounded-full text-xs font-bold text-white/50">
                   {tag}
                 </span>
               ))}
@@ -396,7 +435,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }}
             className="mb-14"
           >
-            <p className="text-xs font-bold uppercase tracking-[0.4em] text-[#3b82f6] mb-4">Comment ça marche</p>
+            <p className="font-mono text-xs text-[#3b82f6] mb-4">[ comment ça marche ]</p>
             <h2 className="text-4xl sm:text-5xl font-bold tracking-tight bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
               Simple. Rapide. Efficace.
             </h2>
@@ -408,7 +447,7 @@ export default function Home() {
                 key={step.n}
                 initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: i * 0.1 }} viewport={{ once: true }}
-                className="group glass-panel rounded-2xl p-6 flex items-start gap-6 hover:border-[#3b82f6]/20 transition-colors"
+                className="group bg-white/10 backdrop-blur-lg rounded-2xl p-6 flex items-start gap-6 hover:border-[#3b82f6]/20 transition-colors"
               >
                 <span className="text-[#3b82f6] font-bold text-xs shrink-0 mt-0.5 tabular-nums">{step.n}</span>
                 <div>
@@ -421,13 +460,78 @@ export default function Home() {
         </div>
       </section>
 
+      {/* TARIFS */}
+      <section id="tarifs" className="py-24 sm:py-36 px-4 sm:px-6 max-w-5xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }}
+          className="mb-16 text-center"
+        >
+          <p className="font-mono text-xs text-[#3b82f6] mb-4">[ tarifs ]</p>
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
+            Un prix simple. Zéro surprise.
+          </h2>
+          <p className="mt-5 text-white/40 text-base max-w-md mx-auto">
+            Gratuit pour démarrer. Un seul plan payant, sans palier caché.
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {PLANS.map((plan, i) => (
+            <motion.div
+              key={plan.name}
+              initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: i * 0.1 }} viewport={{ once: true }}
+              className={`relative rounded-[28px] p-8 sm:p-10 flex flex-col ${
+                plan.highlighted
+                  ? "bg-white/10 backdrop-blur-lg border border-[#3b82f6]/30"
+                  : "bg-white/[0.03] border border-white/10"
+              }`}
+            >
+              {plan.highlighted && (
+                <span className="absolute -top-3 left-8 rounded-full bg-[#3b82f6] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+                  Recommandé
+                </span>
+              )}
+
+              <h3 className="text-lg font-bold text-white mb-1">{plan.name}</h3>
+              <p className="text-white/40 text-sm mb-6">{plan.desc}</p>
+
+              <div className="flex items-baseline gap-1 mb-8">
+                <span className="text-5xl font-bold tracking-tight text-white">{plan.price}</span>
+                {plan.period && <span className="text-white/40 text-sm">{plan.period}</span>}
+              </div>
+
+              <ul className="space-y-3 mb-8 flex-1">
+                {plan.features.map((f) => (
+                  <li key={f} className="flex items-center gap-2.5 text-sm text-white/60">
+                    <Check size={15} className="text-[#3b82f6] shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+
+              <Link
+                href="/signup"
+                className={`w-full h-12 rounded-full font-bold text-sm inline-flex items-center justify-center gap-2 transition-all ${
+                  plan.highlighted
+                    ? "bg-[#3b82f6] text-white hover:bg-[#3b82f6]/90"
+                    : "bg-white/10 text-white hover:bg-white/15"
+                }`}
+              >
+                {plan.cta} <ArrowRight size={14} />
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
       {/* NOTRE HISTOIRE */}
       <section id="histoire" className="py-24 sm:py-36 px-4 sm:px-6 max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }}
           className="mb-16 text-center"
         >
-          <p className="text-xs font-bold uppercase tracking-[0.4em] text-[#3b82f6] mb-4">Notre histoire</p>
+          <p className="font-mono text-xs text-[#3b82f6] mb-4">[ notre histoire ]</p>
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
             Un planning Excel de trop.
           </h2>
@@ -435,7 +539,7 @@ export default function Home() {
 
         <motion.div
           initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} viewport={{ once: true }}
-          className="glass-panel rounded-[28px] p-10 sm:p-14 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-10 md:gap-16 items-center"
+          className="bg-white/10 backdrop-blur-lg rounded-[28px] p-10 sm:p-14 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-10 md:gap-16 items-center"
         >
           <div>
             <p className="text-white/50 text-base sm:text-lg font-medium leading-relaxed mb-5">
@@ -471,7 +575,7 @@ export default function Home() {
 
       {/* CTA FINAL */}
       <section id="security" className="py-24 sm:py-36 px-4 sm:px-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(59, 130, 246,0.08),transparent_65%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(59,130,246,0.08),transparent_65%)] pointer-events-none" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#3b82f6]/6 blur-[160px] rounded-full pointer-events-none" />
 
         <motion.div
@@ -479,15 +583,15 @@ export default function Home() {
           transition={{ duration: 1, ease: [0.19, 1, 0.22, 1] }} viewport={{ once: true }}
           className="max-w-3xl mx-auto text-center relative z-10"
         >
-          <p className="text-xs font-bold uppercase tracking-[0.4em] text-[#3b82f6] mb-6">Commencer</p>
-          <h2 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight leading-[0.88] mb-6">
+          <p className="font-mono text-xs text-[#3b82f6] mb-6">[ commencer ]</p>
+          <h2
+            className="text-5xl sm:text-6xl md:text-7xl font-semibold tracking-tight leading-[0.95] mb-6"
+            style={{ fontFamily: "var(--font-instrument-sans)" }}
+          >
             <span className="bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
               Fini les tableurs.<br />
             </span>
-            <span
-              className="italic bg-gradient-to-b from-[#3b82f6] to-[#3b82f6]/50 bg-clip-text text-transparent"
-              style={{ fontFamily: "var(--font-instrument-serif)" }}
-            >
+            <span className="bg-gradient-to-b from-[#3b82f6] to-blue-300 bg-clip-text text-transparent">
               Bienvenue sur Shiftly.
             </span>
           </h2>
@@ -497,13 +601,13 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/signup"
-              className="h-14 px-10 rounded-full bg-[#3b82f6] text-black font-bold text-sm hover:scale-105 hover:shadow-[0_0_60px_-10px_rgba(59, 130, 246,0.7)] transition-all inline-flex items-center gap-3"
+              className="h-14 px-10 rounded-full bg-[#3b82f6] text-black font-bold text-sm hover:scale-105 hover:shadow-[0_0_60px_-10px_rgba(59,130,246,0.7)] transition-all inline-flex items-center gap-3"
             >
               Commencer gratuitement <ArrowRight size={15} />
             </Link>
             <Link
               href="/login"
-              className="h-14 px-10 rounded-full glass-panel font-bold text-sm text-white/60 hover:bg-white/5 hover:text-white transition-all inline-flex items-center"
+              className="h-14 px-10 rounded-full bg-white/10 backdrop-blur-lg font-bold text-sm text-white/60 hover:bg-white/5 hover:text-white transition-all inline-flex items-center"
             >
               J&apos;ai déjà un compte
             </Link>
@@ -535,7 +639,7 @@ export default function Home() {
 
           <div className="grid grid-cols-2 gap-12 sm:grid-cols-3">
             {[
-              { title: "Produit", links: [["Fonctionnalités", "#features"], ["Comment ça marche", "#steps"], ["Sécurité", "#security"]] },
+              { title: "Produit", links: [["Fonctionnalités", "#features"], ["Comment ça marche", "#steps"], ["Tarifs", "#tarifs"], ["Sécurité", "#security"]] },
               { title: "Compte", links: [["Connexion", "/login"], ["Inscription", "/signup"], ["Support", "/support"]] },
               { title: "Légal", links: [["Confidentialité", "/confidentialite"], ["CGU", "/cgu"], ["RGPD", "/rgpd"]] },
             ].map((col) => (
