@@ -8,7 +8,8 @@ import {
   Calendar, Clock, Users, Plus, User,
   Trash2, Pencil, Upload, Download,
   Loader2, ChevronDown, Image as ImageIcon,
-  LayoutGrid, List, FileSpreadsheet, X
+  LayoutGrid, List, FileSpreadsheet, X,
+  Copy, Repeat, Bookmark
 } from "lucide-react";
 
 // --- Types ---
@@ -30,6 +31,20 @@ type PlanningPeriod = {
 };
 
 type EmployeeOption = { id: number; name: string };
+
+type PlanningTemplateEntry = {
+  id: number;
+  dayOfWeek: number;
+  shift: string;
+  note?: string | null;
+  employeeId?: number | null;
+};
+
+type PlanningTemplate = {
+  id: number;
+  name: string;
+  entries: PlanningTemplateEntry[];
+};
 
 const EMPTY_FORM = { date: "", shift: "", employeeId: "", note: "", planningId: "" };
 const EMPTY_PERIOD = { name: "", startDate: "", endDate: "" };
@@ -63,6 +78,13 @@ export default function PlanningPage() {
   const [confirmDeleteEntryId, setConfirmDeleteEntryId] = useState<number | null>(null);
   const [confirmDeletePeriodId, setConfirmDeletePeriodId] = useState<number | null>(null);
 
+  const [templates, setTemplates] = useState<PlanningTemplate[]>([]);
+  const [savingTemplateForPeriod, setSavingTemplateForPeriod] = useState<number | null>(null);
+  const [applyTemplateId, setApplyTemplateId] = useState<number | null>(null);
+  const [applyDate, setApplyDate] = useState("");
+  const [applyingTemplate, setApplyingTemplate] = useState(false);
+  const [confirmDeleteTemplateId, setConfirmDeleteTemplateId] = useState<number | null>(null);
+
   const isAdmin = me?.role === "admin";
 
   const myName = useMemo(() => {
@@ -79,13 +101,15 @@ export default function PlanningPage() {
       apiFetchClient<EmployeeOption[]>("/employees"),
       apiFetchClient<{ role?: string }>("/auth/me").catch(() => null),
       apiFetchClient<{ planningImageUrl: string | null; planningImageUrl2: string | null }>("/planning/image").catch(() => ({ planningImageUrl: null, planningImageUrl2: null })),
+      apiFetchClient<PlanningTemplate[]>("/planning/templates").catch(() => []),
     ])
-      .then(([pds, allEntries, emps, meData, img]) => {
+      .then(([pds, allEntries, emps, meData, img, tmpls]) => {
         setPeriods(pds);
         const periodEntryIds = new Set(pds.flatMap(p => p.entries.map(e => e.id)));
         setOrphanEntries(allEntries.filter(e => !periodEntryIds.has(e.id)));
         setEmployees(emps);
         setMe(meData);
+        setTemplates(tmpls);
         const parseSlot = (raw: string | null): SlotData | null => {
           if (!raw) return null;
           if (raw.startsWith('__EXCEL__')) {
@@ -229,6 +253,52 @@ export default function PlanningPage() {
     setPeriods(updatedPds);
     const pIds = new Set(updatedPds.flatMap(p => p.entries.map(e => e.id)));
     setOrphanEntries(updatedEntries.filter(e => !pIds.has(e.id)));
+  };
+
+  const handleSaveAsTemplate = async (periodId: number) => {
+    const name = window.prompt("Nom du modèle :");
+    if (!name || !name.trim()) return;
+    setSavingTemplateForPeriod(periodId);
+    try {
+      const created = await apiFetchClient<PlanningTemplate>(`/planning/templates/from-period/${periodId}`, {
+        method: "POST",
+        body: JSON.stringify({ name: name.trim() }),
+      });
+      setTemplates(prev => [created, ...prev]);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Erreur");
+    } finally {
+      setSavingTemplateForPeriod(null);
+    }
+  };
+
+  const handleApplyTemplate = async (templateId: number) => {
+    if (!applyDate) return;
+    setApplyingTemplate(true);
+    try {
+      await apiFetchClient(`/planning/templates/${templateId}/apply`, {
+        method: "POST",
+        body: JSON.stringify({ startDate: applyDate }),
+      });
+      await refreshPlanningData();
+      setApplyTemplateId(null);
+      setApplyDate("");
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Erreur");
+    } finally {
+      setApplyingTemplate(false);
+    }
+  };
+
+  const handleDeleteTemplate = async (id: number) => {
+    try {
+      await apiFetchClient(`/planning/templates/${id}`, { method: "DELETE" });
+      setTemplates(prev => prev.filter(t => t.id !== id));
+    } catch (err: unknown) {
+      alert("Erreur : " + (err instanceof Error ? err.message : "inconnue"));
+    } finally {
+      setConfirmDeleteTemplateId(null);
+    }
   };
 
   const handleSlotUpload = async (e: React.ChangeEvent<HTMLInputElement>, slot: 1 | 2) => {
@@ -578,6 +648,16 @@ export default function PlanningPage() {
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         {isAdmin && (
+                          <button
+                            onClick={e => { e.stopPropagation(); handleSaveAsTemplate(period.id); }}
+                            disabled={savingTemplateForPeriod === period.id}
+                            title="Enregistrer comme modèle"
+                            className="rounded-lg p-2 text-zinc-600 opacity-0 transition-all group-hover:opacity-100 hover:bg-blue-500/10 hover:text-blue-400 disabled:opacity-50"
+                          >
+                            {savingTemplateForPeriod === period.id ? <Loader2 size={14} className="animate-spin" /> : <Copy size={14} />}
+                          </button>
+                        )}
+                        {isAdmin && (
                           confirmDeletePeriodId === period.id ? (
                             <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
                               <button onClick={() => handleDeletePeriod(period.id)} className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-rose-500">Supprimer</button>
@@ -710,6 +790,62 @@ export default function PlanningPage() {
                     {savingPeriod ? <Loader2 className="animate-spin mx-auto" size={18} /> : "Confirmer la création"}
                   </button>
                 </form>
+              </div>
+            )}
+
+            {/* Modèles de planning */}
+            {templates.length > 0 && (
+              <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
+                <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-500 mb-4">
+                  <Bookmark size={13} /> Modèles enregistrés
+                </h3>
+                <div className="space-y-2">
+                  {templates.map(tpl => (
+                    <div key={tpl.id} className="rounded-lg border border-zinc-800 p-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-white truncate">{tpl.name}</p>
+                          <p className="text-[10px] text-zinc-500">{tpl.entries.length} créneaux</p>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            onClick={() => setApplyTemplateId(applyTemplateId === tpl.id ? null : tpl.id)}
+                            className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold text-blue-400 hover:bg-blue-500/10"
+                          >
+                            <Repeat size={12} /> Appliquer
+                          </button>
+                          {confirmDeleteTemplateId === tpl.id ? (
+                            <div className="flex items-center gap-1">
+                              <button onClick={() => handleDeleteTemplate(tpl.id)} className="rounded-lg bg-rose-600 px-2 py-1 text-[10px] font-bold text-white hover:bg-rose-500">OK</button>
+                              <button onClick={() => setConfirmDeleteTemplateId(null)} className="rounded-lg bg-zinc-700 px-2 py-1 text-[10px] font-bold text-zinc-200">×</button>
+                            </div>
+                          ) : (
+                            <button onClick={() => setConfirmDeleteTemplateId(tpl.id)} className="p-1.5 text-zinc-600 hover:text-rose-400 hover:bg-rose-500/10 rounded-md">
+                              <Trash2 size={12} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      {applyTemplateId === tpl.id && (
+                        <div className="mt-3 flex items-center gap-2 border-t border-zinc-800 pt-3">
+                          <input
+                            type="date"
+                            value={applyDate}
+                            onChange={e => setApplyDate(e.target.value)}
+                            className="flex-1 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-xs text-white outline-none focus:border-blue-500"
+                          />
+                          <button
+                            onClick={() => handleApplyTemplate(tpl.id)}
+                            disabled={!applyDate || applyingTemplate}
+                            className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-500 disabled:opacity-50"
+                          >
+                            {applyingTemplate ? <Loader2 size={13} className="animate-spin" /> : "OK"}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
