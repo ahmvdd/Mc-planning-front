@@ -3,10 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
-import { User, KeyRound, Check, Loader2, AlertCircle, Shield } from "lucide-react";
+import { User, KeyRound, Check, Loader2, AlertCircle, Shield, Clock, Plus, X } from "lucide-react";
 
 type Me = { sub: number; name?: string; email?: string; role?: string };
 type EmployeeData = { id: number; name: string; email: string; role: string };
+type AvailabilitySlot = { id: number; dayOfWeek: number; startTime: string; endTime: string };
+
+const DAYS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -17,6 +20,17 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+
+  const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
+  const [newDay, setNewDay] = useState(0);
+  const [newStart, setNewStart] = useState("09:00");
+  const [newEnd, setNewEnd] = useState("17:00");
+  const [slotError, setSlotError] = useState("");
+  const [addingSlot, setAddingSlot] = useState(false);
+
+  const loadSlots = () => {
+    apiFetchClient<AvailabilitySlot[]>("/availability/me").then(setSlots).catch(() => {});
+  };
 
   useEffect(() => {
     if (!getToken()) { router.push("/login"); return; }
@@ -29,7 +43,29 @@ export default function ProfilePage() {
         }
       })
       .catch(() => router.push("/login"));
+    loadSlots();
   }, [router]);
+
+  const handleAddSlot = async () => {
+    setSlotError("");
+    setAddingSlot(true);
+    try {
+      await apiFetchClient("/availability", {
+        method: "POST",
+        body: JSON.stringify({ dayOfWeek: newDay, startTime: newStart, endTime: newEnd }),
+      });
+      loadSlots();
+    } catch (err) {
+      setSlotError(err instanceof Error ? err.message : "Erreur lors de l'ajout");
+    } finally {
+      setAddingSlot(false);
+    }
+  };
+
+  const handleRemoveSlot = async (id: number) => {
+    setSlots((prev) => prev.filter((s) => s.id !== id));
+    await apiFetchClient(`/availability/${id}`, { method: "DELETE" }).catch(() => loadSlots());
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,6 +179,88 @@ export default function ProfilePage() {
               {saving ? "Enregistrement..." : "Enregistrer les modifications"}
             </button>
           </form>
+        </div>
+      </div>
+
+      {/* Disponibilités */}
+      <div className="border-t border-zinc-800 pt-8">
+        <div className="flex items-center gap-2 mb-1">
+          <Clock size={16} className="text-blue-400" />
+          <h2 className="text-lg font-bold text-white">Mes disponibilités</h2>
+        </div>
+        <p className="text-sm text-zinc-500 mb-6">
+          Indiquez vos créneaux disponibles chaque semaine pour aider votre manager à construire le planning.
+        </p>
+
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5 space-y-5">
+          {DAYS.map((day, i) => {
+            const daySlots = slots.filter((s) => s.dayOfWeek === i);
+            return (
+              <div key={day} className="flex flex-col sm:flex-row sm:items-center gap-3 pb-4 border-b border-zinc-800/60 last:border-0 last:pb-0">
+                <span className="w-28 shrink-0 text-sm font-semibold text-white">{day}</span>
+                <div className="flex flex-wrap gap-2 flex-1">
+                  {daySlots.length === 0 && (
+                    <span className="text-xs text-zinc-600">Aucun créneau</span>
+                  )}
+                  {daySlots.map((s) => (
+                    <span
+                      key={s.id}
+                      className="inline-flex items-center gap-2 rounded-full bg-blue-500/10 border border-blue-500/20 px-3 py-1 text-xs font-semibold text-blue-300"
+                    >
+                      {s.startTime} – {s.endTime}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveSlot(s.id)}
+                        className="text-blue-400/60 hover:text-white transition-colors"
+                        aria-label="Supprimer"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Ajout d'un créneau */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3 pt-2">
+            <div className="flex-1 space-y-1.5">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Jour</label>
+              <select
+                className={inputClass}
+                value={newDay}
+                onChange={(e) => setNewDay(Number(e.target.value))}
+              >
+                {DAYS.map((day, i) => (
+                  <option key={day} value={i}>{day}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Début</label>
+              <input type="time" className={inputClass} value={newStart} onChange={(e) => setNewStart(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Fin</label>
+              <input type="time" className={inputClass} value={newEnd} onChange={(e) => setNewEnd(e.target.value)} />
+            </div>
+            <button
+              type="button"
+              onClick={handleAddSlot}
+              disabled={addingSlot}
+              className="flex items-center justify-center gap-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-60 px-4 py-2.5 text-sm font-bold text-white transition-all shrink-0"
+            >
+              {addingSlot ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+              Ajouter
+            </button>
+          </div>
+
+          {slotError && (
+            <div className="flex items-center gap-2 rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-xs font-medium text-rose-400">
+              <AlertCircle size={13} className="shrink-0" /> {slotError}
+            </div>
+          )}
         </div>
       </div>
     </div>

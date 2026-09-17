@@ -6,10 +6,13 @@ import Link from "next/link";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
 import {
   Mail, Shield, ArrowLeft, Loader2,
-  CheckCircle2, XCircle, Clock, Info, Star, ClipboardList
+  CheckCircle2, XCircle, Clock, Info, Star, ClipboardList, CalendarClock
 } from "lucide-react";
 
 type Employee = { id: number; name: string; email: string; role: string; status: string };
+type AvailabilitySlot = { id: number; dayOfWeek: number; startTime: string; endTime: string };
+
+const DAYS_SHORT = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 type RequestLog = { id: number; action: string; note?: string | null; createdAt: string; byEmployeeName?: string | null };
 type RequestItem = {
   id: number; type: string; status: string; message?: string | null;
@@ -32,6 +35,7 @@ export default function EmployeeProfilePage() {
   const router = useRouter();
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [requests, setRequests] = useState<RequestItem[]>([]);
+  const [availability, setAvailability] = useState<AvailabilitySlot[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,8 +43,9 @@ export default function EmployeeProfilePage() {
     Promise.all([
       apiFetchClient<Employee>(`/employees/${id}`),
       apiFetchClient<RequestItem[]>(`/requests?employeeId=${id}`).catch(() => []),
+      apiFetchClient<AvailabilitySlot[]>(`/availability/employee/${id}`).catch(() => []),
     ])
-      .then(([emp, reqs]) => { setEmployee(emp); setRequests(reqs); })
+      .then(([emp, reqs, avail]) => { setEmployee(emp); setRequests(reqs); setAvailability(avail); })
       .catch(() => router.push("/employees"))
       .finally(() => setLoading(false));
   }, [id, router]);
@@ -126,6 +131,35 @@ export default function EmployeeProfilePage() {
                 <p className="text-xs text-slate-400">Demande{requests.length !== 1 ? "s" : ""} au total</p>
               </div>
             </div>
+          </div>
+
+          {/* Disponibilités */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p className="mb-3 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              <CalendarClock size={12} /> Disponibilités déclarées
+            </p>
+            {availability.length === 0 ? (
+              <p className="text-xs text-slate-400">Aucune disponibilité renseignée.</p>
+            ) : (
+              <div className="space-y-2">
+                {DAYS_SHORT.map((day, i) => {
+                  const daySlots = availability.filter((s) => s.dayOfWeek === i);
+                  if (daySlots.length === 0) return null;
+                  return (
+                    <div key={day} className="flex items-center gap-2 text-xs">
+                      <span className="w-8 shrink-0 font-bold text-slate-500">{day}</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {daySlots.map((s) => (
+                          <span key={s.id} className="rounded-full bg-blue-50 px-2 py-0.5 font-semibold text-blue-700">
+                            {s.startTime}–{s.endTime}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
 
