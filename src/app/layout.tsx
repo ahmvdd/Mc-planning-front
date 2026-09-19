@@ -34,6 +34,10 @@ const silkscreen = Silkscreen({
 export const metadata: Metadata = {
   title: "Shiftly",
   description: "Gestion des employés, planning et demandes",
+  icons: {
+    icon: [{ url: "/icon-512.png", type: "image/png" }],
+    apple: [{ url: "/apple-icon.png", type: "image/png" }],
+  },
 };
 
 export const viewport: Viewport = {
