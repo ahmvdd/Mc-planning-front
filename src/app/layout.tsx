@@ -31,12 +31,55 @@ const silkscreen = Silkscreen({
   weight: ["400", "700"],
 });
 
+const SITE_URL = "https://shiftly.site";
+const TITLE = "Shiftly — Logiciel de planning et gestion d'équipe pour TPE/PME";
+const DESCRIPTION =
+  "Shiftly simplifie la création de plannings, le pointage par QR code et la gestion des demandes RH pour les commerces, restaurants et petites équipes. Gratuit jusqu'à 5 employés.";
+
 export const metadata: Metadata = {
-  title: "Shiftly",
-  description: "Gestion des employés, planning et demandes",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: TITLE,
+    template: "%s — Shiftly",
+  },
+  description: DESCRIPTION,
+  keywords: [
+    "logiciel planning employés",
+    "gestion planning équipe",
+    "planning restaurant",
+    "planning commerce",
+    "logiciel RH TPE PME",
+    "pointage QR code",
+    "gestion des horaires salariés",
+    "alternative Skello",
+    "planning en ligne gratuit",
+  ],
+  authors: [{ name: "Shiftly" }],
   icons: {
     icon: [{ url: "/icon-512.png", type: "image/png" }],
     apple: [{ url: "/apple-icon.png", type: "image/png" }],
+  },
+  alternates: {
+    canonical: SITE_URL,
+  },
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    url: SITE_URL,
+    siteName: "Shiftly",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Shiftly — planning d'équipe simplifié" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 

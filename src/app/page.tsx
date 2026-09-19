@@ -119,6 +119,26 @@ export default function Home() {
     <SmoothScroll>
     <div className="min-h-screen bg-black text-white antialiased overflow-x-hidden selection:bg-[#3b82f6]/20 selection:text-[#3b82f6]">
 
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            name: "Shiftly",
+            applicationCategory: "BusinessApplication",
+            operatingSystem: "Web",
+            description:
+              "Logiciel de gestion de planning d'équipe, pointage par QR code et demandes RH pour commerces, restaurants et petites équipes.",
+            url: "https://shiftly.site",
+            offers: [
+              { "@type": "Offer", name: "Gratuit", price: "0", priceCurrency: "EUR" },
+              { "@type": "Offer", name: "Pro", price: "2", priceCurrency: "EUR" },
+            ],
+          }),
+        }}
+      />
+
       {/* NAV — fixe, persiste sur toute la page */}
       <nav
         className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-5 py-5 sm:px-8 sm:py-6 lg:px-12"
