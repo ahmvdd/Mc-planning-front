@@ -6,8 +6,15 @@ Backend : [Mc-planning-back](https://github.com/ahmvdd/Mc-planning-back)
 Production : [shiftly.site](https://shiftly.site)
 
 ---
-<img width="1463" height="948" alt="image" src="https://github.com/user-attachments/assets/9213dd49-974f-4f32-a8e4-6756854245f4" />
 
+<p float="left">
+  <img src="public/screenshots/landing-hero.png" width="49%" alt="Landing page" />
+  <img src="public/screenshots/landing-tarifs.png" width="49%" alt="Tarifs" />
+</p>
+<p float="left">
+  <img src="public/screenshots/app-dashboard.png" width="49%" alt="Dashboard" />
+  <img src="public/screenshots/app-planning.png" width="49%" alt="Gestion du planning" />
+</p>
 
 ## Stack
 
