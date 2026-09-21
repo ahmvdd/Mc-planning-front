@@ -134,7 +134,7 @@ export default function Home() {
 
   return (
     <SmoothScroll>
-    <div className="min-h-screen bg-black text-white antialiased overflow-x-hidden selection:bg-[#3b82f6]/20 selection:text-[#3b82f6]">
+    <div className="min-h-screen bg-white text-gray-900 antialiased overflow-x-hidden selection:bg-[#3b82f6]/20 selection:text-[#3b82f6]">
 
       <script
         type="application/ld+json"
@@ -325,7 +325,7 @@ export default function Home() {
       {/* TICKER + SPOTLIGHT */}
       <section className="pb-8 sm:pb-12">
         {/* Ticker */}
-        <div className="border-y border-white/5 py-3.5 overflow-hidden">
+        <div className="border-y border-gray-200 py-3.5 overflow-hidden">
           <div className="flex animate-ticker" style={{ width: "max-content" }}>
             {[
               "Planning sans conflits",
@@ -345,7 +345,7 @@ export default function Home() {
               "Détection automatique",
               "Équipes connectées",
             ].map((item, i) => (
-              <span key={i} className="text-[10px] font-bold uppercase tracking-[0.35em] text-white/25 shrink-0 px-8">
+              <span key={i} className="text-[10px] font-bold uppercase tracking-[0.35em] text-gray-400 shrink-0 px-8">
                 {item} <span className="text-[#3b82f6]">·</span>
               </span>
             ))}
@@ -357,39 +357,39 @@ export default function Home() {
           <motion.div
             initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }} viewport={{ once: true }}
-            className="relative rounded-3xl overflow-hidden border border-white/8 bg-[#090909] grid grid-cols-1 md:grid-cols-2 min-h-[480px]"
+            className="relative rounded-3xl overflow-hidden border border-gray-200 bg-gray-50 grid grid-cols-1 md:grid-cols-2 min-h-[480px]"
           >
             {/* Left — text */}
             <div className="p-10 sm:p-14 flex flex-col justify-between relative z-10">
               <div>
                 <p className="font-mono text-xs text-[#3b82f6] mb-8">[ gestion d&apos;équipe ]</p>
-                <h2 className="text-5xl sm:text-6xl font-bold tracking-tight text-white leading-[0.9] mb-6">
+                <h2 className="text-5xl sm:text-6xl font-bold tracking-tight text-gray-900 leading-[0.9] mb-6">
                   Planifiez<br />sans effort.
                 </h2>
-                <p className="text-white/40 text-base font-medium leading-relaxed max-w-xs">
+                <p className="text-gray-500 text-base font-medium leading-relaxed max-w-xs">
                   Construisez vos plannings hebdomadaires en quelques clics. Les conflits sont détectés automatiquement, votre équipe notifiée instantanément.
                 </p>
               </div>
               <Link
                 href="/signup"
-                className="mt-10 w-fit h-12 px-8 rounded-full bg-white text-black font-bold text-sm hover:scale-105 transition-all inline-flex items-center gap-2"
+                className="mt-10 w-fit h-12 px-8 rounded-full bg-gray-900 text-white font-bold text-sm hover:scale-105 transition-all inline-flex items-center gap-2"
               >
                 Démarrer gratuitement <ArrowRight size={14} />
               </Link>
             </div>
 
             {/* Right — vraie capture du dashboard */}
-            <div className="relative min-h-[300px] md:min-h-0 bg-[#0a0a0a]">
+            <div className="relative min-h-[300px] md:min-h-0 bg-gray-100">
               <img
                 src="/dashboard-preview.png"
                 alt="Dashboard Shiftly"
                 className="absolute inset-0 w-full h-full object-cover object-top"
               />
-              <div className="absolute inset-0 bg-black/10" />
+              <div className="absolute inset-0 bg-black/5" />
               {/* Gradient blending on left edge */}
-              <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#090909] to-transparent" />
+              <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-gray-50 to-transparent" />
               {/* Gradient blending on bottom */}
-              <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#090909] to-transparent md:hidden" />
+              <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-gray-50 to-transparent md:hidden" />
             </div>
           </motion.div>
         </div>
@@ -403,39 +403,39 @@ export default function Home() {
         >
           <p className="font-mono text-xs text-[#3b82f6] mb-4">[ fonctionnalités ]</p>
           <h2
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent"
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-b from-gray-900 to-gray-400 bg-clip-text text-transparent"
           >
             Tout ce dont votre équipe a besoin.
           </h2>
         </motion.div>
 
-        <div className="border-t border-white/10 mb-5">
+        <div className="border-t border-gray-200 mb-5">
           {FEATURES.map((f, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: i * 0.08 }} viewport={{ once: true }}
-              className="group grid grid-cols-1 md:grid-cols-[80px_1fr_1.3fr_auto] items-center gap-4 md:gap-8 border-b border-white/10 py-8 md:py-10"
+              className="group grid grid-cols-1 md:grid-cols-[80px_1fr_1.3fr_auto] items-center gap-4 md:gap-8 border-b border-gray-200 py-8 md:py-10"
             >
-              <span className="font-mono text-2xl text-white/20 group-hover:text-[#3b82f6] transition-colors">
+              <span className="font-mono text-2xl text-gray-300 group-hover:text-[#3b82f6] transition-colors">
                 {String(i + 1).padStart(2, "0")}
               </span>
 
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 shrink-0 rounded-xl bg-white/10 flex items-center justify-center text-white/40 group-hover:text-[#3b82f6] transition-colors">
+                <div className="w-10 h-10 shrink-0 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 group-hover:text-[#3b82f6] transition-colors">
                   <f.icon size={18} />
                 </div>
                 <div>
-                  <p className="font-mono text-[10px] text-white/30 mb-1">{f.label}</p>
-                  <h3 className="text-lg sm:text-xl font-bold tracking-tight text-white leading-tight">{f.title}</h3>
+                  <p className="font-mono text-[10px] text-gray-400 mb-1">{f.label}</p>
+                  <h3 className="text-lg sm:text-xl font-bold tracking-tight text-gray-900 leading-tight">{f.title}</h3>
                 </div>
               </div>
 
-              <p className="text-white/40 text-sm leading-relaxed max-w-md">{f.desc}</p>
+              <p className="text-gray-500 text-sm leading-relaxed max-w-md">{f.desc}</p>
 
               <Link
                 href={f.href}
-                className="md:justify-self-end inline-flex items-center gap-1.5 text-xs font-bold text-white/30 group-hover:text-[#3b82f6] transition-colors shrink-0"
+                className="md:justify-self-end inline-flex items-center gap-1.5 text-xs font-bold text-gray-400 group-hover:text-[#3b82f6] transition-colors shrink-0"
               >
                 {f.cta} <ArrowRight size={13} />
               </Link>
@@ -478,7 +478,7 @@ export default function Home() {
             className="mb-14"
           >
             <p className="font-mono text-xs text-[#3b82f6] mb-4">[ comment ça marche ]</p>
-            <h2 className="text-4xl sm:text-5xl font-bold tracking-tight bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
+            <h2 className="text-4xl sm:text-5xl font-bold tracking-tight bg-gradient-to-b from-gray-900 to-gray-400 bg-clip-text text-transparent">
               Simple. Rapide. Efficace.
             </h2>
           </motion.div>
@@ -489,12 +489,12 @@ export default function Home() {
                 key={step.n}
                 initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: i * 0.1 }} viewport={{ once: true }}
-                className="group bg-white/10 backdrop-blur-lg rounded-2xl p-6 flex items-start gap-6 hover:border-[#3b82f6]/20 transition-colors"
+                className="group bg-gray-50 border border-gray-200 rounded-2xl p-6 flex items-start gap-6 hover:border-[#3b82f6]/30 transition-colors"
               >
                 <span className="text-[#3b82f6] font-bold text-xs shrink-0 mt-0.5 tabular-nums">{step.n}</span>
                 <div>
-                  <h3 className="text-base font-bold text-white mb-1.5">{step.t}</h3>
-                  <p className="text-sm text-white/40 leading-relaxed font-medium">{step.d}</p>
+                  <h3 className="text-base font-bold text-gray-900 mb-1.5">{step.t}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed font-medium">{step.d}</p>
                 </div>
               </motion.div>
             ))}
@@ -509,10 +509,10 @@ export default function Home() {
           className="mb-16 text-center"
         >
           <p className="font-mono text-xs text-[#3b82f6] mb-4">[ tarifs ]</p>
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-b from-gray-900 to-gray-400 bg-clip-text text-transparent">
             Un prix simple. Zéro surprise.
           </h2>
-          <p className="mt-5 text-white/40 text-base max-w-md mx-auto">
+          <p className="mt-5 text-gray-500 text-base max-w-md mx-auto">
             Gratuit pour démarrer. Un seul plan payant, sans palier caché.
           </p>
         </motion.div>
@@ -525,8 +525,8 @@ export default function Home() {
               transition={{ duration: 0.6, delay: i * 0.1 }} viewport={{ once: true }}
               className={`relative rounded-[28px] p-8 sm:p-10 flex flex-col ${
                 plan.highlighted
-                  ? "bg-white/10 backdrop-blur-lg border border-[#3b82f6]/30"
-                  : "bg-white/[0.03] border border-white/10"
+                  ? "bg-blue-50 border border-[#3b82f6]/30"
+                  : "bg-white border border-gray-200"
               }`}
             >
               {plan.highlighted && (
@@ -535,17 +535,17 @@ export default function Home() {
                 </span>
               )}
 
-              <h3 className="text-lg font-bold text-white mb-1">{plan.name}</h3>
-              <p className="text-white/40 text-sm mb-6">{plan.desc}</p>
+              <h3 className="text-lg font-bold text-gray-900 mb-1">{plan.name}</h3>
+              <p className="text-gray-500 text-sm mb-6">{plan.desc}</p>
 
               <div className="flex items-baseline gap-1 mb-8">
-                <span className="text-5xl font-bold tracking-tight text-white">{plan.price}</span>
-                {plan.period && <span className="text-white/40 text-sm">{plan.period}</span>}
+                <span className="text-5xl font-bold tracking-tight text-gray-900">{plan.price}</span>
+                {plan.period && <span className="text-gray-500 text-sm">{plan.period}</span>}
               </div>
 
               <ul className="space-y-3 mb-8 flex-1">
                 {plan.features.map((f) => (
-                  <li key={f} className="flex items-center gap-2.5 text-sm text-white/60">
+                  <li key={f} className="flex items-center gap-2.5 text-sm text-gray-600">
                     <Check size={15} className="text-[#3b82f6] shrink-0" />
                     {f}
                   </li>
@@ -557,7 +557,7 @@ export default function Home() {
                 className={`w-full h-12 rounded-full font-bold text-sm inline-flex items-center justify-center gap-2 transition-all ${
                   plan.highlighted
                     ? "bg-[#3b82f6] text-white hover:bg-[#3b82f6]/90"
-                    : "bg-white/10 text-white hover:bg-white/15"
+                    : "bg-gray-900 text-white hover:bg-gray-800"
                 }`}
               >
                 {plan.cta} <ArrowRight size={14} />
@@ -574,23 +574,23 @@ export default function Home() {
           className="mb-16 text-center"
         >
           <p className="font-mono text-xs text-[#3b82f6] mb-4">[ notre histoire ]</p>
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-b from-gray-900 to-gray-400 bg-clip-text text-transparent">
             Un planning Excel de trop.
           </h2>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} viewport={{ once: true }}
-          className="bg-white/10 backdrop-blur-lg rounded-[28px] p-10 sm:p-14 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-10 md:gap-16 items-center"
+          className="bg-gray-50 border border-gray-200 rounded-[28px] p-10 sm:p-14 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-10 md:gap-16 items-center"
         >
           <div>
-            <p className="text-white/50 text-base sm:text-lg font-medium leading-relaxed mb-5">
+            <p className="text-gray-600 text-base sm:text-lg font-medium leading-relaxed mb-5">
               Shiftly est né d&apos;un constat simple : dans beaucoup de commerces et de restaurants, le planning se
               fait encore sur un tableur envoyé par mail ou par groupe WhatsApp. Les conflits d&apos;horaires se
               découvrent trop tard, personne ne sait vraiment qui travaille quand, et les managers passent plus de
               temps à corriger des erreurs qu&apos;à gérer leur équipe.
             </p>
-            <p className="text-white/50 text-base sm:text-lg font-medium leading-relaxed">
+            <p className="text-gray-600 text-base sm:text-lg font-medium leading-relaxed">
               J&apos;ai voulu construire l&apos;outil que ces équipes méritent : simple, clair, et qui prévient les
               problèmes avant qu&apos;ils n&apos;arrivent. Shiftly est développé en solo, avec l&apos;objectif de
               rester au plus près des managers et des employés qui l&apos;utilisent au quotidien.
@@ -601,8 +601,8 @@ export default function Home() {
             <div className="w-20 h-20 rounded-full bg-[#3b82f6]/15 border border-[#3b82f6]/30 flex items-center justify-center text-2xl font-bold text-[#3b82f6] mb-4">
               SA
             </div>
-            <p className="font-bold text-white text-sm">Sayeh Ahmed</p>
-            <p className="text-white/40 text-xs font-medium mb-3">Fondateur &amp; Développeur</p>
+            <p className="font-bold text-gray-900 text-sm">Sayeh Ahmed</p>
+            <p className="text-gray-500 text-xs font-medium mb-3">Fondateur &amp; Développeur</p>
             <a
               href="https://www.sayehahmed.com"
               target="_blank"
@@ -630,48 +630,48 @@ export default function Home() {
             className="text-5xl sm:text-6xl md:text-7xl font-semibold tracking-tight leading-[0.95] mb-6"
             style={{ fontFamily: "var(--font-instrument-sans)" }}
           >
-            <span className="bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-b from-gray-900 to-gray-400 bg-clip-text text-transparent">
               Fini les tableurs.<br />
             </span>
-            <span className="bg-gradient-to-b from-[#3b82f6] to-blue-300 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-b from-[#3b82f6] to-blue-400 bg-clip-text text-transparent">
               Bienvenue sur Shiftly.
             </span>
           </h2>
-          <p className="text-white/35 text-lg font-medium mb-12 max-w-xl mx-auto leading-relaxed">
+          <p className="text-gray-500 text-lg font-medium mb-12 max-w-xl mx-auto leading-relaxed">
             Rejoignez les managers qui ont repris le contrôle de leur temps. Gratuit pour commencer, sans engagement.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/signup"
-              className="h-14 px-10 rounded-full bg-[#3b82f6] text-black font-bold text-sm hover:scale-105 hover:shadow-[0_0_60px_-10px_rgba(59,130,246,0.7)] transition-all inline-flex items-center gap-3"
+              className="h-14 px-10 rounded-full bg-[#3b82f6] text-white font-bold text-sm hover:scale-105 hover:shadow-[0_0_60px_-10px_rgba(59,130,246,0.7)] transition-all inline-flex items-center gap-3"
             >
               Commencer gratuitement <ArrowRight size={15} />
             </Link>
             <Link
               href="/login"
-              className="h-14 px-10 rounded-full bg-white/10 backdrop-blur-lg font-bold text-sm text-white/60 hover:bg-white/5 hover:text-white transition-all inline-flex items-center"
+              className="h-14 px-10 rounded-full bg-gray-100 border border-gray-200 font-bold text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all inline-flex items-center"
             >
               J&apos;ai déjà un compte
             </Link>
           </div>
-          <p className="mt-8 text-white/20 text-xs font-medium">Aucune CB requise · Setup en 2 min · RGPD</p>
+          <p className="mt-8 text-gray-400 text-xs font-medium">Aucune CB requise · Setup en 2 min · RGPD</p>
         </motion.div>
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-white/5 py-14 px-6 bg-black">
+      <footer className="border-t border-gray-200 py-14 px-6 bg-white">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start justify-between gap-12">
           <div>
             <div className="flex items-center gap-2.5 mb-4">
               <div className="w-7 h-7 rounded-lg bg-[#3b82f6] flex items-center justify-center">
-                <Calendar size={14} className="text-black" />
+                <Calendar size={14} className="text-white" />
               </div>
-              <span className="font-bold tracking-tight text-white text-sm">SHIFTLY</span>
+              <span className="font-bold tracking-tight text-gray-900 text-sm">SHIFTLY</span>
             </div>
-            <p className="text-white/30 text-sm font-medium max-w-[180px] leading-relaxed mb-4">
+            <p className="text-gray-500 text-sm font-medium max-w-[180px] leading-relaxed mb-4">
               Le planning de vos équipes, simplement.
             </p>
-            <p className="text-white/20 text-xs">
+            <p className="text-gray-400 text-xs">
               Fait par{" "}
               <a href="https://www.sayehahmed.com" target="_blank" rel="noopener noreferrer" className="text-[#3b82f6] hover:text-[#3b82f6]/80 transition-colors font-semibold">
                 Sayeh Ahmed
@@ -686,11 +686,11 @@ export default function Home() {
               { title: "Légal", links: [["Confidentialité", "/confidentialite"], ["CGU", "/cgu"], ["RGPD", "/rgpd"]] },
             ].map((col) => (
               <div key={col.title}>
-                <p className="mb-4 text-[9px] font-bold uppercase tracking-[0.4em] text-white/25">{col.title}</p>
+                <p className="mb-4 text-[9px] font-bold uppercase tracking-[0.4em] text-gray-400">{col.title}</p>
                 <ul className="space-y-3">
                   {col.links.map(([label, href]) => (
                     <li key={label}>
-                      <a href={href} className="text-xs font-medium text-white/30 hover:text-white/70 transition-colors">{label}</a>
+                      <a href={href} className="text-xs font-medium text-gray-400 hover:text-gray-900 transition-colors">{label}</a>
                     </li>
                   ))}
                 </ul>
@@ -699,7 +699,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto mt-12 pt-6 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-3 text-[10px] font-medium text-white/20">
+        <div className="max-w-7xl mx-auto mt-12 pt-6 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-3 text-[10px] font-medium text-gray-400">
           <p>© 2026 Shiftly. Tous droits réservés. Made in France.</p>
           <p>v2.0</p>
         </div>
