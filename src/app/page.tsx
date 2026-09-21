@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import {
@@ -66,6 +66,12 @@ const FEATURES = [
     desc: "Gérez les rotations, les absences et les congés depuis un seul écran. Les conflits sont détectés avant même que vous appuyiez sur Enregistrer.",
     href: "/signup",
     cta: "Créer mon planning",
+    details: [
+      "Créez des périodes de planning (semaine, mois) et ajoutez les créneaux de chaque employé en quelques clics.",
+      "Enregistrez vos semaines types comme modèles réutilisables et appliquez-les à une nouvelle date en un clic.",
+      "Les employés déclarent leurs disponibilités — vous les voyez directement au moment d'assigner un créneau.",
+      "Import et export Excel/CSV pour ceux qui viennent encore d'un tableur.",
+    ],
   },
   {
     icon: ClipboardCheck,
@@ -74,6 +80,12 @@ const FEATURES = [
     desc: "Les demandes de congés arrivent, vous validez ou refusez en un tap. L'employé est notifié instantanément. Fini les emails perdus.",
     href: "/signup",
     cta: "Essayer maintenant",
+    details: [
+      "Chaque employé dépose sa demande (congé, document, absence) directement depuis son espace.",
+      "L'admin valide ou refuse en un geste, avec un message optionnel pour expliquer la décision.",
+      "Historique complet de chaque demande : qui a fait quoi, et quand.",
+      "Fini les allers-retours par email ou WhatsApp pour un simple congé.",
+    ],
   },
   {
     icon: BarChart3,
@@ -82,6 +94,12 @@ const FEATURES = [
     desc: "Taux de présence, heures travaillées, tendances d'absences. Transformez vos données RH en KPIs actionnables.",
     href: "/signup",
     cta: "Voir les analytics",
+    details: [
+      "Un dashboard qui résume l'essentiel dès la connexion : effectifs, créneaux planifiés, demandes en attente.",
+      "Le pointage par QR code capture les présences réelles, à comparer avec le planning prévu.",
+      "Repérez en un coup d'œil les périodes sans planning ou les demandes qui traînent.",
+      "Base posée pour des rapports plus poussés au fil des prochaines mises à jour.",
+    ],
   },
 ];
 
@@ -96,6 +114,7 @@ export default function Home() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [heroEmail, setHeroEmail] = useState("");
   const [heroSubmitting, setHeroSubmitting] = useState(false);
+  const [activeFeature, setActiveFeature] = useState<number | null>(null);
   const heroRef = useRef(null);
 
   const { scrollYProgress } = useScroll({
@@ -110,6 +129,17 @@ export default function Home() {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
+
+  useEffect(() => {
+    if (activeFeature === null) return;
+    document.body.style.overflow = "hidden";
+    const onKeyDown = (e: KeyboardEvent) => { if (e.key === "Escape") setActiveFeature(null); };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [activeFeature]);
 
   useEffect(() => {
     if (getToken()) {
@@ -433,15 +463,70 @@ export default function Home() {
 
               <p className="text-gray-500 text-sm leading-relaxed max-w-md">{f.desc}</p>
 
-              <Link
-                href={f.href}
+              <button
+                type="button"
+                onClick={() => setActiveFeature(i)}
                 className="md:justify-self-end inline-flex items-center gap-1.5 text-xs font-bold text-gray-400 group-hover:text-[#3b82f6] transition-colors shrink-0"
               >
                 {f.cta} <ArrowRight size={13} />
-              </Link>
+              </button>
             </motion.div>
           ))}
         </div>
+
+        {/* Feature detail modal */}
+        <AnimatePresence>
+          {activeFeature !== null && (
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+              onClick={() => setActiveFeature(null)}
+            >
+              <motion.div
+                initial={{ opacity: 0, y: 16, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 16, scale: 0.97 }}
+                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                onClick={(e) => e.stopPropagation()}
+                className="relative w-full max-w-lg rounded-3xl border border-gray-200 bg-white p-8 sm:p-10 shadow-2xl"
+              >
+                <button
+                  type="button"
+                  onClick={() => setActiveFeature(null)}
+                  aria-label="Fermer"
+                  className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-900 transition-colors"
+                >
+                  <X size={16} />
+                </button>
+
+                <div className="w-11 h-11 rounded-xl bg-[#3b82f6]/10 flex items-center justify-center text-[#3b82f6] mb-5">
+                  {(() => { const Icon = FEATURES[activeFeature].icon; return <Icon size={20} />; })()}
+                </div>
+
+                <p className="font-mono text-[10px] text-gray-400 mb-1.5">{FEATURES[activeFeature].label}</p>
+                <h3 className="text-2xl font-bold tracking-tight text-gray-900 mb-3">{FEATURES[activeFeature].title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed mb-6">{FEATURES[activeFeature].desc}</p>
+
+                <ul className="space-y-3 mb-8">
+                  {FEATURES[activeFeature].details.map((d, di) => (
+                    <li key={di} className="flex items-start gap-2.5 text-sm text-gray-600 leading-relaxed">
+                      <Check size={15} className="text-[#3b82f6] shrink-0 mt-0.5" />
+                      {d}
+                    </li>
+                  ))}
+                </ul>
+
+                <Link
+                  href={FEATURES[activeFeature].href}
+                  className="w-full h-12 rounded-full bg-gray-900 text-white font-bold text-sm hover:bg-gray-800 transition-all inline-flex items-center justify-center gap-2"
+                >
+                  Commencer gratuitement <ArrowRight size={14} />
+                </Link>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Big dark card */}
         <motion.div
