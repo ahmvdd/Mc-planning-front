@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -10,6 +10,14 @@ import {
 } from "lucide-react";
 
 export default function AdminSignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <AdminSignupForm />
+    </Suspense>
+  );
+}
+
+function AdminSignupForm() {
   const searchParams = useSearchParams();
   const [form, setForm] = useState({ name: "", orgName: "", email: searchParams.get("email") ?? "", password: "" });
   const [status, setStatus] = useState<{ type: "idle" | "loading" | "success" | "error"; message?: string }>({ type: "idle" });
