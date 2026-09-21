@@ -489,29 +489,25 @@ export default function Home() {
                 exit={{ opacity: 0, y: 16, scale: 0.97 }}
                 transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
                 onClick={(e) => e.stopPropagation()}
-                className="relative w-full max-w-lg rounded-3xl border border-gray-200 bg-white p-8 sm:p-10 shadow-2xl"
+                className="relative w-full max-w-lg border border-white/10 bg-black p-8 sm:p-10"
               >
                 <button
                   type="button"
                   onClick={() => setActiveFeature(null)}
                   aria-label="Fermer"
-                  className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-900 transition-colors"
+                  className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center border border-white/10 text-white/50 hover:text-white hover:border-white/30 transition-colors"
                 >
                   <X size={16} />
                 </button>
 
-                <div className="w-11 h-11 rounded-xl bg-[#3b82f6]/10 flex items-center justify-center text-[#3b82f6] mb-5">
-                  {(() => { const Icon = FEATURES[activeFeature].icon; return <Icon size={20} />; })()}
-                </div>
-
-                <p className="font-mono text-[10px] text-gray-400 mb-1.5">{FEATURES[activeFeature].label}</p>
-                <h3 className="text-2xl font-bold tracking-tight text-gray-900 mb-3">{FEATURES[activeFeature].title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed mb-6">{FEATURES[activeFeature].desc}</p>
+                <p className="font-mono text-[10px] text-white/40 mb-1.5">{FEATURES[activeFeature].label}</p>
+                <h3 className="text-2xl font-bold tracking-tight text-white mb-3">{FEATURES[activeFeature].title}</h3>
+                <p className="text-white/40 text-sm leading-relaxed mb-6">{FEATURES[activeFeature].desc}</p>
 
                 <ul className="space-y-3 mb-8">
                   {FEATURES[activeFeature].details.map((d, di) => (
-                    <li key={di} className="flex items-start gap-2.5 text-sm text-gray-600 leading-relaxed">
-                      <Check size={15} className="text-[#3b82f6] shrink-0 mt-0.5" />
+                    <li key={di} className="flex items-start gap-3 text-sm text-white/60 leading-relaxed">
+                      <span className="text-white/20 shrink-0">—</span>
                       {d}
                     </li>
                   ))}
@@ -519,7 +515,7 @@ export default function Home() {
 
                 <Link
                   href={FEATURES[activeFeature].href}
-                  className="w-full h-12 rounded-full bg-gray-900 text-white font-bold text-sm hover:bg-gray-800 transition-all inline-flex items-center justify-center gap-2"
+                  className="w-full h-12 bg-white text-black font-bold text-sm hover:bg-white/90 transition-all inline-flex items-center justify-center gap-2"
                 >
                   Commencer gratuitement <ArrowRight size={14} />
                 </Link>
