@@ -125,6 +125,7 @@ function AdminSignupForm() {
                     className="w-full rounded-xl border border-white/8 bg-white/[0.04] pl-10 pr-4 py-3 text-sm text-white placeholder:text-white/25 outline-none focus:border-blue-500/50 focus:bg-white/[0.06] focus:ring-2 focus:ring-blue-500/10 transition-all"
                     placeholder={placeholder}
                     type={type}
+                    autoComplete={type === "password" ? "new-password" : "off"}
                     required
                     value={form[key]}
                     onChange={(e) => setForm({ ...form, [key]: e.target.value })}

@@ -75,6 +75,7 @@ function EmployeeSignupForm() {
             className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-3 text-sm outline-none focus:bg-white focus:border-blue-300 focus:ring-2 focus:ring-blue-500/15 transition-all"
             placeholder={placeholder}
             type={type}
+            autoComplete={type === "password" ? "new-password" : "off"}
             required
             minLength={minLength}
             value={form[key as keyof typeof form]}
