@@ -357,39 +357,39 @@ export default function Home() {
           <motion.div
             initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }} viewport={{ once: true }}
-            className="relative rounded-3xl overflow-hidden border border-gray-200 bg-gray-50 grid grid-cols-1 md:grid-cols-2 min-h-[480px]"
+            className="relative rounded-3xl overflow-hidden border border-white/8 bg-[#090909] grid grid-cols-1 md:grid-cols-2 min-h-[480px]"
           >
             {/* Left — text */}
             <div className="p-10 sm:p-14 flex flex-col justify-between relative z-10">
               <div>
                 <p className="font-mono text-xs text-[#3b82f6] mb-8">[ gestion d&apos;équipe ]</p>
-                <h2 className="text-5xl sm:text-6xl font-bold tracking-tight text-gray-900 leading-[0.9] mb-6">
+                <h2 className="text-5xl sm:text-6xl font-bold tracking-tight text-white leading-[0.9] mb-6">
                   Planifiez<br />sans effort.
                 </h2>
-                <p className="text-gray-500 text-base font-medium leading-relaxed max-w-xs">
+                <p className="text-white/40 text-base font-medium leading-relaxed max-w-xs">
                   Construisez vos plannings hebdomadaires en quelques clics. Les conflits sont détectés automatiquement, votre équipe notifiée instantanément.
                 </p>
               </div>
               <Link
                 href="/signup"
-                className="mt-10 w-fit h-12 px-8 rounded-full bg-gray-900 text-white font-bold text-sm hover:scale-105 transition-all inline-flex items-center gap-2"
+                className="mt-10 w-fit h-12 px-8 rounded-full bg-white text-black font-bold text-sm hover:scale-105 transition-all inline-flex items-center gap-2"
               >
                 Démarrer gratuitement <ArrowRight size={14} />
               </Link>
             </div>
 
             {/* Right — vraie capture du dashboard */}
-            <div className="relative min-h-[300px] md:min-h-0 bg-gray-100">
+            <div className="relative min-h-[300px] md:min-h-0 bg-[#0a0a0a]">
               <img
                 src="/dashboard-preview.png"
                 alt="Dashboard Shiftly"
                 className="absolute inset-0 w-full h-full object-cover object-top"
               />
-              <div className="absolute inset-0 bg-black/5" />
+              <div className="absolute inset-0 bg-black/10" />
               {/* Gradient blending on left edge */}
-              <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-gray-50 to-transparent" />
+              <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#090909] to-transparent" />
               {/* Gradient blending on bottom */}
-              <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-gray-50 to-transparent md:hidden" />
+              <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#090909] to-transparent md:hidden" />
             </div>
           </motion.div>
         </div>
