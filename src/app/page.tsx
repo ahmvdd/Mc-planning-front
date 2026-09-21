@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
@@ -93,6 +94,8 @@ const STEPS = [
 export default function Home() {
   const [me, setMe] = useState<{ email?: string; role?: string } | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [heroEmail, setHeroEmail] = useState("");
+  const [heroSubmitting, setHeroSubmitting] = useState(false);
   const heroRef = useRef(null);
 
   const { scrollYProgress } = useScroll({
@@ -114,6 +117,20 @@ export default function Home() {
         .then(setMe).catch(() => setMe(null));
     }
   }, []);
+
+  const router = useRouter();
+
+  const handleHeroSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = heroEmail.trim();
+    if (!email) return;
+    setHeroSubmitting(true);
+    apiFetchClient("/leads/welcome", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }).catch(() => {});
+    router.push(`/signup/admin?email=${encodeURIComponent(email)}`);
+  };
 
   return (
     <SmoothScroll>
@@ -251,23 +268,28 @@ export default function Home() {
                 Le planning qui tourne, même sans vous.
               </motion.h1>
 
-              <motion.div
+              <motion.form
+                onSubmit={handleHeroSubmit}
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}
                 className="mt-6 flex flex-col gap-3 sm:mt-8 sm:inline-flex sm:flex-row sm:items-center sm:rounded-full sm:bg-white sm:p-1.5"
               >
                 <input
                   type="email"
+                  required
+                  value={heroEmail}
+                  onChange={e => setHeroEmail(e.target.value)}
                   placeholder="Votre email pro"
                   className="rounded-full bg-white px-5 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none sm:w-64 sm:rounded-none sm:bg-transparent sm:px-4 sm:py-2"
                 />
-                <Link
-                  href="/signup"
-                  className="rounded-full px-6 py-3 text-center text-sm font-medium text-white hover:opacity-90 transition-opacity sm:py-2.5"
+                <button
+                  type="submit"
+                  disabled={heroSubmitting}
+                  className="rounded-full px-6 py-3 text-center text-sm font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-60 sm:py-2.5"
                   style={{ background: "linear-gradient(to bottom, #2B2B2B, #101010)" }}
                 >
                   Commencer
-                </Link>
-              </motion.div>
+                </button>
+              </motion.form>
             </div>
 
             {/* Right — glass cards */}

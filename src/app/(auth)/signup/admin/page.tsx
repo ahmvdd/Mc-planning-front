@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Building2, Mail, Lock, User,
@@ -9,7 +10,8 @@ import {
 } from "lucide-react";
 
 export default function AdminSignupPage() {
-  const [form, setForm] = useState({ name: "", orgName: "", email: "", password: "" });
+  const searchParams = useSearchParams();
+  const [form, setForm] = useState({ name: "", orgName: "", email: searchParams.get("email") ?? "", password: "" });
   const [status, setStatus] = useState<{ type: "idle" | "loading" | "success" | "error"; message?: string }>({ type: "idle" });
   const [orgCode, setOrgCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
