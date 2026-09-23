@@ -679,8 +679,9 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col items-center text-center md:w-56 shrink-0">
-            <div className="w-20 h-20 rounded-full bg-[#3b82f6]/15 border border-[#3b82f6]/30 flex items-center justify-center text-2xl font-bold text-[#3b82f6] mb-4">
-              SA
+            <div className="w-20 h-20 rounded-full bg-[#3b82f6]/15 border border-[#3b82f6]/30 overflow-hidden mb-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/avatar-sayeh.webp" alt="Sayeh Ahmed" className="w-full h-full object-cover" />
             </div>
             <p className="font-bold text-gray-900 text-sm">Sayeh Ahmed</p>
             <p className="text-gray-500 text-xs font-medium mb-3">Fondateur &amp; Développeur</p>
