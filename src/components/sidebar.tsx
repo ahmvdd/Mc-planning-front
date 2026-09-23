@@ -73,63 +73,50 @@ export default function Sidebar() {
     window.location.href = "/";
   };
 
+  const itemClass = (active: boolean) =>
+    `group/item relative flex h-11 w-full items-center gap-3 overflow-hidden rounded-2xl px-[14px] transition-colors ${
+      active ? "bg-white text-black" : "text-white/40 hover:bg-white/10 hover:text-white"
+    }`;
+
+  const labelClass = "whitespace-nowrap text-sm font-semibold opacity-0 transition-opacity duration-150 group-hover:opacity-100";
+
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 flex w-[76px] flex-col items-center bg-[#0a0a0a] py-6 dark:border-r dark:border-white/5" style={{ paddingTop: "calc(env(safe-area-inset-top) + 24px)" }}>
-      <Link href="/dashboard" className="mb-8 flex h-10 w-10 items-center justify-center rounded-xl bg-[#B4FF39] text-black">
+    <aside
+      className="group fixed left-4 top-4 bottom-4 z-40 flex w-[72px] flex-col items-stretch overflow-hidden rounded-[28px] bg-[#0a0a0a] px-[14px] py-6 shadow-2xl transition-[width] duration-300 ease-out hover:w-[220px] dark:border dark:border-white/5"
+      style={{ paddingTop: "calc(env(safe-area-inset-top) + 24px)" }}
+    >
+      <Link href="/dashboard" className="mb-8 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#B4FF39] text-black">
         <CalendarRange size={20} strokeWidth={2.5} />
       </Link>
 
-      <nav className="flex flex-1 flex-col items-center gap-2">
+      <nav className="flex flex-1 flex-col gap-2">
         {links.map(({ href, icon: Icon, label }) => {
           const active = pathname === href;
           return (
-            <Link
-              key={href}
-              href={href}
-              title={label}
-              className={`flex h-11 w-11 items-center justify-center rounded-xl transition-colors ${
-                active ? "bg-white text-black" : "text-white/40 hover:bg-white/10 hover:text-white"
-              }`}
-            >
-              <Icon size={19} strokeWidth={2} />
+            <Link key={href} href={href} title={label} className={itemClass(active)}>
+              <Icon size={19} strokeWidth={2} className="shrink-0" />
+              <span className={labelClass}>{label}</span>
             </Link>
           );
         })}
       </nav>
 
-      <div className="flex flex-col items-center gap-2">
-        <button
-          type="button"
-          onClick={() => setTutorialOpen(true)}
-          title="Voir le tuto"
-          className="flex h-11 w-11 items-center justify-center rounded-xl text-white/40 transition-colors hover:bg-white/10 hover:text-white"
-        >
-          <HelpCircle size={19} strokeWidth={2} />
+      <div className="flex flex-col gap-2">
+        <button type="button" onClick={() => setTutorialOpen(true)} title="Voir le tuto" className={itemClass(false)}>
+          <HelpCircle size={19} strokeWidth={2} className="shrink-0" />
+          <span className={labelClass}>Tuto</span>
         </button>
-        <button
-          type="button"
-          onClick={toggleTheme}
-          title={theme === "dark" ? "Mode clair" : "Mode sombre"}
-          className="flex h-11 w-11 items-center justify-center rounded-xl text-white/40 transition-colors hover:bg-white/10 hover:text-white"
-        >
-          {theme === "dark" ? <Sun size={19} strokeWidth={2} /> : <Moon size={19} strokeWidth={2} />}
+        <button type="button" onClick={toggleTheme} title={theme === "dark" ? "Mode clair" : "Mode sombre"} className={itemClass(false)}>
+          {theme === "dark" ? <Sun size={19} strokeWidth={2} className="shrink-0" /> : <Moon size={19} strokeWidth={2} className="shrink-0" />}
+          <span className={labelClass}>{theme === "dark" ? "Mode clair" : "Mode sombre"}</span>
         </button>
-        <Link
-          href="/profile"
-          title="Profil"
-          className={`flex h-11 w-11 items-center justify-center rounded-xl transition-colors ${
-            pathname === "/profile" ? "bg-white text-black" : "text-white/40 hover:bg-white/10 hover:text-white"
-          }`}
-        >
-          <UserCircle size={19} strokeWidth={2} />
+        <Link href="/profile" title="Profil" className={itemClass(pathname === "/profile")}>
+          <UserCircle size={19} strokeWidth={2} className="shrink-0" />
+          <span className={labelClass}>Profil</span>
         </Link>
-        <button
-          type="button"
-          onClick={handleLogout}
-          title="Déconnexion"
-          className="flex h-11 w-11 items-center justify-center rounded-xl text-white/40 transition-colors hover:bg-white/10 hover:text-white"
-        >
-          <LogOut size={19} strokeWidth={2} />
+        <button type="button" onClick={handleLogout} title="Déconnexion" className={itemClass(false)}>
+          <LogOut size={19} strokeWidth={2} className="shrink-0" />
+          <span className={labelClass}>Déconnexion</span>
         </button>
       </div>
 

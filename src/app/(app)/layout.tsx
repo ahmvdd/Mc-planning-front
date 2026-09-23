@@ -14,7 +14,7 @@ export default function AppLayout({
   return (
     <div id="app-root" className="min-h-screen bg-[#F5F4EF] dark:bg-[#0E0E10]">
       <Sidebar />
-      <div className="pl-[76px]">
+      <div className="pl-[104px]">
         <TopBar />
         <main className="px-5 pb-16 pt-6 sm:px-8 md:pt-8">{children}</main>
         <footer className="border-t border-black/5 px-5 sm:px-8 dark:border-white/5">

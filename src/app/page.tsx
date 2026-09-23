@@ -207,8 +207,7 @@ export default function Home() {
           </div>
           <Link
             href={me ? "/dashboard" : "/signup"}
-            className="self-stretch flex items-center rounded-full px-5 text-sm font-medium text-white hover:opacity-90 transition-opacity"
-            style={{ background: "linear-gradient(to bottom, #2B2B2B, #101010)" }}
+            className="self-stretch flex items-center rounded-full bg-[#B4FF39] px-5 text-sm font-bold text-black hover:bg-[#a3ec2e] transition-colors"
           >
             {me ? "Dashboard" : "Démarrer"}
           </Link>
@@ -257,9 +256,8 @@ export default function Home() {
         <Link
           href={me ? "/dashboard" : "/signup"}
           onClick={() => setMobileOpen(false)}
-          className="mt-auto mx-6 mb-10 rounded-full px-6 py-3.5 text-center text-sm font-medium text-white transition-all"
+          className="mt-auto mx-6 mb-10 rounded-full bg-[#B4FF39] px-6 py-3.5 text-center text-sm font-bold text-black transition-all"
           style={{
-            background: "linear-gradient(to bottom, #2B2B2B, #101010)",
             opacity: mobileOpen ? 1 : 0,
             transform: mobileOpen ? "translateY(0)" : "translateY(16px)",
             transitionDelay: mobileOpen ? "300ms" : "0ms",
@@ -314,8 +312,7 @@ export default function Home() {
                 <button
                   type="submit"
                   disabled={heroSubmitting}
-                  className="rounded-full px-6 py-3 text-center text-sm font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-60 sm:py-2.5"
-                  style={{ background: "linear-gradient(to bottom, #2B2B2B, #101010)" }}
+                  className="rounded-full bg-[#B4FF39] px-6 py-3 text-center text-sm font-bold text-black hover:bg-[#a3ec2e] transition-colors disabled:opacity-60 sm:py-2.5"
                 >
                   Commencer
                 </button>
@@ -635,11 +632,7 @@ export default function Home() {
 
               <Link
                 href="/signup"
-                className={`w-full h-12 rounded-full font-bold text-sm inline-flex items-center justify-center gap-2 transition-all ${
-                  plan.highlighted
-                    ? "bg-[#3b82f6] text-white hover:bg-[#3b82f6]/90"
-                    : "bg-gray-900 text-white hover:bg-gray-800"
-                }`}
+                className="w-full h-12 rounded-full bg-[#B4FF39] text-black font-bold text-sm inline-flex items-center justify-center gap-2 transition-all hover:bg-[#a3ec2e]"
               >
                 {plan.cta} <ArrowRight size={14} />
               </Link>
@@ -725,7 +718,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/signup"
-              className="h-14 px-10 rounded-full bg-[#3b82f6] text-white font-bold text-sm hover:scale-105 hover:shadow-[0_0_60px_-10px_rgba(59,130,246,0.7)] transition-all inline-flex items-center gap-3"
+              className="h-14 px-10 rounded-full bg-[#B4FF39] text-black font-bold text-sm hover:scale-105 hover:shadow-[0_0_60px_-10px_rgba(180,255,57,0.5)] transition-all inline-flex items-center gap-3"
             >
               Commencer gratuitement <ArrowRight size={15} />
             </Link>
