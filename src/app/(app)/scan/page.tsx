@@ -122,49 +122,49 @@ function ScanContent() {
 
   return (
     <div className="mx-auto max-w-md space-y-6 pb-12">
-      <div className="border-b border-zinc-800 pb-6">
-        <h1 className="text-2xl font-bold tracking-tight text-white">Pointer mon arrivée</h1>
-        <p className="mt-1 text-sm text-zinc-500">Scannez le QR code affiché à l&apos;entrée de votre lieu de travail.</p>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Pointer mon arrivée</h1>
+        <p className="mt-1 text-sm text-gray-400 dark:text-white/30">Scannez le QR code affiché à l&apos;entrée de votre lieu de travail.</p>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-zinc-800">
-        <div className="relative flex min-h-[300px] items-center justify-center bg-zinc-950">
+      <div className="overflow-hidden rounded-2xl bg-white shadow-sm dark:bg-white/5 dark:shadow-none">
+        <div className="relative flex min-h-[300px] items-center justify-center bg-[#0a0a0a]">
           <div id="qr-reader" className="w-full" />
 
           {!cameraActive && status === "idle" && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-              <QrCode size={64} className="text-zinc-800" />
-              <p className="text-sm text-zinc-600">Caméra inactive</p>
+              <QrCode size={64} className="text-white/10" />
+              <p className="text-sm text-white/30">Caméra inactive</p>
             </div>
           )}
 
           {status === "loading" && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-zinc-950/90">
-              <Loader2 size={40} className="animate-spin text-blue-400" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/90">
+              <Loader2 size={40} className="animate-spin text-[#B4FF39]" />
               <p className="text-sm font-medium text-white">Enregistrement...</p>
             </div>
           )}
 
           {status === "success" && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-zinc-950/90">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/90">
               <CheckCircle2 size={56} className="text-emerald-400" />
               <p className="text-base font-bold text-white">{message}</p>
             </div>
           )}
 
           {(status === "error" || status === "already") && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-zinc-950/90">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/90">
               <XCircle size={56} className={status === "already" ? "text-amber-400" : "text-rose-400"} />
               <p className="text-base font-bold text-white text-center px-6">{message}</p>
             </div>
           )}
         </div>
 
-        <div className="p-5 space-y-3 border-t border-zinc-800">
+        <div className="p-5 space-y-3">
           {!cameraActive && status !== "success" && (
             <button
               onClick={startCamera}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-bold text-white transition hover:bg-blue-500 active:scale-95"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-gray-900 py-3 text-sm font-bold text-white transition hover:bg-gray-800 active:scale-95 dark:bg-[#B4FF39] dark:text-black dark:hover:bg-[#a3ec2e]"
             >
               <Camera size={18} /> Ouvrir la caméra
             </button>
@@ -173,7 +173,7 @@ function ScanContent() {
           {cameraActive && (
             <button
               onClick={stopCamera}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-700 bg-zinc-800 py-3 text-sm font-bold text-zinc-300 transition hover:bg-zinc-700"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-gray-100 py-3 text-sm font-bold text-gray-600 transition hover:bg-gray-200 dark:bg-white/10 dark:text-white/70 dark:hover:bg-white/15"
             >
               Annuler
             </button>
@@ -182,7 +182,7 @@ function ScanContent() {
           {(status === "error" || status === "already") && (
             <button
               onClick={() => setStatus("idle")}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-700 bg-zinc-800 py-3 text-sm font-bold text-zinc-300 transition hover:bg-zinc-700"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-gray-100 py-3 text-sm font-bold text-gray-600 transition hover:bg-gray-200 dark:bg-white/10 dark:text-white/70 dark:hover:bg-white/15"
             >
               Réessayer
             </button>
@@ -191,7 +191,7 @@ function ScanContent() {
           {status === "success" && (
             <button
               onClick={() => router.push("/dashboard")}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-800 py-3 text-sm font-bold text-white transition hover:bg-zinc-700"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-gray-100 py-3 text-sm font-bold text-gray-600 transition hover:bg-gray-200 dark:bg-white/10 dark:text-white/70 dark:hover:bg-white/15"
             >
               Retour au dashboard
             </button>
@@ -199,7 +199,7 @@ function ScanContent() {
         </div>
       </div>
 
-      <p className="text-center text-xs text-zinc-600">
+      <p className="text-center text-xs text-gray-300 dark:text-white/20">
         En cas d&apos;oubli, contactez votre responsable pour un pointage manuel.
       </p>
     </div>
@@ -210,7 +210,7 @@ export default function ScanPage() {
   return (
     <Suspense fallback={
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Loader2 className="animate-spin text-zinc-500" size={28} />
+        <Loader2 className="animate-spin text-gray-300 dark:text-white/20" size={28} />
       </div>
     }>
       <ScanContent />

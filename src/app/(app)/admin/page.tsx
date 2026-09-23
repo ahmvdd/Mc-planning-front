@@ -138,65 +138,65 @@ export default function AdminPage() {
 
   if (loading) return (
     <div className="flex min-h-[60vh] items-center justify-center">
-      <Loader2 className="animate-spin text-zinc-500" size={28} />
+      <Loader2 className="animate-spin text-gray-300 dark:text-white/20" size={28} />
     </div>
   );
 
-  const inputClass = "w-full rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all";
+  const inputClass = "w-full rounded-xl bg-gray-50 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-gray-200 transition-all dark:bg-white/5 dark:text-white dark:placeholder:text-white/25 dark:focus:ring-white/10";
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto max-w-6xl space-y-6">
 
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-zinc-800 pb-8">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Espace Admin</h1>
-          <p className="text-sm text-zinc-500">Gérez l&apos;organisation, les accès et les plannings</p>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Espace Admin</h1>
+          <p className="text-sm text-gray-400 mt-1 dark:text-white/30">Gérez l&apos;organisation, les accès et les plannings</p>
         </div>
-        <div className="flex items-center gap-2 rounded-full bg-blue-500/10 border border-blue-500/20 px-4 py-2">
-          <Settings size={13} className="text-blue-400" />
-          <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">Administration</span>
+        <div className="flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 dark:bg-white/5">
+          <Settings size={13} className="text-gray-500 dark:text-white/40" />
+          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider dark:text-white/40">Administration</span>
         </div>
       </div>
 
       {error && (
-        <div className="flex items-center gap-3 rounded-xl border border-rose-500/20 bg-rose-500/10 p-4">
-          <AlertCircle size={16} className="shrink-0 text-rose-400" />
-          <p className="text-sm font-medium text-rose-400">{error}</p>
-          <Link href="/login" className="ml-auto rounded-lg bg-rose-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-rose-500 transition">Se connecter</Link>
+        <div className="flex items-center gap-3 rounded-2xl bg-rose-50 p-4 dark:bg-rose-500/10">
+          <AlertCircle size={16} className="shrink-0 text-rose-500" />
+          <p className="text-sm font-medium text-rose-600 dark:text-rose-400">{error}</p>
+          <Link href="/login" className="ml-auto rounded-full bg-rose-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-rose-500 transition">Se connecter</Link>
         </div>
       )}
 
       {!error && (
-        <div className="grid gap-8 lg:grid-cols-2">
+        <div className="grid gap-5 lg:grid-cols-2">
 
           {/* Organisation */}
-          <section className="space-y-4">
-            <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-500">
+          <section className="space-y-4 rounded-2xl bg-white p-6 shadow-sm dark:bg-white/5 dark:shadow-none">
+            <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-white/30">
               <Building2 size={13} /> Informations de l&apos;entreprise
             </h3>
             <form onSubmit={handleUpdateOrganization} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Nom de l&apos;entreprise</label>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/30">Nom de l&apos;entreprise</label>
                 <input className={inputClass} placeholder="Nom de l'entreprise" value={orgName} onChange={e => setOrgName(e.target.value)} />
               </div>
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Logo</label>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/30">Logo</label>
                 <div
-                  className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-zinc-700 bg-zinc-900 py-8 transition hover:border-blue-500/50 hover:bg-zinc-800"
+                  className="flex cursor-pointer flex-col items-center justify-center rounded-xl bg-gray-50 py-8 transition hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   {logoPreview ? (
                     <div className="flex flex-col items-center gap-2">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={logoPreview} alt="Logo" className="h-14 w-14 rounded-xl object-cover" />
-                      <p className="text-xs text-zinc-500">Cliquer pour changer</p>
+                      <p className="text-xs text-gray-400 dark:text-white/30">Cliquer pour changer</p>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center gap-1.5">
-                      <Upload size={18} className="text-zinc-600" />
-                      <p className="text-sm font-medium text-zinc-500">Importer un logo</p>
-                      <p className="text-xs text-zinc-600">PNG, JPG</p>
+                      <Upload size={18} className="text-gray-300 dark:text-white/20" />
+                      <p className="text-sm font-medium text-gray-400 dark:text-white/30">Importer un logo</p>
+                      <p className="text-xs text-gray-300 dark:text-white/20">PNG, JPG</p>
                     </div>
                   )}
                   <input ref={fileInputRef} type="file" accept="image/png,image/jpeg" onChange={handleLogoChange} className="hidden" />
@@ -204,7 +204,7 @@ export default function AdminPage() {
               </div>
               <button
                 type="submit" disabled={updating}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-bold text-white hover:bg-blue-500 disabled:opacity-60 transition-all"
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-gray-900 py-3 text-sm font-bold text-white hover:bg-gray-800 disabled:opacity-60 transition-all dark:bg-[#B4FF39] dark:text-black dark:hover:bg-[#a3ec2e]"
               >
                 {updating ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}
                 {updating ? "Enregistrement..." : "Enregistrer"}
@@ -212,14 +212,14 @@ export default function AdminPage() {
             </form>
           </section>
 
-          <div className="space-y-8">
+          <div className="space-y-5">
 
             {/* Inviter */}
-            <section className="space-y-4">
-              <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-500">
+            <section className="space-y-4 rounded-2xl bg-white p-6 shadow-sm dark:bg-white/5 dark:shadow-none">
+              <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-white/30">
                 <Users size={13} /> Inviter un employé
               </h3>
-              <p className="text-xs text-zinc-500">L&apos;employé recevra un email avec un lien pour créer son compte.</p>
+              <p className="text-xs text-gray-400 dark:text-white/30">L&apos;employé recevra un email avec un lien pour créer son compte.</p>
               <form onSubmit={sendInvite} className="space-y-3">
                 <input
                   type="email" required placeholder="Email de l'employé"
@@ -227,18 +227,18 @@ export default function AdminPage() {
                   className={inputClass}
                 />
                 {inviteStatus === "error" && (
-                  <div className="flex items-center gap-2 rounded-lg border border-rose-500/20 bg-rose-500/10 px-3.5 py-2.5 text-xs font-bold text-rose-400">
+                  <div className="flex items-center gap-2 rounded-lg bg-rose-50 px-3.5 py-2.5 text-xs font-bold text-rose-600 dark:bg-rose-500/10 dark:text-rose-400">
                     <AlertCircle size={12} /> {inviteError}
                   </div>
                 )}
                 {inviteStatus === "success" && (
-                  <div className="flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3.5 py-2.5 text-xs font-bold text-emerald-400">
+                  <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3.5 py-2.5 text-xs font-bold text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
                     <Check size={12} /> Invitation envoyée !
                   </div>
                 )}
                 <button
                   type="submit" disabled={inviteStatus === "loading"}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 text-sm font-bold text-white hover:bg-blue-500 transition disabled:opacity-60"
+                  className="flex w-full items-center justify-center gap-2 rounded-full bg-gray-900 py-2.5 text-sm font-bold text-white hover:bg-gray-800 transition disabled:opacity-60 dark:bg-[#B4FF39] dark:text-black dark:hover:bg-[#a3ec2e]"
                 >
                   <Send size={13} />
                   {inviteStatus === "loading" ? "Envoi..." : "Envoyer l'invitation"}
@@ -248,23 +248,23 @@ export default function AdminPage() {
 
             {/* Invitations en attente */}
             {pendingInvitations.length > 0 && (
-              <section className="space-y-3">
-                <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-500">
-                  <Clock size={13} className="text-amber-400" /> Invitations en attente
-                  <span className="rounded-full bg-amber-400/10 border border-amber-400/20 px-2 py-0.5 text-[10px] font-bold text-amber-400">{pendingInvitations.length}</span>
+              <section className="space-y-3 rounded-2xl bg-white p-6 shadow-sm dark:bg-white/5 dark:shadow-none">
+                <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-white/30">
+                  <Clock size={13} className="text-amber-500" /> Invitations en attente
+                  <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">{pendingInvitations.length}</span>
                 </h3>
-                <div className="rounded-xl border border-zinc-800 overflow-hidden">
+                <div className="rounded-xl bg-gray-50 overflow-hidden dark:bg-white/5">
                   {pendingInvitations.map((inv, i, arr) => (
-                    <div key={inv.id} className={`flex items-center justify-between gap-3 px-4 py-3.5 ${i < arr.length - 1 ? "border-b border-zinc-800" : ""}`}>
+                    <div key={inv.id} className={`flex items-center justify-between gap-3 px-4 py-3.5 ${i < arr.length - 1 ? "border-b border-white dark:border-white/5" : ""}`}>
                       <div className="flex items-center gap-2 min-w-0">
-                        <Mail size={12} className="shrink-0 text-zinc-500" />
-                        <span className="truncate text-sm text-zinc-300">{inv.email}</span>
+                        <Mail size={12} className="shrink-0 text-gray-400 dark:text-white/30" />
+                        <span className="truncate text-sm text-gray-600 dark:text-white/60">{inv.email}</span>
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
-                        <span className="text-[11px] text-zinc-600 hidden sm:block">
+                        <span className="text-[11px] text-gray-300 hidden sm:block dark:text-white/20">
                           Expire le {new Date(inv.expiresAt).toLocaleDateString("fr-FR")}
                         </span>
-                        <button onClick={() => cancelInvitation(inv.id)} className="text-zinc-600 transition hover:text-rose-400">
+                        <button onClick={() => cancelInvitation(inv.id)} className="text-gray-300 transition hover:text-rose-500 dark:text-white/20">
                           <Trash2 size={13} />
                         </button>
                       </div>
@@ -275,44 +275,44 @@ export default function AdminPage() {
             )}
 
             {/* Import CSV */}
-            <section className="space-y-4">
-              <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-500">
+            <section className="space-y-4 rounded-2xl bg-white p-6 shadow-sm dark:bg-white/5 dark:shadow-none">
+              <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-white/30">
                 <FileSpreadsheet size={13} /> Importer des employés
               </h3>
-              <p className="text-xs text-zinc-500">
-                CSV ou Excel — colonnes : <span className="font-mono font-bold text-zinc-300">email</span>, name (optionnel).
+              <p className="text-xs text-gray-400 dark:text-white/30">
+                CSV ou Excel — colonnes : <span className="font-mono font-bold text-gray-600 dark:text-white/60">email</span>, name (optionnel).
               </p>
               <form onSubmit={handleImport} className="space-y-3">
-                <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-zinc-700 bg-zinc-900 py-6 transition hover:border-emerald-500/50 hover:bg-zinc-800">
+                <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl bg-gray-50 py-6 transition hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10">
                   {importFile ? (
-                    <div className="flex items-center gap-2 text-sm font-medium text-emerald-400">
+                    <div className="flex items-center gap-2 text-sm font-medium text-emerald-600 dark:text-emerald-400">
                       <FileSpreadsheet size={15} /> {importFile.name}
-                      <button type="button" onClick={e => { e.preventDefault(); setImportFile(null); if (importInputRef.current) importInputRef.current.value = ""; }} className="text-zinc-500 hover:text-rose-400">
+                      <button type="button" onClick={e => { e.preventDefault(); setImportFile(null); if (importInputRef.current) importInputRef.current.value = ""; }} className="text-gray-400 hover:text-rose-500 dark:text-white/30">
                         <X size={13} />
                       </button>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center gap-1.5">
-                      <Upload size={18} className="text-zinc-600" />
-                      <span className="text-xs font-bold uppercase text-zinc-500">Choisir un fichier</span>
-                      <span className="text-[11px] text-zinc-600">.csv, .xlsx, .xls</span>
+                      <Upload size={18} className="text-gray-300 dark:text-white/20" />
+                      <span className="text-xs font-bold uppercase text-gray-400 dark:text-white/30">Choisir un fichier</span>
+                      <span className="text-[11px] text-gray-300 dark:text-white/20">.csv, .xlsx, .xls</span>
                     </div>
                   )}
                   <input ref={importInputRef} type="file" accept=".csv,.xlsx,.xls,text/csv" className="hidden" onChange={e => setImportFile(e.target.files?.[0] ?? null)} />
                 </label>
                 <button
                   type="submit" disabled={!importFile || importStatus === "loading"}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-2.5 text-sm font-bold text-white hover:bg-emerald-500 transition disabled:opacity-40"
+                  className="flex w-full items-center justify-center gap-2 rounded-full bg-gray-900 py-2.5 text-sm font-bold text-white hover:bg-gray-800 transition disabled:opacity-40 dark:bg-[#B4FF39] dark:text-black dark:hover:bg-[#a3ec2e]"
                 >
                   {importStatus === "loading" ? <><Loader2 size={13} className="animate-spin" /> Import en cours...</> : <><Send size={13} /> Lancer l&apos;import</>}
                 </button>
               </form>
               {importStatus === "done" && importResult && (
-                <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-xs font-bold text-emerald-400">
+                <div className="rounded-xl bg-emerald-50 px-4 py-3 text-xs font-bold text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
                   <Check size={12} className="mr-1 inline" />
                   {importResult.invited} invitation{importResult.invited !== 1 ? "s" : ""} envoyée{importResult.invited !== 1 ? "s" : ""} sur {importResult.total}
                   {importResult.errors.length > 0 && (
-                    <div className="mt-2 space-y-1 font-normal text-rose-400">
+                    <div className="mt-2 space-y-1 font-normal text-rose-500">
                       {importResult.errors.map((err, i) => <p key={i}>{err.email} — {err.reason}</p>)}
                     </div>
                   )}
@@ -321,29 +321,29 @@ export default function AdminPage() {
             </section>
 
             {/* Reset password */}
-            <section className="space-y-4">
-              <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-500">
+            <section className="space-y-4 rounded-2xl bg-white p-6 shadow-sm dark:bg-white/5 dark:shadow-none">
+              <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-white/30">
                 <KeyRound size={13} /> Réinitialiser un mot de passe
               </h3>
               <form className="space-y-3" onSubmit={e => e.preventDefault()}>
                 <input className={inputClass} placeholder="Email de l'employé" type="email" />
                 <input className={inputClass} placeholder="Nouveau mot de passe" type="password" />
-                <button className="w-full rounded-xl bg-zinc-800 py-2.5 text-sm font-bold text-white hover:bg-blue-600 transition-colors">
+                <button className="w-full rounded-full bg-gray-100 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-200 transition-colors dark:bg-white/10 dark:text-white/70 dark:hover:bg-white/15">
                   Mettre à jour
                 </button>
               </form>
             </section>
 
             {/* Publier planning */}
-            <section className="space-y-4">
-              <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-500">
+            <section className="space-y-4 rounded-2xl bg-white p-6 shadow-sm dark:bg-white/5 dark:shadow-none">
+              <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-white/30">
                 <CalendarDays size={13} /> Publier le planning
               </h3>
-              <p className="text-xs text-zinc-500">Informez les employés des nouveaux horaires.</p>
+              <p className="text-xs text-gray-400 dark:text-white/30">Informez les employés des nouveaux horaires.</p>
               <form className="space-y-3" onSubmit={e => e.preventDefault()}>
                 <input className={inputClass} type="date" />
                 <textarea className={`${inputClass} resize-none`} placeholder="Message aux équipes" rows={2} />
-                <button className="w-full rounded-xl bg-zinc-800 py-2.5 text-sm font-bold text-white hover:bg-blue-600 transition-colors">
+                <button className="w-full rounded-full bg-gray-100 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-200 transition-colors dark:bg-white/10 dark:text-white/70 dark:hover:bg-white/15">
                   Publier
                 </button>
               </form>

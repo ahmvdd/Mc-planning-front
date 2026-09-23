@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 :root {
   --background: #08090d;
   --foreground: #f3f4f6;
@@ -27,34 +29,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
-}
-
-[data-theme="light"] #app-root {
-  --background: #f7f8fa;
-  --foreground: #0f1117;
-  --card: #ffffff;
-  --border: rgba(0, 0, 0, 0.08);
-  --color-white: #0f1117;
-  --color-zinc-950: #f7f8fa;
-  --color-zinc-900: #eef0f3;
-  --color-zinc-800: #e2e5ea;
-  --color-zinc-700: #c8cdd6;
-  --color-zinc-600: #9aa1ac;
-  --color-zinc-500: #6b7280;
-  --color-zinc-400: #4b5563;
-  --color-zinc-300: #2b3140;
-  --color-zinc-200: #1a1d24;
-}
-
-[data-theme="light"] #app-root .glass-panel {
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-[data-theme="light"] #app-root .glass-panel-hover:hover {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: rgba(59, 130, 246, 0.3);
-  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.08), 0 0 20px -5px rgba(59, 130, 246, 0.12);
 }
 
 /* Glassmorphism Premium */
