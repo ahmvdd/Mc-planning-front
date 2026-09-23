@@ -17,7 +17,9 @@ import {
   CalendarRange,
   Sun,
   Moon,
+  HelpCircle,
 } from "lucide-react";
+import TutorialModal from "./tutorial-modal";
 
 const ADMIN_LINKS = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -39,6 +41,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [role, setRole] = useState<string | null>(null);
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [tutorialOpen, setTutorialOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("shiftly_token");
@@ -97,6 +100,14 @@ export default function Sidebar() {
       <div className="flex flex-col items-center gap-2">
         <button
           type="button"
+          onClick={() => setTutorialOpen(true)}
+          title="Voir le tuto"
+          className="flex h-11 w-11 items-center justify-center rounded-xl text-white/40 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          <HelpCircle size={19} strokeWidth={2} />
+        </button>
+        <button
+          type="button"
           onClick={toggleTheme}
           title={theme === "dark" ? "Mode clair" : "Mode sombre"}
           className="flex h-11 w-11 items-center justify-center rounded-xl text-white/40 transition-colors hover:bg-white/10 hover:text-white"
@@ -121,6 +132,8 @@ export default function Sidebar() {
           <LogOut size={19} strokeWidth={2} />
         </button>
       </div>
+
+      <TutorialModal open={tutorialOpen} onClose={() => setTutorialOpen(false)} role={role} />
     </aside>
   );
 }
