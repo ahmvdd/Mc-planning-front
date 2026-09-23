@@ -14,9 +14,9 @@ export default function AppLayout({
   return (
     <div id="app-root" className="min-h-screen bg-[#F5F4EF] dark:bg-[#0E0E10]">
       <Sidebar />
-      <div className="pl-[104px]">
+      <div className="md:pl-[104px]">
         <TopBar />
-        <main className="px-5 pb-16 pt-6 sm:px-8 md:pt-8">{children}</main>
+        <main className="px-5 pb-28 pt-6 sm:px-8 md:pb-16 md:pt-8">{children}</main>
         <footer className="border-t border-black/5 px-5 sm:px-8 dark:border-white/5">
           <div className="flex flex-col items-center justify-between gap-2 py-6 text-xs text-gray-400 sm:flex-row dark:text-white/30">
             <p>
