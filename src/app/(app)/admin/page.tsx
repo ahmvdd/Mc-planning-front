@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
 import {
   Building2, KeyRound, CalendarDays, Upload, Users, Send,
-  Check, AlertCircle, FileSpreadsheet, Loader2, X, Settings, Mail, Trash2, Clock
+  Check, AlertCircle, FileSpreadsheet, Loader2, X, Mail, Trash2, Clock
 } from "lucide-react";
 
 type ImportResult = {
@@ -148,15 +148,9 @@ export default function AdminPage() {
     <div className="mx-auto max-w-6xl space-y-6">
 
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Espace Admin</h1>
-          <p className="text-sm text-gray-400 mt-1 dark:text-white/30">Gérez l&apos;organisation, les accès et les plannings</p>
-        </div>
-        <div className="flex items-center gap-2 rounded-full bg-gray-100 px-4 py-2 dark:bg-white/5">
-          <Settings size={13} className="text-gray-500 dark:text-white/40" />
-          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider dark:text-white/40">Administration</span>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Espace Admin</h1>
+        <p className="text-sm text-gray-400 mt-1 dark:text-white/30">Gérez l&apos;organisation, les accès et les plannings</p>
       </div>
 
       {error && (
