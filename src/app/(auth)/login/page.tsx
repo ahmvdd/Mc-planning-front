@@ -80,7 +80,7 @@ export default function LoginPage() {
             <div className="relative">
               <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
               <input
-                className="w-full rounded-xl border border-white/8 bg-white/[0.04] pl-10 pr-4 py-3 text-sm text-white placeholder:text-white/25 outline-none focus:border-blue-500/50 focus:bg-white/[0.06] focus:ring-2 focus:ring-blue-500/10 transition-all"
+                className="w-full rounded-xl border border-white/8 bg-white/[0.04] pl-10 pr-4 py-3 text-sm text-white placeholder:text-white/25 outline-none focus:border-[#B4FF39]/50 focus:bg-white/[0.06] focus:ring-2 focus:ring-[#B4FF39]/10 transition-all"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 type="email"
@@ -94,7 +94,7 @@ export default function LoginPage() {
               <div className="relative">
                 <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
                 <input
-                  className="w-full rounded-xl border border-white/8 bg-white/[0.04] pl-10 pr-4 py-3 text-sm text-white placeholder:text-white/25 outline-none focus:border-blue-500/50 focus:bg-white/[0.06] focus:ring-2 focus:ring-blue-500/10 transition-all"
+                  className="w-full rounded-xl border border-white/8 bg-white/[0.04] pl-10 pr-4 py-3 text-sm text-white placeholder:text-white/25 outline-none focus:border-[#B4FF39]/50 focus:bg-white/[0.06] focus:ring-2 focus:ring-[#B4FF39]/10 transition-all"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   type="password"
@@ -104,7 +104,7 @@ export default function LoginPage() {
                 />
               </div>
               <div className="flex justify-end mt-1.5">
-                <a href="#" className="text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors">Oublié ?</a>
+                <a href="#" className="text-xs font-medium text-[#B4FF39] hover:text-[#a3ec2e] transition-colors">Oublié ?</a>
               </div>
             </div>
 
@@ -122,7 +122,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="group mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 text-sm font-bold text-white transition-all hover:bg-blue-500 active:scale-[0.98] disabled:opacity-50"
+              className="group mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#B4FF39] py-3.5 text-sm font-bold text-black transition-all hover:bg-[#a3ec2e] active:scale-[0.98] disabled:opacity-50"
             >
               {loading ? (
                 <><Loader2 size={15} className="animate-spin" /> Connexion...</>
@@ -134,7 +134,7 @@ export default function LoginPage() {
 
           <p className="mt-5 text-center text-xs text-white/25">
             Pas encore de compte ?{" "}
-            <Link href="/signup" className="font-semibold text-blue-400 hover:text-blue-300 transition-colors">
+            <Link href="/signup" className="font-semibold text-[#B4FF39] hover:text-[#a3ec2e] transition-colors">
               S&apos;inscrire
             </Link>
           </p>

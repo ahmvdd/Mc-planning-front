@@ -164,7 +164,7 @@ export default function Home() {
 
   return (
     <SmoothScroll>
-    <div className="min-h-screen bg-white text-gray-900 antialiased overflow-x-hidden selection:bg-[#3b82f6]/20 selection:text-[#3b82f6]">
+    <div className="min-h-screen bg-white text-gray-900 antialiased overflow-x-hidden selection:bg-[#B4FF39]/20 selection:text-[#B4FF39]">
 
       <script
         type="application/ld+json"
@@ -373,7 +373,7 @@ export default function Home() {
               "Équipes connectées",
             ].map((item, i) => (
               <span key={i} className="text-[10px] font-bold uppercase tracking-[0.35em] text-gray-400 shrink-0 px-8">
-                {item} <span className="text-[#3b82f6]">·</span>
+                {item} <span className="text-[#B4FF39]">·</span>
               </span>
             ))}
           </div>
@@ -389,7 +389,7 @@ export default function Home() {
             {/* Left — text */}
             <div className="p-10 sm:p-14 flex flex-col justify-between relative z-10">
               <div>
-                <p className="font-mono text-xs text-[#3b82f6] mb-8">[ gestion d&apos;équipe ]</p>
+                <p className="font-mono text-xs text-[#B4FF39] mb-8">[ gestion d&apos;équipe ]</p>
                 <h2 className="text-5xl sm:text-6xl font-bold tracking-tight text-white leading-[0.9] mb-6">
                   Planifiez<br />sans effort.
                 </h2>
@@ -428,7 +428,7 @@ export default function Home() {
           initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }}
           className="mb-16 text-center"
         >
-          <p className="font-mono text-xs text-[#3b82f6] mb-4">[ fonctionnalités ]</p>
+          <p className="font-mono text-xs text-[#B4FF39] mb-4">[ fonctionnalités ]</p>
           <h2
             className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-b from-gray-900 to-gray-400 bg-clip-text text-transparent"
           >
@@ -444,12 +444,12 @@ export default function Home() {
               transition={{ duration: 0.6, delay: i * 0.08 }} viewport={{ once: true }}
               className="group grid grid-cols-1 md:grid-cols-[80px_1fr_1.3fr_auto] items-center gap-4 md:gap-8 border-b border-gray-200 py-8 md:py-10"
             >
-              <span className="font-mono text-2xl text-gray-300 group-hover:text-[#3b82f6] transition-colors">
+              <span className="font-mono text-2xl text-gray-300 group-hover:text-[#B4FF39] transition-colors">
                 {String(i + 1).padStart(2, "0")}
               </span>
 
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 shrink-0 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 group-hover:text-[#3b82f6] transition-colors">
+                <div className="w-10 h-10 shrink-0 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 group-hover:text-[#B4FF39] transition-colors">
                   <f.icon size={18} />
                 </div>
                 <div>
@@ -463,7 +463,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setActiveFeature(i)}
-                className="md:justify-self-end inline-flex items-center gap-1.5 text-xs font-bold text-gray-400 group-hover:text-[#3b82f6] transition-colors shrink-0"
+                className="md:justify-self-end inline-flex items-center gap-1.5 text-xs font-bold text-gray-400 group-hover:text-[#B4FF39] transition-colors shrink-0"
               >
                 {f.cta} <ArrowRight size={13} />
               </button>
@@ -526,9 +526,9 @@ export default function Home() {
           initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} viewport={{ once: true }}
           className="relative rounded-[28px] bg-[#090909] border border-white/8 p-10 sm:p-16 overflow-hidden"
         >
-          <div className="absolute top-0 right-0 w-[500px] h-[300px] bg-[#3b82f6]/5 blur-[100px] rounded-full pointer-events-none" />
+          <div className="absolute top-0 right-0 w-[500px] h-[300px] bg-[#B4FF39]/5 blur-[100px] rounded-full pointer-events-none" />
           <div className="relative z-10 max-w-2xl">
-            <ShieldCheck size={32} className="text-[#3b82f6] mb-6" />
+            <ShieldCheck size={32} className="text-[#B4FF39] mb-6" />
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[0.9] mb-5">
               <span className="bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
                 Souveraineté totale<br />des données.
@@ -555,7 +555,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }}
             className="mb-14"
           >
-            <p className="font-mono text-xs text-[#3b82f6] mb-4">[ comment ça marche ]</p>
+            <p className="font-mono text-xs text-[#B4FF39] mb-4">[ comment ça marche ]</p>
             <h2 className="text-4xl sm:text-5xl font-bold tracking-tight bg-gradient-to-b from-gray-900 to-gray-400 bg-clip-text text-transparent">
               Simple. Rapide. Efficace.
             </h2>
@@ -567,9 +567,9 @@ export default function Home() {
                 key={step.n}
                 initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: i * 0.1 }} viewport={{ once: true }}
-                className="group bg-gray-50 border border-gray-200 rounded-2xl p-6 flex items-start gap-6 hover:border-[#3b82f6]/30 transition-colors"
+                className="group bg-gray-50 border border-gray-200 rounded-2xl p-6 flex items-start gap-6 hover:border-[#B4FF39]/30 transition-colors"
               >
-                <span className="text-[#3b82f6] font-bold text-xs shrink-0 mt-0.5 tabular-nums">{step.n}</span>
+                <span className="text-[#B4FF39] font-bold text-xs shrink-0 mt-0.5 tabular-nums">{step.n}</span>
                 <div>
                   <h3 className="text-base font-bold text-gray-900 mb-1.5">{step.t}</h3>
                   <p className="text-sm text-gray-500 leading-relaxed font-medium">{step.d}</p>
@@ -586,7 +586,7 @@ export default function Home() {
           initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }}
           className="mb-16 text-center"
         >
-          <p className="font-mono text-xs text-[#3b82f6] mb-4">[ tarifs ]</p>
+          <p className="font-mono text-xs text-[#B4FF39] mb-4">[ tarifs ]</p>
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-b from-gray-900 to-gray-400 bg-clip-text text-transparent">
             Un prix simple. Zéro surprise.
           </h2>
@@ -603,12 +603,12 @@ export default function Home() {
               transition={{ duration: 0.6, delay: i * 0.1 }} viewport={{ once: true }}
               className={`relative rounded-[28px] p-8 sm:p-10 flex flex-col ${
                 plan.highlighted
-                  ? "bg-blue-50 border border-[#3b82f6]/30"
+                  ? "bg-lime-50 border border-[#B4FF39]/30"
                   : "bg-white border border-gray-200"
               }`}
             >
               {plan.highlighted && (
-                <span className="absolute -top-3 left-8 rounded-full bg-[#3b82f6] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+                <span className="absolute -top-3 left-8 rounded-full bg-[#B4FF39] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-black">
                   Recommandé
                 </span>
               )}
@@ -624,7 +624,7 @@ export default function Home() {
               <ul className="space-y-3 mb-8 flex-1">
                 {plan.features.map((f) => (
                   <li key={f} className="flex items-center gap-2.5 text-sm text-gray-600">
-                    <Check size={15} className="text-[#3b82f6] shrink-0" />
+                    <Check size={15} className="text-[#B4FF39] shrink-0" />
                     {f}
                   </li>
                 ))}
@@ -647,7 +647,7 @@ export default function Home() {
           initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }}
           className="mb-16 text-center"
         >
-          <p className="font-mono text-xs text-[#3b82f6] mb-4">[ notre histoire ]</p>
+          <p className="font-mono text-xs text-[#B4FF39] mb-4">[ notre histoire ]</p>
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-b from-gray-900 to-gray-400 bg-clip-text text-transparent">
             Un planning Excel de trop.
           </h2>
@@ -672,7 +672,7 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col items-center text-center md:w-56 shrink-0">
-            <div className="w-20 h-20 rounded-full bg-[#3b82f6]/15 border border-[#3b82f6]/30 overflow-hidden mb-4">
+            <div className="w-20 h-20 rounded-full bg-[#B4FF39]/15 border border-[#B4FF39]/30 overflow-hidden mb-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/avatar-sayeh.webp" alt="Sayeh Ahmed" className="w-full h-full object-cover" />
             </div>
@@ -682,7 +682,7 @@ export default function Home() {
               href="https://www.sayehahmed.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs font-semibold text-[#3b82f6] hover:text-[#3b82f6]/80 transition-colors"
+              className="text-xs font-semibold text-[#B4FF39] hover:text-[#B4FF39]/80 transition-colors"
             >
               sayehahmed.com
             </a>
@@ -693,14 +693,14 @@ export default function Home() {
       {/* CTA FINAL */}
       <section id="security" className="py-24 sm:py-36 px-4 sm:px-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(59,130,246,0.08),transparent_65%)] pointer-events-none" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#3b82f6]/6 blur-[160px] rounded-full pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#B4FF39]/6 blur-[160px] rounded-full pointer-events-none" />
 
         <motion.div
           initial={{ opacity: 0, scale: 0.94 }} whileInView={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1, ease: [0.19, 1, 0.22, 1] }} viewport={{ once: true }}
           className="max-w-3xl mx-auto text-center relative z-10"
         >
-          <p className="font-mono text-xs text-[#3b82f6] mb-6">[ commencer ]</p>
+          <p className="font-mono text-xs text-[#B4FF39] mb-6">[ commencer ]</p>
           <h2
             className="text-5xl sm:text-6xl md:text-7xl font-semibold tracking-tight leading-[0.95] mb-6"
             style={{ fontFamily: "var(--font-instrument-sans)" }}
@@ -708,7 +708,7 @@ export default function Home() {
             <span className="bg-gradient-to-b from-gray-900 to-gray-400 bg-clip-text text-transparent">
               Fini les tableurs.<br />
             </span>
-            <span className="bg-gradient-to-b from-[#3b82f6] to-blue-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-b from-[#B4FF39] to-lime-300 bg-clip-text text-transparent">
               Bienvenue sur Shiftly.
             </span>
           </h2>
@@ -738,7 +738,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start justify-between gap-12">
           <div>
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-7 h-7 rounded-lg bg-[#3b82f6] flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-[#B4FF39] flex items-center justify-center">
                 <Calendar size={14} className="text-white" />
               </div>
               <span className="font-bold tracking-tight text-gray-900 text-sm">SHIFTLY</span>
@@ -748,7 +748,7 @@ export default function Home() {
             </p>
             <p className="text-gray-400 text-xs">
               Fait par{" "}
-              <a href="https://www.sayehahmed.com" target="_blank" rel="noopener noreferrer" className="text-[#3b82f6] hover:text-[#3b82f6]/80 transition-colors font-semibold">
+              <a href="https://www.sayehahmed.com" target="_blank" rel="noopener noreferrer" className="text-[#B4FF39] hover:text-[#B4FF39]/80 transition-colors font-semibold">
                 Sayeh Ahmed
               </a>
             </p>

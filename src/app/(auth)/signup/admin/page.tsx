@@ -100,9 +100,9 @@ function AdminSignupForm() {
 
               <button
                 onClick={copyCode}
-                className="group w-full rounded-2xl border border-white/8 bg-white/[0.03] hover:bg-white/[0.06] hover:border-blue-500/30 px-5 py-4 transition-all"
+                className="group w-full rounded-2xl border border-white/8 bg-white/[0.03] hover:bg-white/[0.06] hover:border-[#B4FF39]/40 px-5 py-4 transition-all"
               >
-                <p className="font-mono text-2xl font-bold tracking-widest text-blue-400">{orgCode}</p>
+                <p className="font-mono text-2xl font-bold tracking-widest text-[#B4FF39]">{orgCode}</p>
                 <div className="mt-1.5 flex items-center justify-center gap-1.5 text-xs text-white/25">
                   <Copy size={11} />
                   {copied ? <span className="text-emerald-400 font-semibold">Copié !</span> : "Cliquer pour copier"}
@@ -111,7 +111,7 @@ function AdminSignupForm() {
 
               <Link
                 href="/dashboard"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 text-sm font-bold text-white transition hover:bg-blue-500"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#B4FF39] py-3.5 text-sm font-bold text-black transition hover:bg-[#a3ec2e]"
               >
                 Accéder au Dashboard <ArrowRight size={15} />
               </Link>
@@ -122,7 +122,7 @@ function AdminSignupForm() {
                 <div key={key} className="relative">
                   <Icon size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none" />
                   <input
-                    className="w-full rounded-xl border border-white/8 bg-white/[0.04] pl-10 pr-4 py-3 text-sm text-white placeholder:text-white/25 outline-none focus:border-blue-500/50 focus:bg-white/[0.06] focus:ring-2 focus:ring-blue-500/10 transition-all"
+                    className="w-full rounded-xl border border-white/8 bg-white/[0.04] pl-10 pr-4 py-3 text-sm text-white placeholder:text-white/25 outline-none focus:border-[#B4FF39]/50 focus:bg-white/[0.06] focus:ring-2 focus:ring-[#B4FF39]/10 transition-all"
                     placeholder={placeholder}
                     type={type}
                     autoComplete={type === "password" ? "new-password" : "off"}
@@ -142,7 +142,7 @@ function AdminSignupForm() {
               <button
                 type="submit"
                 disabled={status.type === "loading"}
-                className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 text-sm font-bold text-white transition hover:bg-blue-500 disabled:opacity-50 active:scale-[0.98]"
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#B4FF39] py-3.5 text-sm font-bold text-black transition hover:bg-[#a3ec2e] disabled:opacity-50 active:scale-[0.98]"
               >
                 {status.type === "loading" ? (
                   <><Loader2 size={15} className="animate-spin" /> Configuration...</>
@@ -153,7 +153,7 @@ function AdminSignupForm() {
 
               <p className="text-center text-xs text-white/25 pt-1">
                 Déjà membre ?{" "}
-                <Link href="/login" className="font-semibold text-blue-400 hover:text-blue-300 transition-colors">
+                <Link href="/login" className="font-semibold text-[#B4FF39] hover:text-[#a3ec2e] transition-colors">
                   Connexion
                 </Link>
               </p>

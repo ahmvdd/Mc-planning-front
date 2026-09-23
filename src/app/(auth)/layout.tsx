@@ -4,9 +4,9 @@ import { ArrowLeft } from "lucide-react";
 export default function AuthLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <div className="dot-grid-dark min-h-screen relative flex flex-col overflow-hidden">
-      {/* Halos bleu/indigo, cohérents avec le hero */}
-      <div className="pointer-events-none absolute -top-[20%] left-[15%] h-[600px] w-[600px] rounded-full bg-blue-900/20 blur-[120px] mix-blend-screen" />
-      <div className="pointer-events-none absolute -bottom-[20%] right-[15%] h-[500px] w-[500px] rounded-full bg-indigo-900/15 blur-[120px] mix-blend-screen" />
+      {/* Halos verts, cohérents avec l'app */}
+      <div className="pointer-events-none absolute -top-[20%] left-[15%] h-[600px] w-[600px] rounded-full bg-[#B4FF39]/10 blur-[120px] mix-blend-screen" />
+      <div className="pointer-events-none absolute -bottom-[20%] right-[15%] h-[500px] w-[500px] rounded-full bg-[#B4FF39]/5 blur-[120px] mix-blend-screen" />
 
       {/* Back link */}
       <div className="relative z-10 px-8 pt-8">
