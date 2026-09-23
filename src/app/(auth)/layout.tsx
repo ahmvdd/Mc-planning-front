@@ -3,7 +3,13 @@ import { ArrowLeft } from "lucide-react";
 
 export default function AuthLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="dot-grid-dark min-h-screen relative flex flex-col overflow-hidden">
+    <div
+      className="min-h-screen relative flex flex-col overflow-hidden bg-black bg-cover bg-center"
+      style={{ backgroundImage: "url('/auth-bg-clouds.jpg')" }}
+    >
+      {/* Overlay pour la lisibilité du texte */}
+      <div className="pointer-events-none absolute inset-0 bg-black/55" />
+
       {/* Halos verts, cohérents avec l'app */}
       <div className="pointer-events-none absolute -top-[20%] left-[15%] h-[600px] w-[600px] rounded-full bg-[#B4FF39]/10 blur-[120px] mix-blend-screen" />
       <div className="pointer-events-none absolute -bottom-[20%] right-[15%] h-[500px] w-[500px] rounded-full bg-[#B4FF39]/5 blur-[120px] mix-blend-screen" />
