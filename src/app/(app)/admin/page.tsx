@@ -5,21 +5,14 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
 import {
-  Building2, KeyRound, CalendarDays, Upload, Users, Send,
-  Check, AlertCircle, FileSpreadsheet, Loader2, X, Mail, Trash2, Clock
+  Building2, KeyRound, CalendarDays, Upload, Send,
+  Check, AlertCircle, FileSpreadsheet, Loader2, X
 } from "lucide-react";
 
 type ImportResult = {
   total: number;
   invited: number;
   errors: { email: string; reason: string }[];
-};
-
-type PendingInvitation = {
-  id: number;
-  email: string;
-  createdAt: string;
-  expiresAt: string;
 };
 
 export default function AdminPage() {
@@ -30,27 +23,11 @@ export default function AdminPage() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [updating, setUpdating] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteStatus, setInviteStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [inviteError, setInviteError] = useState("");
 
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importStatus, setImportStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
-
-  const [pendingInvitations, setPendingInvitations] = useState<PendingInvitation[]>([]);
-
-  const loadInvitations = async () => {
-    const data = await apiFetchClient<PendingInvitation[]>("/invitations").catch(() => []);
-    setPendingInvitations(data);
-  };
-
-  const cancelInvitation = async (id: number) => {
-    if (!confirm("Annuler cette invitation ?")) return;
-    await apiFetchClient(`/invitations/${id}`, { method: "DELETE" }).catch(() => null);
-    setPendingInvitations(prev => prev.filter(i => i.id !== id));
-  };
 
   const handleImport = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,25 +54,6 @@ export default function AdminPage() {
     }
   };
 
-  const sendInvite = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setInviteStatus("loading");
-    setInviteError("");
-    try {
-      await apiFetchClient("/invitations/send", {
-        method: "POST",
-        body: JSON.stringify({ email: inviteEmail }),
-      });
-      setInviteStatus("success");
-      setInviteEmail("");
-      await loadInvitations();
-      setTimeout(() => setInviteStatus("idle"), 4000);
-    } catch (err) {
-      setInviteError(err instanceof Error ? err.message : "Erreur lors de l'envoi");
-      setInviteStatus("error");
-    }
-  };
-
   useEffect(() => {
     if (!getToken()) { setError("Connexion requise"); router.push("/login"); setLoading(false); return; }
     apiFetchClient<{ role?: string }>("/auth/me")
@@ -104,7 +62,6 @@ export default function AdminPage() {
         else {
           const org = await apiFetchClient<{ name: string }>("/admin/organization").catch(() => null);
           setOrgName(org?.name || "");
-          await loadInvitations();
         }
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Erreur"))
@@ -207,66 +164,6 @@ export default function AdminPage() {
           </section>
 
           <div className="space-y-5">
-
-            {/* Inviter */}
-            <section className="space-y-4 rounded-2xl bg-white p-6 shadow-sm dark:bg-white/5 dark:shadow-none">
-              <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-white/30">
-                <Users size={13} /> Inviter un employé
-              </h3>
-              <p className="text-xs text-gray-400 dark:text-white/30">L&apos;employé recevra un email avec un lien pour créer son compte.</p>
-              <form onSubmit={sendInvite} className="space-y-3">
-                <input
-                  type="email" required placeholder="Email de l'employé"
-                  value={inviteEmail} onChange={e => setInviteEmail(e.target.value)}
-                  className={inputClass}
-                />
-                {inviteStatus === "error" && (
-                  <div className="flex items-center gap-2 rounded-lg bg-rose-50 px-3.5 py-2.5 text-xs font-bold text-rose-600 dark:bg-rose-500/10 dark:text-rose-400">
-                    <AlertCircle size={12} /> {inviteError}
-                  </div>
-                )}
-                {inviteStatus === "success" && (
-                  <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3.5 py-2.5 text-xs font-bold text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
-                    <Check size={12} /> Invitation envoyée !
-                  </div>
-                )}
-                <button
-                  type="submit" disabled={inviteStatus === "loading"}
-                  className="flex w-full items-center justify-center gap-2 rounded-full bg-gray-900 py-2.5 text-sm font-bold text-white hover:bg-gray-800 transition disabled:opacity-60 dark:bg-[#B4FF39] dark:text-black dark:hover:bg-[#a3ec2e]"
-                >
-                  <Send size={13} />
-                  {inviteStatus === "loading" ? "Envoi..." : "Envoyer l'invitation"}
-                </button>
-              </form>
-            </section>
-
-            {/* Invitations en attente */}
-            {pendingInvitations.length > 0 && (
-              <section className="space-y-3 rounded-2xl bg-white p-6 shadow-sm dark:bg-white/5 dark:shadow-none">
-                <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-white/30">
-                  <Clock size={13} className="text-amber-500" /> Invitations en attente
-                  <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">{pendingInvitations.length}</span>
-                </h3>
-                <div className="rounded-xl bg-gray-50 overflow-hidden dark:bg-white/5">
-                  {pendingInvitations.map((inv, i, arr) => (
-                    <div key={inv.id} className={`flex items-center justify-between gap-3 px-4 py-3.5 ${i < arr.length - 1 ? "border-b border-white dark:border-white/5" : ""}`}>
-                      <div className="flex items-center gap-2 min-w-0">
-                        <Mail size={12} className="shrink-0 text-gray-400 dark:text-white/30" />
-                        <span className="truncate text-sm text-gray-600 dark:text-white/60">{inv.email}</span>
-                      </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <span className="text-[11px] text-gray-300 hidden sm:block dark:text-white/20">
-                          Expire le {new Date(inv.expiresAt).toLocaleDateString("fr-FR")}
-                        </span>
-                        <button onClick={() => cancelInvitation(inv.id)} className="text-gray-300 transition hover:text-rose-500 dark:text-white/20">
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
 
             {/* Import CSV */}
             <section className="space-y-4 rounded-2xl bg-white p-6 shadow-sm dark:bg-white/5 dark:shadow-none">

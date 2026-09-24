@@ -6,12 +6,13 @@ import { apiFetchClient, getToken } from "@/lib/clientApi";
 import {
   Users, Pencil, Trash2,
   UserPlus, Loader2, Mail, Shield, CheckCircle2, X,
-  Search, ChevronLeft, ChevronRight
+  Search, ChevronLeft, ChevronRight, Send, AlertCircle, Clock, Check
 } from "lucide-react";
 
 const PAGE_SIZE = 15;
 
 type Employee = { id: number; name: string; email: string; role: string; status: string };
+type PendingInvitation = { id: number; email: string; createdAt: string; expiresAt: string };
 
 export default function EmployeesPage() {
   const router = useRouter();
@@ -24,8 +25,44 @@ export default function EmployeesPage() {
   const [form, setForm] = useState({ name: "", email: "", role: "employee", status: "active", password: "" });
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [createMode, setCreateMode] = useState<"invite" | "direct">("invite");
+
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteStatus, setInviteStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [inviteError, setInviteError] = useState("");
+  const [pendingInvitations, setPendingInvitations] = useState<PendingInvitation[]>([]);
 
   const isAdmin = me?.role === "admin";
+
+  const loadInvitations = async () => {
+    const data = await apiFetchClient<PendingInvitation[]>("/invitations").catch(() => []);
+    setPendingInvitations(data);
+  };
+
+  const cancelInvitation = async (id: number) => {
+    if (!confirm("Annuler cette invitation ?")) return;
+    await apiFetchClient(`/invitations/${id}`, { method: "DELETE" }).catch(() => null);
+    setPendingInvitations(prev => prev.filter(i => i.id !== id));
+  };
+
+  const sendInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setInviteStatus("loading");
+    setInviteError("");
+    try {
+      await apiFetchClient("/invitations/send", {
+        method: "POST",
+        body: JSON.stringify({ email: inviteEmail }),
+      });
+      setInviteStatus("success");
+      setInviteEmail("");
+      await loadInvitations();
+      setTimeout(() => { setInviteStatus("idle"); setShowForm(false); }, 1800);
+    } catch (err) {
+      setInviteError(err instanceof Error ? err.message : "Erreur lors de l'envoi");
+      setInviteStatus("error");
+    }
+  };
 
   useEffect(() => {
     if (!getToken()) { router.push("/login"); return; }
@@ -33,7 +70,11 @@ export default function EmployeesPage() {
       apiFetchClient<Employee[]>("/employees"),
       apiFetchClient<{ role?: string }>("/auth/me").catch(() => null),
     ])
-    .then(([data, meData]) => { setEmployees(data); if (meData) setMe(meData); })
+    .then(([data, meData]) => {
+      setEmployees(data);
+      if (meData) setMe(meData);
+      if (meData?.role === "admin") loadInvitations();
+    })
     .catch(() => {})
     .finally(() => setLoading(false));
   }, [router]);
@@ -62,6 +103,10 @@ export default function EmployeesPage() {
     setForm({ name: "", email: "", role: "employee", status: "active", password: "" });
     setEditId(null);
     setShowForm(false);
+    setCreateMode("invite");
+    setInviteEmail("");
+    setInviteStatus("idle");
+    setInviteError("");
   };
 
   const handleAction = async (e: React.FormEvent) => {
@@ -282,6 +327,34 @@ export default function EmployeesPage() {
               )}
             </>
           )}
+
+          {/* Invitations en attente */}
+          {isAdmin && pendingInvitations.length > 0 && (
+            <div className="rounded-2xl bg-white p-5 shadow-sm dark:bg-white/5 dark:shadow-none">
+              <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 mb-3 dark:text-white/30">
+                <Clock size={13} className="text-amber-500" /> Invitations en attente
+                <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">{pendingInvitations.length}</span>
+              </h3>
+              <div className="rounded-xl bg-gray-50 overflow-hidden dark:bg-white/5">
+                {pendingInvitations.map((inv, i, arr) => (
+                  <div key={inv.id} className={`flex items-center justify-between gap-3 px-4 py-3 ${i < arr.length - 1 ? "border-b border-white dark:border-white/5" : ""}`}>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Mail size={12} className="shrink-0 text-gray-400 dark:text-white/30" />
+                      <span className="truncate text-sm text-gray-600 dark:text-white/60">{inv.email}</span>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-[11px] text-gray-300 hidden sm:block dark:text-white/20">
+                        Expire le {new Date(inv.expiresAt).toLocaleDateString("fr-FR")}
+                      </span>
+                      <button onClick={() => cancelInvitation(inv.id)} className="text-gray-300 transition hover:text-rose-500 dark:text-white/20">
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Form sidebar */}
@@ -300,6 +373,57 @@ export default function EmployeesPage() {
                 </button>
               </div>
 
+              {!editId && (
+                <div className="flex gap-1 p-2 border-b border-gray-50 dark:border-white/5">
+                  <button
+                    type="button"
+                    onClick={() => setCreateMode("invite")}
+                    className={`flex-1 rounded-lg py-2 text-xs font-bold transition-colors ${createMode === "invite" ? "bg-gray-900 text-white dark:bg-[#B4FF39] dark:text-black" : "text-gray-400 hover:bg-gray-50 dark:text-white/30 dark:hover:bg-white/5"}`}
+                  >
+                    Inviter par email
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCreateMode("direct")}
+                    className={`flex-1 rounded-lg py-2 text-xs font-bold transition-colors ${createMode === "direct" ? "bg-gray-900 text-white dark:bg-[#B4FF39] dark:text-black" : "text-gray-400 hover:bg-gray-50 dark:text-white/30 dark:hover:bg-white/5"}`}
+                  >
+                    Créer directement
+                  </button>
+                </div>
+              )}
+
+              {!editId && createMode === "invite" ? (
+                <form onSubmit={sendInvite} className="space-y-4 p-5">
+                  <p className="text-xs text-gray-400 dark:text-white/30">
+                    L&apos;employé reçoit un email d&apos;invitation avec un lien pour créer son compte et rejoindre l&apos;organisation.
+                  </p>
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/30">Email</label>
+                    <input
+                      type="email" required placeholder="employe@exemple.com"
+                      value={inviteEmail} onChange={e => setInviteEmail(e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+                  {inviteStatus === "error" && (
+                    <div className="flex items-center gap-2 rounded-lg bg-rose-50 px-3.5 py-2.5 text-xs font-bold text-rose-600 dark:bg-rose-500/10 dark:text-rose-400">
+                      <AlertCircle size={12} /> {inviteError}
+                    </div>
+                  )}
+                  {inviteStatus === "success" && (
+                    <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3.5 py-2.5 text-xs font-bold text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
+                      <Check size={12} /> Invitation envoyée !
+                    </div>
+                  )}
+                  <button
+                    type="submit" disabled={inviteStatus === "loading"}
+                    className="flex w-full items-center justify-center gap-2 rounded-full bg-gray-900 py-3 text-sm font-bold text-white hover:bg-gray-800 disabled:opacity-60 transition-all dark:bg-[#B4FF39] dark:text-black dark:hover:bg-[#a3ec2e]"
+                  >
+                    {inviteStatus === "loading" ? <Loader2 size={15} className="animate-spin" /> : <Send size={14} />}
+                    {inviteStatus === "loading" ? "Envoi..." : "Envoyer l'invitation"}
+                  </button>
+                </form>
+              ) : (
               <form onSubmit={handleAction} className="space-y-4 p-5">
                 {[
                   { label: "Nom complet", key: "name", type: "text" },
@@ -359,6 +483,7 @@ export default function EmployeesPage() {
                   </button>
                 </div>
               </form>
+              )}
             </div>
           </aside>
         )}
