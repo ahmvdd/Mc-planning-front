@@ -746,12 +746,20 @@ export default function Home() {
             <p className="text-gray-500 text-sm font-medium max-w-[180px] leading-relaxed mb-4">
               Le planning de vos équipes, simplement.
             </p>
-            <p className="text-gray-400 text-xs">
+            <p className="text-gray-400 text-xs mb-5">
               Fait par{" "}
               <a href="https://www.sayehahmed.com" target="_blank" rel="noopener noreferrer" className="text-[#B4FF39] hover:text-[#B4FF39]/80 transition-colors font-semibold">
                 Sayeh Ahmed
               </a>
             </p>
+            <a
+              href="https://x.com/SHIFTLYApp"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-gray-100 hover:bg-gray-900 hover:text-white px-4 py-2 text-xs font-bold text-gray-700 transition-colors"
+            >
+              <span className="text-sm font-black">𝕏</span> Suivez notre évolution
+            </a>
           </div>
 
           <div className="grid grid-cols-2 gap-12 sm:grid-cols-3">
