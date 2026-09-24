@@ -67,6 +67,8 @@ export default function ProfilePage() {
     await apiFetchClient(`/availability/${id}`, { method: "DELETE" }).catch(() => loadSlots());
   };
 
+  const isAdmin = me?.role === "admin";
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -75,7 +77,7 @@ export default function ProfilePage() {
     try {
       await apiFetchClient("/employees/me", {
         method: "PATCH",
-        body: JSON.stringify({ name: name || undefined, password: password || undefined }),
+        body: JSON.stringify({ name: isAdmin ? (name || undefined) : undefined, password: password || undefined }),
       });
       setSuccess(true);
       setPassword("");
@@ -132,7 +134,19 @@ export default function ProfilePage() {
               <label className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/30">
                 <User size={11} /> Nom complet
               </label>
-              <input className={inputClass} value={name} onChange={e => setName(e.target.value)} required />
+              {isAdmin ? (
+                <input className={inputClass} value={name} onChange={e => setName(e.target.value)} required />
+              ) : (
+                <>
+                  <input
+                    className={`${inputClass} cursor-not-allowed opacity-60`}
+                    value={name}
+                    disabled
+                    readOnly
+                  />
+                  <p className="text-xs text-gray-400 dark:text-white/30">Seul un administrateur peut modifier votre nom. Contactez votre manager.</p>
+                </>
+              )}
             </div>
 
             {/* Mot de passe */}
