@@ -40,7 +40,7 @@ const PLANS = [
     name: "Pro",
     price: "2€",
     period: "/mois",
-    desc: "Prix de lancement — augmente une fois l'app stabilisée.",
+    desc: "Pour les équipes qui grandissent.",
     features: [
       "Employés illimités",
       "Tout le plan Gratuit",
