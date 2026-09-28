@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
 import {
   Building2, KeyRound, CalendarDays, Upload, Send,
-  Check, AlertCircle, FileSpreadsheet, Loader2, X
+  Check, AlertCircle, FileSpreadsheet, Loader2, X, Copy
 } from "lucide-react";
 
 type ImportResult = {
@@ -20,6 +20,8 @@ export default function AdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [orgName, setOrgName] = useState("");
+  const [orgCode, setOrgCode] = useState("");
+  const [codeCopied, setCodeCopied] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [updating, setUpdating] = useState(false);
@@ -60,8 +62,9 @@ export default function AdminPage() {
       .then(async (me) => {
         if (me?.role !== "admin") { setError("Accès réservé aux admins"); router.push("/dashboard"); }
         else {
-          const org = await apiFetchClient<{ name: string }>("/admin/organization").catch(() => null);
+          const org = await apiFetchClient<{ name: string; code: string }>("/admin/organization").catch(() => null);
           setOrgName(org?.name || "");
+          setOrgCode(org?.code || "");
         }
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Erreur"))
@@ -161,6 +164,31 @@ export default function AdminPage() {
                 {updating ? "Enregistrement..." : "Enregistrer"}
               </button>
             </form>
+
+            {orgCode && (
+              <div className="rounded-xl bg-gray-50 p-4 dark:bg-white/5">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-2 dark:text-white/30">Code d&apos;organisation</p>
+                <p className="text-xs text-gray-400 mb-3 dark:text-white/30">
+                  Partagez ce code à vos équipiers : ils s&apos;inscrivent avec sur la page &quot;Rejoindre l&apos;équipe&quot;, et vous validez leur demande ici.
+                </p>
+                <div className="flex items-center gap-2">
+                  <span className="flex-1 rounded-lg bg-white px-4 py-2.5 text-center font-mono text-lg font-bold tracking-[0.2em] text-gray-900 dark:bg-white/5 dark:text-white">
+                    {orgCode}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(orgCode).catch(() => {});
+                      setCodeCopied(true);
+                      setTimeout(() => setCodeCopied(false), 1800);
+                    }}
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-gray-900 text-white hover:bg-gray-800 transition dark:bg-[#B4FF39] dark:text-black dark:hover:bg-[#a3ec2e]"
+                  >
+                    {codeCopied ? <Check size={15} /> : <Copy size={15} />}
+                  </button>
+                </div>
+              </div>
+            )}
           </section>
 
           <div className="space-y-5">
