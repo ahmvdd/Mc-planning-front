@@ -79,8 +79,8 @@ export default function EmployeesPage() {
     .finally(() => setLoading(false));
   }, [router]);
 
-  const pendingJoinRequests = useMemo(() => employees.filter(e => e.status === "pending"), [employees]);
-  const activeEmployees = useMemo(() => employees.filter(e => e.status !== "pending"), [employees]);
+  const pendingJoinRequests = useMemo(() => employees.filter(e => e.status === "pending" || e.status === "requested"), [employees]);
+  const activeEmployees = useMemo(() => employees.filter(e => e.status !== "pending" && e.status !== "requested"), [employees]);
 
   const stats = useMemo(() => {
     const active = activeEmployees.filter(e => e.status === "active").length;
@@ -100,11 +100,14 @@ export default function EmployeesPage() {
   const acceptJoinRequest = async (id: number) => {
     setSaving(true);
     try {
-      const updated = await apiFetchClient<Employee>(`/employees/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ status: "active" }),
+      const result = await apiFetchClient<{ success: boolean; invited: boolean; employee?: Employee }>(`/employees/${id}/approve-join`, {
+        method: "POST",
       });
-      setEmployees(prev => prev.map(e => e.id === id ? updated : e));
+      if (result.invited) {
+        setEmployees(prev => prev.filter(e => e.id !== id));
+      } else if (result.employee) {
+        setEmployees(prev => prev.map(e => e.id === id ? result.employee! : e));
+      }
     } catch (err) {
       alert(err instanceof Error ? err.message : "Erreur");
     } finally {

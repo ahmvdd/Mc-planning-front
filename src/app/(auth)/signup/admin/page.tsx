@@ -159,7 +159,7 @@ function AdminSignupForm() {
               </p>
               <p className="text-center text-xs text-white/25">
                 Vous rejoignez une équipe existante ?{" "}
-                <Link href="/signup/employee" className="font-semibold text-[#B4FF39] hover:text-[#a3ec2e] transition-colors">
+                <Link href="/login?join=1" className="font-semibold text-[#B4FF39] hover:text-[#a3ec2e] transition-colors">
                   Rejoindre avec un code
                 </Link>
               </p>
