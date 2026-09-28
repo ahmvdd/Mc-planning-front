@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { User, Mail, Lock, Hash, Loader2, CheckCircle2, AlertCircle, ArrowRight, ArrowLeft } from "lucide-react";
+import { User, Mail, Lock, Hash, Loader2, Clock, AlertCircle, ArrowRight, ArrowLeft } from "lucide-react";
 
 function EmployeeSignupForm() {
   const router = useRouter();
@@ -43,7 +43,7 @@ function EmployeeSignupForm() {
         throw new Error((err as { message?: string }).message || "Erreur lors de l'inscription");
       }
       setStatus("success");
-      setTimeout(() => router.push("/login"), 2500);
+      setTimeout(() => router.push("/login"), 4000);
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Une erreur est survenue");
       setStatus("error");
@@ -53,11 +53,13 @@ function EmployeeSignupForm() {
   if (status === "success") {
     return (
       <div className="space-y-4 text-center py-4">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
-          <CheckCircle2 size={28} className="text-emerald-600" />
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
+          <Clock size={28} className="text-amber-600" />
         </div>
-        <h2 className="text-xl font-bold text-slate-900">Compte créé !</h2>
-        <p className="text-sm text-slate-500">Redirection vers la connexion...</p>
+        <h2 className="text-xl font-bold text-slate-900">Demande envoyée !</h2>
+        <p className="text-sm text-slate-500">
+          Un administrateur doit valider votre compte avant que vous puissiez vous connecter.
+        </p>
       </div>
     );
   }

@@ -79,20 +79,51 @@ export default function EmployeesPage() {
     .finally(() => setLoading(false));
   }, [router]);
 
+  const pendingJoinRequests = useMemo(() => employees.filter(e => e.status === "pending"), [employees]);
+  const activeEmployees = useMemo(() => employees.filter(e => e.status !== "pending"), [employees]);
+
   const stats = useMemo(() => {
-    const active = employees.filter(e => e.status === "active").length;
-    return { total: employees.length, active, inactive: employees.length - active };
-  }, [employees]);
+    const active = activeEmployees.filter(e => e.status === "active").length;
+    return { total: activeEmployees.length, active, inactive: activeEmployees.length - active };
+  }, [activeEmployees]);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
-    if (!q) return employees;
-    return employees.filter(e =>
+    if (!q) return activeEmployees;
+    return activeEmployees.filter(e =>
       e.name.toLowerCase().includes(q) ||
       e.email.toLowerCase().includes(q) ||
       e.role.toLowerCase().includes(q)
     );
-  }, [employees, search]);
+  }, [activeEmployees, search]);
+
+  const acceptJoinRequest = async (id: number) => {
+    setSaving(true);
+    try {
+      const updated = await apiFetchClient<Employee>(`/employees/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: "active" }),
+      });
+      setEmployees(prev => prev.map(e => e.id === id ? updated : e));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Erreur");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const rejectJoinRequest = async (id: number) => {
+    if (!confirm("Refuser cette demande d'adhésion ? Le compte sera supprimé.")) return;
+    setSaving(true);
+    try {
+      await apiFetchClient(`/employees/${id}`, { method: "DELETE" });
+      setEmployees(prev => prev.filter(e => e.id !== id));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Erreur");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -186,6 +217,50 @@ export default function EmployeesPage() {
         </div>
       </div>
 
+      {/* Demandes d'adhésion (auto-inscription par code) */}
+      {isAdmin && pendingJoinRequests.length > 0 && (
+        <div className="rounded-2xl bg-white p-5 shadow-sm dark:bg-white/5 dark:shadow-none">
+          <h3 className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 mb-3 dark:text-white/30">
+            <Clock size={13} className="text-amber-500" /> Demandes d&apos;adhésion en attente
+            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">{pendingJoinRequests.length}</span>
+          </h3>
+          <p className="text-xs text-gray-400 mb-3 dark:text-white/30">
+            Ces personnes se sont inscrites avec le code de votre organisation et attendent votre validation.
+          </p>
+          <div className="rounded-xl bg-gray-50 overflow-hidden dark:bg-white/5">
+            {pendingJoinRequests.map((req, i, arr) => (
+              <div key={req.id} className={`flex items-center justify-between gap-3 px-4 py-3 ${i < arr.length - 1 ? "border-b border-white dark:border-white/5" : ""}`}>
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-sm font-bold text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">
+                    {req.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">{req.name}</p>
+                    <p className="truncate text-xs text-gray-400 dark:text-white/30">{req.email}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => acceptJoinRequest(req.id)}
+                    disabled={saving}
+                    className="flex items-center gap-1.5 rounded-full bg-gray-900 px-3.5 py-2 text-xs font-bold text-white hover:bg-gray-800 disabled:opacity-60 transition dark:bg-[#B4FF39] dark:text-black dark:hover:bg-[#a3ec2e]"
+                  >
+                    <Check size={12} /> Accepter
+                  </button>
+                  <button
+                    onClick={() => rejectJoinRequest(req.id)}
+                    disabled={saving}
+                    className="flex items-center gap-1.5 rounded-full bg-white px-3 py-2 text-xs font-bold text-gray-500 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-60 transition dark:bg-white/10 dark:text-white/50 dark:hover:bg-rose-500/10 dark:hover:text-rose-400"
+                  >
+                    <X size={12} /> Refuser
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="grid gap-5 lg:grid-cols-12">
 
         {/* Table */}
@@ -207,7 +282,7 @@ export default function EmployeesPage() {
             )}
           </div>
 
-          {employees.length === 0 ? (
+          {activeEmployees.length === 0 ? (
             <div className="rounded-2xl bg-white p-16 text-center shadow-sm dark:bg-white/5 dark:shadow-none">
               <Users className="mx-auto mb-3 text-gray-300 dark:text-white/15" size={32} />
               <h4 className="font-bold text-gray-500 dark:text-white/50">Aucun collaborateur</h4>
