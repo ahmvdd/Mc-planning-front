@@ -138,6 +138,12 @@ export default function LoginPage() {
               S&apos;inscrire
             </Link>
           </p>
+          <p className="mt-2 text-center text-xs text-white/25">
+            Vous rejoignez une équipe ?{" "}
+            <Link href="/signup/employee" className="font-semibold text-[#B4FF39] hover:text-[#a3ec2e] transition-colors">
+              Rejoindre avec un code
+            </Link>
+          </p>
         </div>
       </div>
     </motion.div>
