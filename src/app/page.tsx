@@ -47,7 +47,7 @@ const PLANS = [
       "Pointage par QR code",
       "Statistiques & analytics",
       "Logo personnalisé",
-      "IA de planification (bientôt)",
+      "IA intégrée — résout les conflits et fluidifie le planning (bientôt)",
     ],
     cta: "Essayer le plan Pro",
     highlighted: true,
