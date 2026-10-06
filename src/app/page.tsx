@@ -27,10 +27,10 @@ const PLANS = [
     period: "",
     desc: "Pour tester avec une petite équipe.",
     features: [
-      "Jusqu'à 5 employés",
+      "Employés illimités",
       "Planning & créneaux",
       "Congés et demandes",
-      "Gestion des employés",
+      "Pointage par QR code",
       "Import / export Excel",
     ],
     cta: "Démarrer gratuitement",
@@ -42,9 +42,7 @@ const PLANS = [
     period: "/mois",
     desc: "Pour les équipes qui grandissent.",
     features: [
-      "Employés illimités",
       "Tout le plan Gratuit",
-      "Pointage par QR code",
       "Statistiques & analytics",
       "Logo personnalisé",
       "IA intégrée — résout les conflits et fluidifie le planning (bientôt)",
