@@ -518,7 +518,7 @@ export default function Home() {
         <div className="sq-field" data-count="18" />
         <div id="statsGlow" className="stats-glow" />
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img id="statsRise" src="/stats-column.png" alt="" aria-hidden="true" className="stats-rise" />
+        <img id="statsRise" src="/stats-column-v2.png" alt="" aria-hidden="true" className="stats-rise" />
 
         <div className="stats-inner">
           <span className="pill reveal">Pensé pour les petites équipes</span>
