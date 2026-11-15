@@ -223,35 +223,6 @@ export default function DashboardPage() {
   const maxCount = Math.max(1, ...weekCounts);
   const todayIdx = (new Date().getDay() + 6) % 7;
 
-  // Tendance des demandes sur 7 jours glissants (style sparkline)
-  const trendValues = Array.from({ length: 7 }, (_, i) => {
-    const day = new Date();
-    day.setHours(0, 0, 0, 0);
-    day.setDate(day.getDate() - (6 - i));
-    const next = new Date(day);
-    next.setDate(day.getDate() + 1);
-    return data.requests.filter(r => { const d = new Date(r.createdAt); return d >= day && d < next; }).length;
-  });
-  const trendMax = Math.max(1, ...trendValues);
-  const trendAvg = trendValues.reduce((a, b) => a + b, 0) / trendValues.length;
-  const trendCurrent = trendValues[trendValues.length - 1];
-
-  const TREND_W = 280;
-  const TREND_H = 72;
-  const TREND_PAD = 6;
-  const trendPoints: [number, number][] = trendValues.map((v, i) => [
-    TREND_PAD + (i * (TREND_W - TREND_PAD * 2)) / (trendValues.length - 1),
-    TREND_H - TREND_PAD - (v / trendMax) * (TREND_H - TREND_PAD * 2),
-  ]);
-  const trendLinePath = trendPoints.reduce((d, [x, y], i) => {
-    if (i === 0) return `M${x},${y}`;
-    const [x0, y0] = trendPoints[i - 1];
-    const cx = (x0 + x) / 2;
-    return `${d} C${cx},${y0} ${cx},${y} ${x},${y}`;
-  }, "");
-  const trendAreaPath = `${trendLinePath} L${trendPoints[trendPoints.length - 1][0]},${TREND_H} L${trendPoints[0][0]},${TREND_H} Z`;
-  const trendLast = trendPoints[trendPoints.length - 1];
-
   return (
     <div className="mx-auto max-w-7xl space-y-6">
 
@@ -394,54 +365,6 @@ export default function DashboardPage() {
         </aside>
 
       </div>
-
-      {/* Tendance des demandes — sparkline */}
-      <section className="rounded-2xl bg-white p-6 sm:p-7 shadow-sm dark:bg-white/5 dark:shadow-none">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-sm font-bold text-gray-900 dark:text-white">Activité des demandes</h2>
-            <p className="text-xs text-gray-400 mt-0.5 dark:text-white/30">7 derniers jours</p>
-          </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{trendCurrent}</div>
-            <p className="text-[11px] text-gray-400 dark:text-white/30">aujourd&apos;hui</p>
-          </div>
-        </div>
-
-        <svg viewBox={`0 0 ${TREND_W} ${TREND_H}`} className="w-full h-20" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#B4FF39" stopOpacity="0.28" />
-              <stop offset="100%" stopColor="#B4FF39" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          <path d={trendAreaPath} fill="url(#trendFill)" stroke="none" />
-          <path d={trendLinePath} fill="none" stroke="#B4FF39" strokeWidth="2" strokeLinecap="round" className="dash-trend-line" />
-          <circle cx={trendLast[0]} cy={trendLast[1]} r="3.5" fill="#B4FF39" className="dash-trend-dot" />
-        </svg>
-
-        <div className="mt-5 grid grid-cols-3 gap-3 border-t border-gray-100 pt-4 dark:border-white/10">
-          <div>
-            <p className="text-[10px] uppercase font-semibold text-gray-400 dark:text-white/30">Actuel</p>
-            <p className="text-sm font-bold text-gray-900 dark:text-white">{trendCurrent}</p>
-          </div>
-          <div>
-            <p className="text-[10px] uppercase font-semibold text-gray-400 dark:text-white/30">Moyenne</p>
-            <p className="text-sm font-bold text-gray-900 dark:text-white">{trendAvg.toFixed(1)}</p>
-          </div>
-          <div>
-            <p className="text-[10px] uppercase font-semibold text-gray-400 dark:text-white/30">Max</p>
-            <p className="text-sm font-bold text-gray-900 dark:text-white">{trendMax}</p>
-          </div>
-        </div>
-
-        <style>{`
-          .dash-trend-line { stroke-dasharray: 500; stroke-dashoffset: 500; animation: dashTrendDraw 1.1s ease forwards; }
-          @keyframes dashTrendDraw { to { stroke-dashoffset: 0; } }
-          .dash-trend-dot { animation: dashTrendPulse 2s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
-          @keyframes dashTrendPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .5; transform: scale(1.6); } }
-        `}</style>
-      </section>
 
       {/* Upcoming planning */}
       <section className="rounded-2xl bg-white p-6 sm:p-7 shadow-sm dark:bg-white/5 dark:shadow-none">

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Instrument_Serif, Instrument_Sans, Silkscreen, Inter_Tight } from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Serif, Instrument_Sans, Silkscreen } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -29,13 +29,6 @@ const silkscreen = Silkscreen({
   variable: "--font-silkscreen",
   subsets: ["latin"],
   weight: ["400", "700"],
-});
-
-const interTight = Inter_Tight({
-  variable: "--font-inter-tight",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
 });
 
 const SITE_URL = "https://shiftly.site";
@@ -107,7 +100,7 @@ export default function RootLayout({
         {/* Apply saved theme before first paint to prevent flash */}
         <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('shiftly_theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})()` }} />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} ${instrumentSans.variable} ${silkscreen.variable} ${interTight.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} ${instrumentSans.variable} ${silkscreen.variable} antialiased`}>
         {children}
       </body>
     </html>

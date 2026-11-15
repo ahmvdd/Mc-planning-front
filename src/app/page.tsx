@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import createGlobe from "cobe";
 
 const NAV_LINKS: [string, string][] = [
   ["Fonctionnalités", "#features"],
@@ -142,6 +143,90 @@ function splitWords(el: Element) {
     });
   };
   walk(el);
+}
+
+function VisionGlobe() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const pointerInteracting = useRef<number | null>(null);
+  const pointerInteractionMovement = useRef(0);
+
+  useEffect(() => {
+    let phi = 0;
+    let width = 0;
+    const onResize = () => {
+      if (canvasRef.current) width = canvasRef.current.offsetWidth;
+    };
+    window.addEventListener("resize", onResize);
+    onResize();
+
+    const globe = createGlobe(canvasRef.current as HTMLCanvasElement, {
+      devicePixelRatio: 2,
+      width: width * 2,
+      height: width * 2,
+      phi: 0,
+      theta: 0.32,
+      dark: 1,
+      diffuse: 1.2,
+      mapSamples: 14000,
+      mapBrightness: 5,
+      baseColor: [0.22, 0.24, 0.18],
+      markerColor: [0.706, 1, 0.224],
+      glowColor: [0.22, 0.26, 0.14],
+      markers: [
+        { location: [48.8566, 2.3522], size: 0.06 },
+        { location: [40.7128, -74.006], size: 0.06 },
+        { location: [35.6762, 139.6503], size: 0.06 },
+        { location: [-23.5505, -46.6333], size: 0.06 },
+        { location: [6.5244, 3.3792], size: 0.06 },
+        { location: [-33.8688, 151.2093], size: 0.06 },
+      ],
+    });
+
+    let rafId: number;
+    const loop = () => {
+      if (pointerInteracting.current === null) phi += 0.0045;
+      globe.update({ phi: phi + pointerInteractionMovement.current, width: width * 2, height: width * 2 });
+      rafId = requestAnimationFrame(loop);
+    };
+    rafId = requestAnimationFrame(loop);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      globe.destroy();
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      onPointerDown={(e) => {
+        pointerInteracting.current = e.clientX - pointerInteractionMovement.current * 200;
+        if (canvasRef.current) canvasRef.current.style.cursor = "grabbing";
+      }}
+      onPointerUp={() => {
+        pointerInteracting.current = null;
+        if (canvasRef.current) canvasRef.current.style.cursor = "grab";
+      }}
+      onPointerOut={() => {
+        pointerInteracting.current = null;
+        if (canvasRef.current) canvasRef.current.style.cursor = "grab";
+      }}
+      onMouseMove={(e) => {
+        if (pointerInteracting.current !== null) {
+          const delta = e.clientX - pointerInteracting.current;
+          pointerInteractionMovement.current = delta / 200;
+        }
+      }}
+      onTouchMove={(e) => {
+        if (pointerInteracting.current !== null && e.touches[0]) {
+          const delta = e.touches[0].clientX - pointerInteracting.current;
+          pointerInteractionMovement.current = delta / 200;
+        }
+      }}
+      style={{ width: "100%", height: "100%", cursor: "grab", contain: "layout paint size" }}
+    />
+  );
 }
 
 export default function Home() {
@@ -383,7 +468,7 @@ export default function Home() {
       />
 
       {/* NAV */}
-      <nav className="nav" style={{ fontFamily: "var(--font-inter-tight)" }}>
+      <nav className="nav" style={{ fontFamily: "var(--font-instrument-sans)" }}>
         <Link href="#hero" className="brand">Shiftly</Link>
         <div className="nav-links">
           {NAV_LINKS.map(([label, href]) => (
@@ -396,7 +481,7 @@ export default function Home() {
       </nav>
 
       {/* HERO */}
-      <section id="hero" className="hero" style={{ fontFamily: "var(--font-inter-tight)" }}>
+      <section id="hero" className="hero" style={{ fontFamily: "var(--font-instrument-sans)" }}>
         <div id="heroVideoBg" className="hero-video-bg">
           <video autoPlay loop muted playsInline>
             <source src="/hero-painting.webm" type="video/webm" />
@@ -765,6 +850,31 @@ export default function Home() {
         </motion.div>
       </section>
 
+      {/* NOTRE VISION */}
+      <section className="py-24 sm:py-36 px-4 sm:px-6 max-w-7xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }}
+          className="mb-14 text-center"
+        >
+          <p className="font-mono text-xs text-[#B4FF39] mb-4">[ notre vision ]</p>
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
+            Un problème mondial,<br />pas seulement régional.
+          </h2>
+          <p className="mt-6 text-gray-400 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
+            Le planning sur tableur, les erreurs d&apos;horaires, les équipes mal coordonnées — ce n&apos;est pas
+            qu&apos;un problème français. Partout, de petites équipes perdent du temps sur les mêmes outils
+            dépassés. Notre ambition : que Shiftly règle ce problème bien au-delà de nos frontières.
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.92 }} whileInView={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8 }} viewport={{ once: true }}
+          className="relative mx-auto aspect-square w-full max-w-[460px]"
+        >
+          <VisionGlobe />
+        </motion.div>
+      </section>
+
       {/* CTA FINAL */}
       <section id="security" className="py-24 sm:py-36 px-4 sm:px-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(59,130,246,0.08),transparent_65%)] pointer-events-none" />
@@ -845,7 +955,7 @@ export default function Home() {
         .hero-video-overlay { position: absolute; inset: 0; background: rgba(6,6,6,.78); }
         .hero-glass { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
         .glass { position: absolute; border-radius: 12px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18); backdrop-filter: blur(10px) saturate(1.2); box-shadow: inset 0 1px 0 rgba(255,255,255,.25); opacity: 0; }
-        h1#heroTitle { position: relative; z-index: 3; font: 500 clamp(32px,6vw,72px)/1.06 var(--font-inter-tight); letter-spacing: -.03em; max-width: 900px; }
+        h1#heroTitle { position: relative; z-index: 3; font: 500 clamp(32px,6vw,72px)/1.06 var(--font-instrument-sans); letter-spacing: -.03em; max-width: 900px; }
         h1#heroTitle em { color: #B4FF39; font-style: italic; font-weight: 600; }
         .cap { position: relative; z-index: 3; margin-top: 22px; font-size: clamp(14px,1.6vw,18px); line-height: 1.4; color: rgba(255,255,255,.55); max-width: 480px; }
         .hero-form { position: relative; z-index: 3; margin-top: 30px; display: inline-flex; align-items: center; gap: 6px; padding: 6px; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); }
@@ -864,7 +974,7 @@ export default function Home() {
         .sq-field { position: absolute; inset: 0 0 auto 0; height: 42%; z-index: 0; pointer-events: none; -webkit-mask-image: linear-gradient(#000, transparent); mask-image: linear-gradient(#000, transparent); }
         .grid-sq { position: absolute; border: 1px solid rgba(255,255,255,.06); border-radius: 10px; opacity: 0; pointer-events: none; }
         .stats-glow { position: absolute; left: 50%; top: 40%; translate: -50% -50%; width: 420px; height: 420px; border-radius: 999px; background: radial-gradient(closest-side, rgba(180,255,57,.22), transparent); filter: blur(30px); opacity: .15; transform: scale(.6); pointer-events: none; z-index: 0; }
-        .stats-rise { position: absolute; left: 50%; bottom: -6%; transform: translateX(-50%) translateY(70%); width: min(260px,38vw); filter: invert(1) opacity(.5); pointer-events: none; z-index: 1; }
+        .stats-rise { position: absolute; left: 50%; bottom: -6%; transform: translateX(-50%) translateY(70%); width: min(260px,38vw); opacity: .55; pointer-events: none; z-index: 1; }
         .stats-inner { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 22px; max-width: 980px; margin: 0 auto; }
         .cards { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; width: 100%; margin-top: 8px; }
         .card { position: relative; height: 140px; padding: 18px 20px; background: #B4FF39; display: flex; flex-direction: column; justify-content: space-between; clip-path: polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px); }
