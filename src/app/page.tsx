@@ -2,21 +2,21 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { apiFetchClient, getToken } from "@/lib/clientApi";
 import { SmoothScroll } from "@/components/smooth-scroll";
 import {
   ArrowRight, Calendar, ClipboardCheck,
-  ShieldCheck, BarChart3, Check,
-  Menu, X, Lock,
+  ShieldCheck, BarChart3, Check, X,
 } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 const NAV_LINKS: [string, string][] = [
   ["Fonctionnalités", "#features"],
   ["Comment ça marche", "#steps"],
   ["Tarifs", "#tarifs"],
-  ["Notre histoire", "#histoire"],
   ["Sécurité", "#security"],
 ];
 
@@ -51,11 +51,6 @@ const PLANS = [
     highlighted: true,
   },
 ];
-
-const fadeUp = {
-  initial: { opacity: 0, y: 24 },
-  animate: { opacity: 1, y: 0 },
-};
 
 const FEATURES = [
   {
@@ -108,26 +103,54 @@ const STEPS = [
   { n: "03", t: "Partagez en un clic", d: "Notifiez votre équipe instantanément. Chaque employé consulte son planning en temps réel depuis son téléphone." },
 ];
 
+const STAT_CARDS = [
+  { label: "Mise en place", to: 3, dec: 0, suf: " clics" },
+  { label: "Employés gratuits", to: 5, dec: 0, suf: "+" },
+  { label: "Disponibilité visée", to: 99.9, dec: 1, suf: "%" },
+  { label: "Tarif plan Pro", to: 2, dec: 0, suf: "€/mois" },
+];
+
+const BADGES = ["RGPD", "Hébergement France", "AES-256", "TLS 1.3"];
+
+const FOOTER_COLUMNS: { title: string; links: [string, string][] }[] = [
+  { title: "Produit", links: [["Fonctionnalités", "#features"], ["Comment ça marche", "#steps"], ["Tarifs", "#tarifs"], ["Sécurité", "#security"]] },
+  { title: "Compte", links: [["Connexion", "/login"], ["Inscription", "/signup"], ["Support", "/support"]] },
+  { title: "Légal", links: [["Confidentialité", "/confidentialite"], ["CGU", "/cgu"], ["RGPD", "/rgpd"]] },
+];
+
+function splitWords(el: Element) {
+  const walk = (node: ChildNode) => {
+    Array.from(node.childNodes).forEach((child) => {
+      if (child.nodeType === 3) {
+        const text = child.textContent ?? "";
+        const parts = text.split(/(\s+)/).filter((p) => p.length > 0);
+        const frag = document.createDocumentFragment();
+        parts.forEach((part) => {
+          if (/^\s+$/.test(part)) {
+            frag.appendChild(document.createTextNode(part));
+          } else {
+            const span = document.createElement("span");
+            span.className = "w";
+            span.textContent = part;
+            frag.appendChild(span);
+          }
+        });
+        child.replaceWith(frag);
+      } else if (child.nodeType === 1 && (child as Element).tagName !== "BR") {
+        walk(child);
+      }
+    });
+  };
+  walk(el);
+}
+
 export default function Home() {
   const [me, setMe] = useState<{ email?: string; role?: string } | null>(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [heroEmail, setHeroEmail] = useState("");
   const [heroSubmitting, setHeroSubmitting] = useState(false);
   const [activeFeature, setActiveFeature] = useState<number | null>(null);
-  const heroRef = useRef(null);
-
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  });
-
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.6], [1, 0.92]);
-
-  useEffect(() => {
-    document.body.style.overflow = mobileOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [mobileOpen]);
+  const [activePanel, setActivePanel] = useState(0);
+  const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (activeFeature === null) return;
@@ -161,9 +184,183 @@ export default function Home() {
     router.push(`/signup/admin?email=${encodeURIComponent(email)}`);
   };
 
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const ctx = gsap.context(() => {
+      root.querySelectorAll(".split").forEach(splitWords);
+
+      // Decorative flicker-square fields
+      root.querySelectorAll<HTMLElement>(".sq-field").forEach((field) => {
+        const count = parseInt(field.dataset.count ?? "16", 10);
+        for (let i = 0; i < count; i++) {
+          const sq = document.createElement("div");
+          sq.className = "grid-sq";
+          const col = Math.floor(Math.random() * 20);
+          const row = Math.floor(Math.random() * 5);
+          sq.style.left = `${col * 48 - 10}px`;
+          sq.style.top = `${row * 48 + 6}px`;
+          sq.style.width = "46px";
+          sq.style.height = "46px";
+          field.appendChild(sq);
+          gsap.to(sq, {
+            opacity: 1,
+            duration: 1.2,
+            yoyo: true,
+            repeat: -1,
+            delay: Math.random() * 4,
+            repeatDelay: Math.random() * 3,
+          });
+        }
+      });
+
+      // Hero glass squares
+      const heroGlass = root.querySelector<HTMLElement>("#heroGlass");
+      if (heroGlass) {
+        const positions = [
+          [6, 68], [10, 76], [16, 68], [84, 60], [88, 70], [80, 78], [50, 78], [54, 82],
+        ];
+        positions.forEach(([x, y], i) => {
+          const sq = document.createElement("div");
+          sq.className = "glass";
+          const size = x > 40 && x < 60 ? "clamp(26px,3.2vw,42px)" : "clamp(32px,5vw,66px)";
+          sq.style.left = `${x}%`;
+          sq.style.top = `${y}%`;
+          sq.style.width = size;
+          sq.style.aspectRatio = "1";
+          heroGlass.appendChild(sq);
+          gsap.to(sq, {
+            opacity: 0.15,
+            duration: 0.9,
+            yoyo: true,
+            repeat: -1,
+            ease: "sine.inOut",
+            delay: i * 0.3 + Math.random() * 2,
+            repeatDelay: 1 + Math.random() * 3,
+          });
+        });
+      }
+
+      // Simple intro reveal — doux et lent, dans l'esprit de la vidéo
+      gsap.timeline()
+        .fromTo(".nav", { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 1.1, ease: "sine.out" })
+        .fromTo("#heroTitle .w, #heroCap .w", { opacity: 0, y: 20, filter: "blur(12px)" },
+          { opacity: 1, y: 0, filter: "blur(0px)", duration: 1.4, stagger: 0.09, ease: "sine.out" }, "-=0.7")
+        .fromTo("#heroForm", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.9, ease: "sine.out" }, "-=0.8")
+        .fromTo(".glass", { opacity: 0, scale: 0.7 }, { opacity: 0.15, scale: 1, duration: 1, stagger: { each: 0.06, from: "random" }, ease: "sine.out" }, "-=1");
+
+      // Word reveals for the rest of the split elements (stats/loop/cta headings)
+      root.querySelectorAll<HTMLElement>(".stats .split, .loop .split").forEach((el) => {
+        gsap.from(el.querySelectorAll(".w"), {
+          opacity: 0, y: 20, filter: "blur(8px)", duration: 1.2, stagger: 0.08, ease: "sine.out",
+          scrollTrigger: { trigger: el, start: "top 82%" },
+        });
+      });
+
+      root.querySelectorAll<HTMLElement>(".reveal").forEach((el) => {
+        gsap.from(el, {
+          opacity: 0, y: 14, duration: 1.1, ease: "sine.out",
+          scrollTrigger: { trigger: el, start: "top 87%" },
+        });
+      });
+
+      // Hero video background reacts to scroll
+      gsap.to("#heroVideoBg", {
+        opacity: 0.15,
+        scale: 1.08,
+        ease: "none",
+        scrollTrigger: { trigger: "#hero", start: "top top", end: "bottom top", scrub: 0.8 },
+      });
+
+      const statsSection = root.querySelector<HTMLElement>("#stats");
+      const cardEls = Array.from(root.querySelectorAll<HTMLElement>(".card"));
+      const glow = root.querySelector<HTMLElement>("#statsGlow");
+      const rise = root.querySelector<HTMLElement>("#statsRise");
+
+      const setCounters = (p: number) => {
+        cardEls.forEach((el) => {
+          const to = parseFloat(el.dataset.to ?? "0");
+          const dec = parseInt(el.dataset.dec ?? "0", 10);
+          const suf = el.dataset.suf ?? "";
+          const b = el.querySelector("b");
+          if (b) b.textContent = (to * p).toFixed(dec) + suf;
+        });
+      };
+
+      const mm = gsap.matchMedia();
+
+      mm.add("(min-width: 901px)", () => {
+        gsap.from(cardEls, {
+          y: 40, opacity: 0, stagger: 0.08, duration: 0.6, ease: "power3.out",
+          scrollTrigger: { trigger: ".cards", start: "top 70%" },
+        });
+
+        if (statsSection) {
+          const proxy = { p: 0 };
+          gsap.timeline({
+            scrollTrigger: { trigger: statsSection, start: "top top", end: "+=120%", pin: true, scrub: 1 },
+          })
+            .to(proxy, { p: 1, ease: "none", onUpdate: () => setCounters(proxy.p) }, 0)
+            .to(glow, { scale: 1.2, opacity: 0.4, ease: "none" }, 0)
+            .to(rise, { yPercent: -70, ease: "none" }, 0);
+        }
+
+        return () => {};
+      });
+
+      mm.add("(max-width: 900px)", () => {
+        gsap.from(cardEls, {
+          y: 30, opacity: 0, stagger: 0.08, duration: 0.6, ease: "power3.out",
+          scrollTrigger: { trigger: ".cards", start: "top 85%" },
+        });
+
+        const proxy = { p: 0 };
+        gsap.to(proxy, {
+          p: 1, duration: 2, ease: "power2.out", onUpdate: () => setCounters(proxy.p),
+          scrollTrigger: { trigger: ".cards", start: "top 80%", once: true },
+        });
+
+        gsap.to(rise, {
+          yPercent: -40, ease: "none",
+          scrollTrigger: { trigger: statsSection, start: "top bottom", end: "bottom top", scrub: true },
+        });
+
+        return () => {};
+      });
+
+      // Loop decorative blob drift
+      gsap.to(".loop-blob", {
+        x: 40, ease: "none",
+        scrollTrigger: { trigger: "#steps", start: "top bottom", end: "bottom top", scrub: 0.8 },
+      });
+
+      // Footer logomark animation
+      const footer = root.querySelector<HTMLElement>("#footer");
+      if (footer) {
+        const dots = footer.querySelectorAll(".fdot");
+        const tl = gsap.timeline({ scrollTrigger: { trigger: footer, start: "top 92%" } });
+        tl.to(dots, { y: -8, duration: 0.25, stagger: 0.08, yoyo: true, repeat: 3, ease: "sine.inOut" })
+          .to(dots, { attr: { cx: 40 }, duration: 0.45, ease: "power3.inOut" })
+          .to([dots[0], dots[2]], { opacity: 0, duration: 0.1 }, "<")
+          .to("#fMark", { strokeDashoffset: 0, duration: 0.6, ease: "power3.out" }, "-=0.05")
+          .to(dots[1], { attr: { r: 5.5 }, duration: 0.4, ease: "back.out(3)" }, "<")
+          .to("#fRing", { strokeDashoffset: 0, duration: 0.9, ease: "power2.inOut" }, "-=0.3");
+      }
+
+      ScrollTrigger.refresh();
+    }, root);
+
+    return () => ctx.revert();
+  }, []);
+
+  const panelActivate = (i: number) => setActivePanel(i);
+
   return (
     <SmoothScroll>
-    <div className="min-h-screen bg-white text-gray-900 antialiased overflow-x-hidden selection:bg-[#B4FF39]/20 selection:text-[#B4FF39]">
+    <div ref={rootRef} className="ptl-root min-h-screen bg-[#060606] text-white antialiased overflow-x-hidden">
 
       <script
         type="application/ld+json"
@@ -185,236 +382,153 @@ export default function Home() {
         }}
       />
 
-      {/* NAV — fixe, persiste sur toute la page */}
-      <nav
-        className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-5 py-5 sm:px-8 sm:py-6 lg:px-12"
-        style={{ fontFamily: "var(--font-instrument-sans)" }}
-      >
-        <span className="text-lg font-semibold tracking-tight text-white">Shiftly</span>
-
-        <div className="hidden md:flex items-center gap-3">
-          <div className="flex items-center gap-1 rounded-full bg-white/10 px-1.5 py-1.5 backdrop-blur-lg">
-            {NAV_LINKS.map(([label, href]) => (
-              <a
-                key={label}
-                href={href}
-                className="rounded-full px-4 py-1.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors"
-              >
-                {label}
-              </a>
-            ))}
-          </div>
-          <Link
-            href={me ? "/dashboard" : "/signup"}
-            className="self-stretch flex items-center rounded-full bg-[#B4FF39] px-5 text-sm font-bold text-black hover:bg-[#a3ec2e] transition-colors"
-          >
-            {me ? "Dashboard" : "Démarrer"}
+      {/* NAV */}
+      <nav className="nav" style={{ fontFamily: "var(--font-inter-tight)" }}>
+        <Link href="#hero" className="brand">Shiftly</Link>
+        <div className="nav-links">
+          {NAV_LINKS.map(([label, href]) => (
+            <a key={label} href={href}>{label}</a>
+          ))}
+          <Link href={me ? "/dashboard" : "/signup"} className="pill btn">
+            {me ? "Dashboard" : "Commencer"}
           </Link>
         </div>
-
-        <button
-          className="md:hidden relative z-50 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-lg text-white"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Menu"
-        >
-          <Menu size={18} className={`absolute transition-all duration-300 ${mobileOpen ? "rotate-90 scale-0 opacity-0" : "opacity-100"}`} />
-          <X size={18} className={`absolute transition-all duration-300 ${mobileOpen ? "opacity-100" : "-rotate-90 scale-0 opacity-0"}`} />
-        </button>
       </nav>
 
-      {/* Mobile overlay */}
-      <div
-        className={`fixed inset-0 z-40 bg-black/80 backdrop-blur-md transition-opacity duration-300 md:hidden ${mobileOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
-        onClick={() => setMobileOpen(false)}
-      />
-
-      {/* Mobile drawer */}
-      <div
-        className={`fixed right-0 top-0 z-40 flex h-full w-72 flex-col bg-black/90 backdrop-blur-xl transition-transform md:hidden ${mobileOpen ? "translate-x-0" : "translate-x-full"}`}
-        style={{ transitionDuration: "500ms", transitionTimingFunction: "cubic-bezier(0.16,1,0.3,1)" }}
-      >
-        <div className="flex flex-col gap-2 px-6 pt-24">
-          {NAV_LINKS.map(([label, href], i) => (
-            <a
-              key={label}
-              href={href}
-              onClick={() => setMobileOpen(false)}
-              className="rounded-xl px-4 py-3.5 text-base font-medium text-white/80 hover:bg-white/10 hover:text-white transition-all"
-              style={{
-                transitionProperty: "opacity, transform, background-color, color",
-                opacity: mobileOpen ? 1 : 0,
-                transform: mobileOpen ? "translateX(0)" : "translateX(24px)",
-                transitionDelay: mobileOpen ? `${(i + 1) * 60}ms` : "0ms",
-                transitionDuration: "300ms",
-              }}
-            >
-              {label}
-            </a>
-          ))}
+      {/* HERO */}
+      <section id="hero" className="hero" style={{ fontFamily: "var(--font-inter-tight)" }}>
+        <div id="heroVideoBg" className="hero-video-bg">
+          <video autoPlay loop muted playsInline>
+            <source src="/hero-painting.webm" type="video/webm" />
+            <source src="/hero-painting.mp4" type="video/mp4" />
+          </video>
+          <div className="hero-video-overlay" />
         </div>
-        <Link
-          href={me ? "/dashboard" : "/signup"}
-          onClick={() => setMobileOpen(false)}
-          className="mt-auto mx-6 mb-10 rounded-full bg-[#B4FF39] px-6 py-3.5 text-center text-sm font-bold text-black transition-all"
-          style={{
-            opacity: mobileOpen ? 1 : 0,
-            transform: mobileOpen ? "translateY(0)" : "translateY(16px)",
-            transitionDelay: mobileOpen ? "300ms" : "0ms",
-            transitionDuration: "400ms",
-          }}
-        >
-          {me ? "Dashboard" : "Démarrer"}
-        </Link>
-      </div>
 
-      {/* HERO — contenu ancré en bas d'une section plein écran */}
-      <section ref={heroRef} className="dot-grid-dark relative h-screen w-full overflow-hidden" style={{ fontFamily: "var(--font-instrument-sans)" }}>
+        <div id="heroGlass" className="hero-glass" />
 
-        {/* Background video (source: motionsites.ai) */}
-        <video
-          className="absolute inset-0 h-full w-full object-cover"
-          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260803_192301_9231ed6b-c55c-4a48-909c-4ebe11cf2e11.mp4"
-          autoPlay
-          loop
-          muted
-          playsInline
-        />
-        <div className="pointer-events-none absolute inset-0 bg-black/40" />
+        <h1 id="heroTitle" className="split">
+          Le planning qui tourne,<br />même sans <em>vous.</em>
+        </h1>
+        <p id="heroCap" className="cap split">
+          Plannings, congés et pointage —<br />zéro tableur, zéro stress.
+        </p>
 
-        <motion.div style={{ opacity: heroOpacity, scale: heroScale }} className="relative z-10 flex h-full flex-col">
-
-          {/* MAIN — ancré en bas */}
-          <main className="mt-auto flex flex-col gap-6 px-5 pb-8 sm:gap-8 sm:px-8 sm:pb-12 lg:flex-row lg:items-end lg:justify-between lg:px-12 lg:pb-16">
-
-            {/* Left — headline + CTA email */}
-            <div className="max-w-xl">
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
-                className="text-3xl sm:text-4xl lg:text-[3.5rem] font-semibold leading-[1.1] tracking-tight text-white"
-              >
-                Le planning qui tourne, même sans vous.
-              </motion.h1>
-
-              <motion.form
-                onSubmit={handleHeroSubmit}
-                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}
-                className="mt-6 flex flex-col gap-3 sm:mt-8 sm:inline-flex sm:flex-row sm:items-center sm:rounded-full sm:bg-white sm:p-1.5"
-              >
-                <input
-                  type="email"
-                  required
-                  value={heroEmail}
-                  onChange={e => setHeroEmail(e.target.value)}
-                  placeholder="Votre email pro"
-                  className="rounded-full bg-white px-5 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none sm:w-64 sm:rounded-none sm:bg-transparent sm:px-4 sm:py-2"
-                />
-                <button
-                  type="submit"
-                  disabled={heroSubmitting}
-                  className="rounded-full bg-[#B4FF39] px-6 py-3 text-center text-sm font-bold text-black hover:bg-[#a3ec2e] transition-colors disabled:opacity-60 sm:py-2.5"
-                >
-                  Commencer
-                </button>
-              </motion.form>
-            </div>
-
-            {/* Right — glass cards */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.5 }}
-              className="flex flex-col gap-4 sm:flex-row lg:w-auto lg:gap-5"
-            >
-              <div className="flex flex-col justify-between rounded-2xl bg-white/10 p-5 backdrop-blur-lg sm:w-64 sm:p-6">
-                <p className="text-3xl sm:text-4xl font-normal tracking-tight text-white" style={{ fontFamily: "var(--font-silkscreen)" }}>
-                  3 clics
-                </p>
-                <p className="mt-3 text-sm leading-relaxed text-white/70 sm:mt-4">
-                  Pour publier un planning complet, sans tableur.
-                </p>
-              </div>
-
-              <div className="rounded-2xl bg-white/10 p-5 backdrop-blur-lg sm:w-64 sm:p-6">
-                <div className="mb-3 flex items-center gap-2 sm:mb-4">
-                  <span className="flex h-6 w-6 items-center justify-center rounded bg-black">
-                    <Lock size={12} className="text-white" />
-                  </span>
-                  <span className="text-sm font-semibold text-white">Sécurité</span>
-                </div>
-                <p className="text-sm leading-relaxed text-white/80">
-                  Hébergement en France, données chiffrées, conforme RGPD.
-                </p>
-              </div>
-            </motion.div>
-          </main>
-        </motion.div>
+        <form id="heroForm" onSubmit={handleHeroSubmit} className="hero-form">
+          <input
+            type="email"
+            required
+            value={heroEmail}
+            onChange={(e) => setHeroEmail(e.target.value)}
+            placeholder="Votre email pro"
+          />
+          <button type="submit" disabled={heroSubmitting} aria-label="Commencer">
+            <ArrowRight size={18} />
+          </button>
+        </form>
       </section>
 
-      {/* TICKER + SPOTLIGHT */}
-      <section className="pb-8 sm:pb-12">
-        {/* Ticker */}
-        <div className="border-y border-gray-200 py-3.5 overflow-hidden">
-          <div className="flex animate-ticker" style={{ width: "max-content" }}>
-            {[
-              "Planning sans conflits",
-              "Gestion des congés",
-              "Notifications temps réel",
-              "Rapports analytiques",
-              "Hébergement France",
-              "Conformité RGPD",
-              "Détection automatique",
-              "Équipes connectées",
-              "Planning sans conflits",
-              "Gestion des congés",
-              "Notifications temps réel",
-              "Rapports analytiques",
-              "Hébergement France",
-              "Conformité RGPD",
-              "Détection automatique",
-              "Équipes connectées",
-            ].map((item, i) => (
-              <span key={i} className="text-[10px] font-bold uppercase tracking-[0.35em] text-gray-400 shrink-0 px-8">
-                {item} <span className="text-[#B4FF39]">·</span>
-              </span>
+      {/* STATS */}
+      <section id="stats" className="stats">
+        <div className="sq-field" data-count="18" />
+        <div id="statsGlow" className="stats-glow" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img id="statsRise" src="/stats-column.png" alt="" aria-hidden="true" className="stats-rise" />
+
+        <div className="stats-inner">
+          <span className="pill reveal">Pensé pour les petites équipes</span>
+          <h2 className="h2 split">Un planning fiable,<br />construit en quelques clics.</h2>
+
+          <div className="cards">
+            {STAT_CARDS.map((c) => (
+              <div key={c.label} className="card" data-to={c.to} data-dec={c.dec} data-suf={c.suf}>
+                <svg className="card-laurel card-laurel--tl" viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
+                  <path d="M12 22C12 22 4 18 4 10C4 6 7 3 12 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                  <ellipse cx="7" cy="14" rx="2" ry="1" transform="rotate(-30 7 14)" fill="currentColor" />
+                  <ellipse cx="6" cy="10" rx="2" ry="1" transform="rotate(-50 6 10)" fill="currentColor" />
+                  <ellipse cx="8" cy="6" rx="2" ry="1" transform="rotate(-70 8 6)" fill="currentColor" />
+                </svg>
+                <svg className="card-laurel card-laurel--br" viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
+                  <path d="M12 22C12 22 4 18 4 10C4 6 7 3 12 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                  <ellipse cx="7" cy="14" rx="2" ry="1" transform="rotate(-30 7 14)" fill="currentColor" />
+                  <ellipse cx="6" cy="10" rx="2" ry="1" transform="rotate(-50 6 10)" fill="currentColor" />
+                  <ellipse cx="8" cy="6" rx="2" ry="1" transform="rotate(-70 8 6)" fill="currentColor" />
+                </svg>
+                <span className="card-label">{c.label}</span>
+                <b>0{c.suf.trim().startsWith("%") || c.suf.trim().startsWith("€") ? "" : ""}</b>
+              </div>
+            ))}
+          </div>
+          <div className="cards-shadow" />
+
+          <div className="badges">
+            {BADGES.map((b) => (
+              <span key={b} className="badge">{b}</span>
             ))}
           </div>
         </div>
+      </section>
 
-        {/* Split spotlight card */}
+      {/* LOOP — accordéon "comment ça marche" */}
+      <section id="steps" className="loop">
+        <div className="loop-blob" />
+        <div className="loop-head">
+          <span className="pill reveal">Comment ça marche</span>
+          <h2 className="h2 split">Trois étapes,<br />zéro friction.</h2>
+        </div>
+
+        <div className="track">
+          {STEPS.map((step, i) => (
+            <div
+              key={step.n}
+              tabIndex={0}
+              className={`panel ${activePanel === i ? "is-active" : ""}`}
+              onMouseEnter={() => panelActivate(i)}
+              onFocus={() => panelActivate(i)}
+              onClick={() => panelActivate(i)}
+              aria-label={`Étape ${step.n} : ${step.t}`}
+            >
+              <div className="panel-in">
+                <span className={`num num-${i}`}>{step.n}</span>
+                <div className="step">
+                  <h3>{step.t}</h3>
+                  <p>{step.d}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* SPOTLIGHT */}
+      <section className="pb-8 sm:pb-12 pt-8 sm:pt-12">
+
         <div className="px-4 sm:px-6 max-w-7xl mx-auto mt-5">
           <motion.div
             initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }} viewport={{ once: true }}
             className="relative rounded-3xl overflow-hidden border border-white/8 bg-[#090909] grid grid-cols-1 md:grid-cols-2 min-h-[480px]"
           >
-            {/* Left — text */}
             <div className="p-10 sm:p-14 flex flex-col justify-between relative z-10">
               <div>
                 <p className="font-mono text-xs text-[#B4FF39] mb-8">[ gestion d&apos;équipe ]</p>
                 <h2 className="text-5xl sm:text-6xl font-bold tracking-tight text-white leading-[0.9] mb-6">
-                  Planifiez<br />sans effort.
+                  Planifiez.<br />Guidez.<br />Exécutez.
                 </h2>
                 <p className="text-white/40 text-base font-medium leading-relaxed max-w-xs">
                   Construisez vos plannings hebdomadaires en quelques clics. Les conflits sont détectés automatiquement, votre équipe notifiée instantanément.
                 </p>
               </div>
-              <Link
-                href="/signup"
-                className="mt-10 w-fit h-12 px-8 rounded-full bg-white text-black font-bold text-sm hover:scale-105 transition-all inline-flex items-center gap-2"
-              >
+              <Link href="/signup" className="mt-10 w-fit h-12 px-8 rounded-full bg-white text-black font-bold text-sm hover:scale-105 transition-all inline-flex items-center gap-2">
                 Démarrer gratuitement <ArrowRight size={14} />
               </Link>
             </div>
 
-            {/* Right — vraie capture du dashboard */}
             <div className="relative min-h-[300px] md:min-h-0 bg-[#0a0a0a]">
-              <img
-                src="/dashboard-preview.png"
-                alt="Dashboard Shiftly"
-                className="absolute inset-0 w-full h-full object-cover object-top"
-              />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/spotlight-wreath.png" alt="" className="absolute inset-0 w-full h-full object-cover object-center" />
               <div className="absolute inset-0 bg-black/10" />
-              {/* Gradient blending on left edge */}
               <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#090909] to-transparent" />
-              {/* Gradient blending on bottom */}
               <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#090909] to-transparent md:hidden" />
             </div>
           </motion.div>
@@ -428,41 +542,36 @@ export default function Home() {
           className="mb-16 text-center"
         >
           <p className="font-mono text-xs text-[#B4FF39] mb-4">[ fonctionnalités ]</p>
-          <h2
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-b from-gray-900 to-gray-400 bg-clip-text text-transparent"
-          >
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
             Tout ce dont votre équipe a besoin.
           </h2>
         </motion.div>
 
-        <div className="border-t border-gray-200 mb-5">
+        <div className="border-t border-white/10 mb-5">
           {FEATURES.map((f, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: i * 0.08 }} viewport={{ once: true }}
-              className="group grid grid-cols-1 md:grid-cols-[80px_1fr_1.3fr_auto] items-center gap-4 md:gap-8 border-b border-gray-200 py-8 md:py-10"
+              className="group grid grid-cols-1 md:grid-cols-[80px_1fr_1.3fr_auto] items-center gap-4 md:gap-8 border-b border-white/10 py-8 md:py-10"
             >
-              <span className="font-mono text-2xl text-gray-300 group-hover:text-[#B4FF39] transition-colors">
+              <span className="font-mono text-2xl text-gray-600 group-hover:text-[#B4FF39] transition-colors">
                 {String(i + 1).padStart(2, "0")}
               </span>
-
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 shrink-0 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 group-hover:text-[#B4FF39] transition-colors">
+                <div className="w-10 h-10 shrink-0 rounded-xl bg-white/5 flex items-center justify-center text-gray-500 group-hover:text-[#B4FF39] transition-colors">
                   <f.icon size={18} />
                 </div>
                 <div>
-                  <p className="font-mono text-[10px] text-gray-400 mb-1">{f.label}</p>
-                  <h3 className="text-lg sm:text-xl font-bold tracking-tight text-gray-900 leading-tight">{f.title}</h3>
+                  <p className="font-mono text-[10px] text-gray-500 mb-1">{f.label}</p>
+                  <h3 className="text-lg sm:text-xl font-bold tracking-tight text-white leading-tight">{f.title}</h3>
                 </div>
               </div>
-
-              <p className="text-gray-500 text-sm leading-relaxed max-w-md">{f.desc}</p>
-
+              <p className="text-gray-400 text-sm leading-relaxed max-w-md">{f.desc}</p>
               <button
                 type="button"
                 onClick={() => setActiveFeature(i)}
-                className="md:justify-self-end inline-flex items-center gap-1.5 text-xs font-bold text-gray-400 group-hover:text-[#B4FF39] transition-colors shrink-0"
+                className="md:justify-self-end inline-flex items-center gap-1.5 text-xs font-bold text-gray-500 group-hover:text-[#B4FF39] transition-colors shrink-0"
               >
                 {f.cta} <ArrowRight size={13} />
               </button>
@@ -470,7 +579,6 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Feature detail modal */}
         <AnimatePresence>
           {activeFeature !== null && (
             <motion.div
@@ -495,11 +603,9 @@ export default function Home() {
                 >
                   <X size={16} />
                 </button>
-
                 <p className="font-mono text-[10px] text-white/40 mb-1.5">{FEATURES[activeFeature].label}</p>
                 <h3 className="text-2xl font-bold tracking-tight text-white mb-3">{FEATURES[activeFeature].title}</h3>
                 <p className="text-white/40 text-sm leading-relaxed mb-6">{FEATURES[activeFeature].desc}</p>
-
                 <ul className="space-y-3 mb-8">
                   {FEATURES[activeFeature].details.map((d, di) => (
                     <li key={di} className="flex items-start gap-3 text-sm text-white/60 leading-relaxed">
@@ -508,11 +614,7 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
-
-                <Link
-                  href={FEATURES[activeFeature].href}
-                  className="w-full h-12 bg-white text-black font-bold text-sm hover:bg-white/90 transition-all inline-flex items-center justify-center gap-2"
-                >
+                <Link href={FEATURES[activeFeature].href} className="w-full h-12 bg-white text-black font-bold text-sm hover:bg-white/90 transition-all inline-flex items-center justify-center gap-2">
                   Commencer gratuitement <ArrowRight size={14} />
                 </Link>
               </motion.div>
@@ -520,7 +622,6 @@ export default function Home() {
           )}
         </AnimatePresence>
 
-        {/* Big dark card */}
         <motion.div
           initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} viewport={{ once: true }}
           className="relative rounded-[28px] bg-[#090909] border border-white/8 p-10 sm:p-16 overflow-hidden"
@@ -547,38 +648,6 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* COMMENT ÇA MARCHE */}
-      <section id="steps" className="py-24 sm:py-36 px-4 sm:px-6">
-        <div className="max-w-3xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }}
-            className="mb-14"
-          >
-            <p className="font-mono text-xs text-[#B4FF39] mb-4">[ comment ça marche ]</p>
-            <h2 className="text-4xl sm:text-5xl font-bold tracking-tight bg-gradient-to-b from-gray-900 to-gray-400 bg-clip-text text-transparent">
-              Simple. Rapide. Efficace.
-            </h2>
-          </motion.div>
-
-          <div className="flex flex-col gap-4">
-            {STEPS.map((step, i) => (
-              <motion.div
-                key={step.n}
-                initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: i * 0.1 }} viewport={{ once: true }}
-                className="group bg-gray-50 border border-gray-200 rounded-2xl p-6 flex items-start gap-6 hover:border-[#B4FF39]/30 transition-colors"
-              >
-                <span className="text-[#B4FF39] font-bold text-xs shrink-0 mt-0.5 tabular-nums">{step.n}</span>
-                <div>
-                  <h3 className="text-base font-bold text-gray-900 mb-1.5">{step.t}</h3>
-                  <p className="text-sm text-gray-500 leading-relaxed font-medium">{step.d}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* TARIFS */}
       <section id="tarifs" className="py-24 sm:py-36 px-4 sm:px-6 max-w-5xl mx-auto">
         <motion.div
@@ -586,10 +655,10 @@ export default function Home() {
           className="mb-16 text-center"
         >
           <p className="font-mono text-xs text-[#B4FF39] mb-4">[ tarifs ]</p>
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-b from-gray-900 to-gray-400 bg-clip-text text-transparent">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
             Un prix simple. Zéro surprise.
           </h2>
-          <p className="mt-5 text-gray-500 text-base max-w-md mx-auto">
+          <p className="mt-5 text-gray-400 text-base max-w-md mx-auto">
             Gratuit pour démarrer. Un seul plan payant, sans palier caché.
           </p>
         </motion.div>
@@ -601,9 +670,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: i * 0.1 }} viewport={{ once: true }}
               className={`relative rounded-[28px] p-8 sm:p-10 flex flex-col ${
-                plan.highlighted
-                  ? "bg-lime-50 border border-[#B4FF39]/30"
-                  : "bg-white border border-gray-200"
+                plan.highlighted ? "bg-[#B4FF39]/[0.07] border border-[#B4FF39]/30" : "bg-white/5 border border-white/10"
               }`}
             >
               {plan.highlighted && (
@@ -611,28 +678,21 @@ export default function Home() {
                   Recommandé
                 </span>
               )}
-
-              <h3 className="text-lg font-bold text-gray-900 mb-1">{plan.name}</h3>
-              <p className="text-gray-500 text-sm mb-6">{plan.desc}</p>
-
+              <h3 className="text-lg font-bold text-white mb-1">{plan.name}</h3>
+              <p className="text-gray-400 text-sm mb-6">{plan.desc}</p>
               <div className="flex items-baseline gap-1 mb-8">
-                <span className="text-5xl font-bold tracking-tight text-gray-900">{plan.price}</span>
-                {plan.period && <span className="text-gray-500 text-sm">{plan.period}</span>}
+                <span className="text-5xl font-bold tracking-tight text-white">{plan.price}</span>
+                {plan.period && <span className="text-gray-400 text-sm">{plan.period}</span>}
               </div>
-
               <ul className="space-y-3 mb-8 flex-1">
                 {plan.features.map((f) => (
-                  <li key={f} className="flex items-center gap-2.5 text-sm text-gray-600">
+                  <li key={f} className="flex items-center gap-2.5 text-sm text-gray-300">
                     <Check size={15} className="text-[#B4FF39] shrink-0" />
                     {f}
                   </li>
                 ))}
               </ul>
-
-              <Link
-                href="/signup"
-                className="w-full h-12 rounded-full bg-[#B4FF39] text-black font-bold text-sm inline-flex items-center justify-center gap-2 transition-all hover:bg-[#a3ec2e]"
-              >
+              <Link href="/signup" className="w-full h-12 rounded-full bg-[#B4FF39] text-black font-bold text-sm inline-flex items-center justify-center gap-2 transition-all hover:bg-[#a3ec2e]">
                 {plan.cta} <ArrowRight size={14} />
               </Link>
             </motion.div>
@@ -647,42 +707,58 @@ export default function Home() {
           className="mb-16 text-center"
         >
           <p className="font-mono text-xs text-[#B4FF39] mb-4">[ notre histoire ]</p>
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-b from-gray-900 to-gray-400 bg-clip-text text-transparent">
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
             Un planning Excel de trop.
           </h2>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} viewport={{ once: true }}
-          className="bg-gray-50 border border-gray-200 rounded-[28px] p-10 sm:p-14 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-10 md:gap-16 items-center"
+          className="max-w-2xl mx-auto text-center"
         >
-          <div>
-            <p className="text-gray-600 text-base sm:text-lg font-medium leading-relaxed mb-5">
-              Shiftly est né d&apos;un constat simple : dans beaucoup de commerces et de restaurants, le planning se
-              fait encore sur un tableur envoyé par mail ou par groupe WhatsApp. Les conflits d&apos;horaires se
-              découvrent trop tard, personne ne sait vraiment qui travaille quand, et les managers passent plus de
-              temps à corriger des erreurs qu&apos;à gérer leur équipe.
-            </p>
-            <p className="text-gray-600 text-base sm:text-lg font-medium leading-relaxed">
-              J&apos;ai voulu construire l&apos;outil que ces équipes méritent : simple, clair, et qui prévient les
-              problèmes avant qu&apos;ils n&apos;arrivent. Shiftly est développé en solo, avec l&apos;objectif de
-              rester au plus près des managers et des employés qui l&apos;utilisent au quotidien.
-            </p>
-          </div>
+          <svg viewBox="0 0 48 48" width="44" height="44" fill="none" className="mx-auto mb-10 text-[#B4FF39]" aria-hidden="true">
+            <path d="M24 44C12 40 6 30 8 20C9 14 13 10 18 8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+            <path d="M24 44C36 40 42 30 40 20C39 14 35 10 30 8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+            <g fill="currentColor">
+              <ellipse cx="10" cy="32" rx="2.2" ry="1.1" transform="rotate(30 10 32)" />
+              <ellipse cx="9" cy="25" rx="2.2" ry="1.1" transform="rotate(10 9 25)" />
+              <ellipse cx="11" cy="18" rx="2.2" ry="1.1" transform="rotate(-20 11 18)" />
+              <ellipse cx="16" cy="12" rx="2.2" ry="1.1" transform="rotate(-45 16 12)" />
+              <ellipse cx="38" cy="32" rx="2.2" ry="1.1" transform="rotate(-30 38 32)" />
+              <ellipse cx="39" cy="25" rx="2.2" ry="1.1" transform="rotate(-10 39 25)" />
+              <ellipse cx="37" cy="18" rx="2.2" ry="1.1" transform="rotate(20 37 18)" />
+              <ellipse cx="32" cy="12" rx="2.2" ry="1.1" transform="rotate(45 32 12)" />
+            </g>
+          </svg>
 
-          <div className="flex flex-col items-center text-center md:w-56 shrink-0">
-            <div className="w-20 h-20 rounded-full bg-[#B4FF39]/15 border border-[#B4FF39]/30 overflow-hidden mb-4">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/avatar-sayeh.webp" alt="Sayeh Ahmed" className="w-full h-full object-cover" />
-            </div>
-            <p className="font-bold text-gray-900 text-sm">Sayeh Ahmed</p>
-            <p className="text-gray-500 text-xs font-medium mb-3">Fondateur &amp; Développeur</p>
-            <a
-              href="https://www.sayehahmed.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs font-semibold text-[#B4FF39] hover:text-[#B4FF39]/80 transition-colors"
-            >
+          <p
+            className="italic text-2xl sm:text-3xl text-white leading-snug mb-8"
+            style={{ fontFamily: "var(--font-instrument-serif)" }}
+          >
+            Shiftly est né d&apos;un constat simple : dans beaucoup de commerces et de restaurants, le planning se
+            fait encore sur un tableur envoyé par mail ou par groupe WhatsApp.
+          </p>
+
+          <p className="text-gray-400 text-base leading-relaxed mb-4 max-w-xl mx-auto">
+            Les conflits d&apos;horaires se découvrent trop tard, personne ne sait vraiment qui travaille quand, et
+            les managers passent plus de temps à corriger des erreurs qu&apos;à gérer leur équipe.
+          </p>
+          <p className="text-gray-400 text-base leading-relaxed mb-12 max-w-xl mx-auto">
+            J&apos;ai voulu construire l&apos;outil que ces équipes méritent : simple, clair, et qui prévient les
+            problèmes avant qu&apos;ils n&apos;arrivent. Shiftly est développé en solo, avec l&apos;objectif de
+            rester au plus près des managers et des employés qui l&apos;utilisent au quotidien.
+          </p>
+
+          <div className="flex flex-col items-center gap-1.5 pt-8 border-t border-white/10">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" className="text-[#B4FF39] mb-1" aria-hidden="true">
+              <path d="M12 22C12 22 4 18 4 10C4 6 7 3 12 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+              <ellipse cx="7" cy="14" rx="2" ry="1" transform="rotate(-30 7 14)" fill="currentColor" />
+              <ellipse cx="6" cy="10" rx="2" ry="1" transform="rotate(-50 6 10)" fill="currentColor" />
+              <ellipse cx="8" cy="6" rx="2" ry="1" transform="rotate(-70 8 6)" fill="currentColor" />
+            </svg>
+            <p className="italic text-white text-base" style={{ fontFamily: "var(--font-instrument-serif)" }}>Sayeh Ahmed</p>
+            <p className="text-gray-500 text-xs font-medium">Fondateur &amp; Développeur</p>
+            <a href="https://www.sayehahmed.com" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-[#B4FF39] hover:text-[#B4FF39]/80 transition-colors mt-1">
               sayehahmed.com
             </a>
           </div>
@@ -700,92 +776,148 @@ export default function Home() {
           className="max-w-3xl mx-auto text-center relative z-10"
         >
           <p className="font-mono text-xs text-[#B4FF39] mb-6">[ commencer ]</p>
-          <h2
-            className="text-5xl sm:text-6xl md:text-7xl font-semibold tracking-tight leading-[0.95] mb-6"
-            style={{ fontFamily: "var(--font-instrument-sans)" }}
-          >
-            <span className="bg-gradient-to-b from-gray-900 to-gray-400 bg-clip-text text-transparent">
+          <h2 className="text-5xl sm:text-6xl md:text-7xl font-semibold tracking-tight leading-[0.95] mb-6" style={{ fontFamily: "var(--font-instrument-sans)" }}>
+            <span className="bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
               Fini les tableurs.<br />
             </span>
             <span className="bg-gradient-to-b from-[#B4FF39] to-lime-300 bg-clip-text text-transparent">
               Bienvenue sur Shiftly.
             </span>
           </h2>
-          <p className="text-gray-500 text-lg font-medium mb-12 max-w-xl mx-auto leading-relaxed">
+          <p className="text-gray-400 text-lg font-medium mb-12 max-w-xl mx-auto leading-relaxed">
             Rejoignez les managers qui ont repris le contrôle de leur temps. Gratuit pour commencer, sans engagement.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="/signup"
-              className="h-14 px-10 rounded-full bg-[#B4FF39] text-black font-bold text-sm hover:scale-105 hover:shadow-[0_0_60px_-10px_rgba(180,255,57,0.5)] transition-all inline-flex items-center gap-3"
-            >
+            <Link href="/signup" className="h-14 px-10 rounded-full bg-[#B4FF39] text-black font-bold text-sm hover:scale-105 hover:shadow-[0_0_60px_-10px_rgba(180,255,57,0.5)] transition-all inline-flex items-center gap-3">
               Commencer gratuitement <ArrowRight size={15} />
             </Link>
-            <Link
-              href="/login"
-              className="h-14 px-10 rounded-full bg-gray-100 border border-gray-200 font-bold text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all inline-flex items-center"
-            >
+            <Link href="/login" className="h-14 px-10 rounded-full bg-white/5 border border-white/10 font-bold text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-all inline-flex items-center">
               J&apos;ai déjà un compte
             </Link>
           </div>
-          <p className="mt-8 text-gray-400 text-xs font-medium">Aucune CB requise · Setup en 2 min · RGPD</p>
+          <p className="mt-8 text-gray-500 text-xs font-medium">Aucune CB requise · Setup en 2 min · RGPD</p>
         </motion.div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-gray-200 py-14 px-6 bg-white">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start justify-between gap-12">
-          <div>
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-7 h-7 rounded-lg bg-[#B4FF39] flex items-center justify-center">
-                <Calendar size={14} className="text-white" />
-              </div>
-              <span className="font-bold tracking-tight text-gray-900 text-sm">SHIFTLY</span>
+      {/* FOOTER — lime, animation logo */}
+      <footer id="footer" className="ptl-footer">
+        <svg className="f-logo" viewBox="0 0 80 80" aria-label="Shiftly">
+          <circle id="fRing" cx="40" cy="40" r="37" fill="none" stroke="#111" strokeWidth="2.4" strokeDasharray="233" strokeDashoffset="233" transform="rotate(-90 40 40)" />
+          <circle className="fdot" cx="22" cy="40" r="4.5" fill="#111" />
+          <circle className="fdot" cx="40" cy="40" r="4.5" fill="#111" />
+          <circle className="fdot" cx="58" cy="40" r="4.5" fill="#111" />
+          <path id="fMark" d="M28 44 40 24 52 44" fill="none" stroke="#111" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="56" strokeDashoffset="56" />
+        </svg>
+
+        <div className="f-columns">
+          {FOOTER_COLUMNS.map((col) => (
+            <div key={col.title} className="f-col">
+              <p className="f-col-title">{col.title}</p>
+              <ul>
+                {col.links.map(([label, href]) => (
+                  <li key={label}><a href={href}>{label}</a></li>
+                ))}
+              </ul>
             </div>
-            <p className="text-gray-500 text-sm font-medium max-w-[180px] leading-relaxed mb-4">
-              Le planning de vos équipes, simplement.
-            </p>
-            <p className="text-gray-400 text-xs mb-5">
-              Fait par{" "}
-              <a href="https://www.sayehahmed.com" target="_blank" rel="noopener noreferrer" className="text-[#B4FF39] hover:text-[#B4FF39]/80 transition-colors font-semibold">
-                Sayeh Ahmed
-              </a>
-            </p>
-            <a
-              href="https://x.com/SHIFTLYApp"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-full bg-gray-100 hover:bg-gray-900 hover:text-white px-4 py-2 text-xs font-bold text-gray-700 transition-colors"
-            >
-              <span className="text-sm font-black">𝕏</span> Suivez notre évolution
-            </a>
-          </div>
-
-          <div className="grid grid-cols-2 gap-12 sm:grid-cols-3">
-            {[
-              { title: "Produit", links: [["Fonctionnalités", "#features"], ["Comment ça marche", "#steps"], ["Tarifs", "#tarifs"], ["Sécurité", "#security"]] },
-              { title: "Compte", links: [["Connexion", "/login"], ["Inscription", "/signup"], ["Support", "/support"]] },
-              { title: "Légal", links: [["Confidentialité", "/confidentialite"], ["CGU", "/cgu"], ["RGPD", "/rgpd"]] },
-            ].map((col) => (
-              <div key={col.title}>
-                <p className="mb-4 text-[9px] font-bold uppercase tracking-[0.4em] text-gray-400">{col.title}</p>
-                <ul className="space-y-3">
-                  {col.links.map(([label, href]) => (
-                    <li key={label}>
-                      <a href={href} className="text-xs font-medium text-gray-400 hover:text-gray-900 transition-colors">{label}</a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
+          ))}
         </div>
 
-        <div className="max-w-7xl mx-auto mt-12 pt-6 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-3 text-[10px] font-medium text-gray-400">
-          <p>© 2026 Shiftly. Tous droits réservés. Made in France.</p>
-          <p>v2.0</p>
+        <div className="f-social">
+          <a href="https://x.com/SHIFTLYApp" target="_blank" rel="noopener noreferrer" aria-label="X">𝕏</a>
         </div>
+
+        <p className="f-copy">© 2026 Shiftly. Tous droits réservés. Made in France.</p>
       </footer>
+
+      <style>{`
+        .ptl-root { position: relative; }
+        .nav { position: fixed; top: 22px; left: 50%; transform: translateX(-50%); z-index: 50; display: flex; align-items: center; gap: 36px; padding: 6px 6px 6px 18px; border-radius: 999px; background: rgba(10,10,10,.75); border: 1px solid rgba(255,255,255,.08); backdrop-filter: blur(10px); }
+        .nav .brand { font-size: 18px; font-weight: 600; letter-spacing: -.02em; color: #fff; }
+        .nav-links { display: flex; align-items: center; gap: 28px; font-size: 13px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; color: rgba(255,255,255,.7); }
+        .nav-links a:not(.pill) { transition: color .2s; }
+        .nav-links a:not(.pill):hover { color: #fff; }
+        .pill.btn { display: inline-flex; align-items: center; height: 38px; padding: 0 18px; border-radius: 999px; background: #B4FF39; color: #0a0a0a; font-weight: 700; letter-spacing: 0; text-transform: none; font-size: 13px; transition: transform .25s; }
+        .pill.btn:hover { transform: translateY(-1px); }
+
+        .hero { position: relative; min-height: 100vh; padding: 160px 20px 60px; display: flex; flex-direction: column; align-items: center; text-align: center; overflow: hidden; background: #060606; }
+        .hero-video-bg { position: absolute; inset: 0; z-index: 0; overflow: hidden; transform-origin: 50% 50%; }
+        .hero-video-bg video { width: 100%; height: 100%; object-fit: cover; }
+        .hero-video-overlay { position: absolute; inset: 0; background: rgba(6,6,6,.78); }
+        .hero-glass { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+        .glass { position: absolute; border-radius: 12px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18); backdrop-filter: blur(10px) saturate(1.2); box-shadow: inset 0 1px 0 rgba(255,255,255,.25); opacity: 0; }
+        h1#heroTitle { position: relative; z-index: 3; font: 500 clamp(32px,6vw,72px)/1.06 var(--font-inter-tight); letter-spacing: -.03em; max-width: 900px; }
+        h1#heroTitle em { color: #B4FF39; font-style: italic; font-weight: 600; }
+        .cap { position: relative; z-index: 3; margin-top: 22px; font-size: clamp(14px,1.6vw,18px); line-height: 1.4; color: rgba(255,255,255,.55); max-width: 480px; }
+        .hero-form { position: relative; z-index: 3; margin-top: 30px; display: inline-flex; align-items: center; gap: 6px; padding: 6px; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); }
+        .hero-form input { height: 40px; padding: 0 16px; border-radius: 999px; border: none; background: transparent; color: #fff; font-size: 14px; outline: none; width: 220px; }
+        .hero-form input::placeholder { color: rgba(255,255,255,.4); }
+        .hero-form button { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 999px; background: #B4FF39; color: #0a0a0a; transition: transform .2s; }
+        .hero-form button:hover { transform: scale(1.06); }
+
+        .split .w { display: inline-block; will-change: transform, filter, opacity; }
+
+        .pill { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; padding: 6px 12px; border-radius: 999px; background: rgba(180,255,57,.12); color: #B4FF39; letter-spacing: .02em; }
+        .h2 { font-size: clamp(26px,3.6vw,46px); font-weight: 500; letter-spacing: -.02em; line-height: 1.12; text-align: center; }
+
+        .stats, .loop { position: relative; overflow: hidden; }
+        .stats { padding: 100px 20px 80px; }
+        .sq-field { position: absolute; inset: 0 0 auto 0; height: 42%; z-index: 0; pointer-events: none; -webkit-mask-image: linear-gradient(#000, transparent); mask-image: linear-gradient(#000, transparent); }
+        .grid-sq { position: absolute; border: 1px solid rgba(255,255,255,.06); border-radius: 10px; opacity: 0; pointer-events: none; }
+        .stats-glow { position: absolute; left: 50%; top: 40%; translate: -50% -50%; width: 420px; height: 420px; border-radius: 999px; background: radial-gradient(closest-side, rgba(180,255,57,.22), transparent); filter: blur(30px); opacity: .15; transform: scale(.6); pointer-events: none; z-index: 0; }
+        .stats-rise { position: absolute; left: 50%; bottom: -6%; transform: translateX(-50%) translateY(70%); width: min(260px,38vw); filter: invert(1) opacity(.5); pointer-events: none; z-index: 1; }
+        .stats-inner { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 22px; max-width: 980px; margin: 0 auto; }
+        .cards { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; width: 100%; margin-top: 8px; }
+        .card { position: relative; height: 140px; padding: 18px 20px; background: #B4FF39; display: flex; flex-direction: column; justify-content: space-between; clip-path: polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px); }
+        .card-laurel { position: absolute; color: rgba(10,12,2,.35); pointer-events: none; }
+        .card-laurel--tl { top: 10px; left: 10px; }
+        .card-laurel--br { bottom: 10px; right: 10px; transform: rotate(180deg); }
+        .card-label { font-size: 11px; font-weight: 600; color: #1b2308; }
+        .card b { font-size: clamp(26px,3vw,38px); font-weight: 700; letter-spacing: -.03em; color: #0a0a0a; font-variant-numeric: tabular-nums; }
+        .cards-shadow { width: 90%; height: 10px; margin: -14px auto 0; border-radius: 50%; background: radial-gradient(closest-side, rgba(0,0,0,.35), transparent); }
+        .badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 8px; }
+        .badge { font-size: 12px; font-weight: 600; letter-spacing: .02em; color: rgba(255,255,255,.55); background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); padding: 7px 14px; border-radius: 999px; }
+
+        .loop { min-height: 100vh; padding: 110px 0 60px; display: flex; flex-direction: column; }
+        .loop-blob { position: absolute; top: 10%; left: -8%; width: 320px; height: 320px; border-radius: 999px; background: radial-gradient(closest-side, rgba(180,255,57,.15), transparent); filter: blur(40px); z-index: 0; }
+        .loop-head { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 0 20px; margin-bottom: 48px; }
+        .track { position: relative; z-index: 2; flex: 1; display: flex; min-height: 420px; border-top: 1px solid rgba(255,255,255,.1); }
+        .panel { position: relative; flex: 0 0 clamp(70px,10vw,140px); border-right: 1px solid rgba(255,255,255,.1); overflow: hidden; cursor: pointer; outline: none; transition: flex-grow 1s cubic-bezier(.16,1,.3,1); display: flex; align-items: flex-end; }
+        .panel:last-child { border-right: none; }
+        .panel.is-active { flex-grow: 3; cursor: default; }
+        .panel-in { display: flex; align-items: flex-end; gap: 24px; padding: 28px; width: max-content; max-width: 100%; }
+        .num { font-size: clamp(90px,16vw,220px); font-weight: 700; line-height: .74; letter-spacing: -.04em; color: rgba(255,255,255,.15); }
+        .panel.is-active .num { color: #B4FF39; }
+        .step { width: min(360px,60vw); opacity: 0; transform: translateX(-16px); filter: blur(6px); transition: opacity .5s, transform .6s, filter .5s; }
+        .panel.is-active .step { opacity: 1; transform: none; filter: none; transition: opacity .9s .35s, transform 1.05s .35s cubic-bezier(.16,1,.3,1), filter .9s .35s; }
+        .step h3 { font-size: clamp(18px,1.6vw,24px); font-weight: 500; letter-spacing: -.01em; margin-bottom: 10px; color: #fff; }
+        .step p { font-size: 14px; line-height: 1.5; color: rgba(255,255,255,.5); }
+
+
+        .ptl-footer { position: relative; background: #B4FF39; color: #121410; padding: 56px 6vw 28px; display: flex; flex-direction: column; align-items: center; gap: 36px; }
+        .f-logo { width: 56px; height: 56px; overflow: visible; }
+        .f-columns { display: grid; grid-template-columns: repeat(3, minmax(120px, 170px)); gap: 32px 48px; }
+        .f-col-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; opacity: .55; margin-bottom: 14px; }
+        .f-col ul { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+        .f-col a { font-size: 13px; font-weight: 600; color: #121410; transition: opacity .2s; }
+        .f-col a:hover { opacity: .6; }
+        .f-social { font-size: 18px; }
+        .f-copy { text-align: center; font-size: 11px; opacity: .7; }
+
+        @media (max-width: 900px) {
+          .cards { grid-template-columns: repeat(2,1fr); }
+          .card { height: 120px; }
+        }
+        @media (max-width: 760px) {
+          .nav { left: 16px; right: 16px; transform: none; justify-content: space-between; }
+          .nav-links a:not(.pill) { display: none; }
+          .hero { padding-top: 120px; }
+          .track { flex-direction: column; min-height: 0; }
+          .panel { flex: none; border-right: none; border-bottom: 1px solid rgba(255,255,255,.1); }
+          .panel .num { color: #B4FF39; }
+          .step { opacity: 1; transform: none; filter: none; width: auto; }
+          .f-columns { grid-template-columns: 1fr; gap: 24px; text-align: center; }
+        }
+      `}</style>
     </div>
     </SmoothScroll>
   );
